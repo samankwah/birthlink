@@ -228,60 +228,71 @@ export const CertificateGeneration: React.FC = () => {
       {/* Header */}
       <div className="bg-white shadow-sm border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between py-4 space-y-4 sm:space-y-0 sm:h-16">
             <div className="flex items-center">
               <Button 
                 variant="ghost" 
                 onClick={() => navigate('/registrations')}
                 className="mr-4"
+                size="sm"
               >
                 <ArrowLeft className="w-4 h-4 mr-2" />
-                {t('common.back')}
+                <span className="hidden sm:inline">{t('common.back')}</span>
               </Button>
-              <h1 className="text-xl font-semibold text-gray-900">
+              <h1 className="text-lg sm:text-xl font-semibold text-gray-900">
                 {t('certificate.pageTitle')}
               </h1>
             </div>
             
-            <div className="flex items-center space-x-3">
+            {/* Mobile Action Buttons - Horizontal Scroll */}
+            <div className="flex items-center space-x-2 overflow-x-auto w-full sm:w-auto pb-2 sm:pb-0">
               <Button
                 variant="ghost"
                 onClick={() => setShowPreview(!showPreview)}
+                size="sm"
+                className="flex-shrink-0"
               >
-                <Eye className="w-4 h-4 mr-2" />
-                {showPreview ? t('certificate.hidePreview') : t('certificate.showPreview')}
+                <Eye className="w-4 h-4 sm:mr-2" />
+                <span className="hidden sm:inline">
+                  {showPreview ? t('certificate.hidePreview') : t('certificate.showPreview')}
+                </span>
               </Button>
               
               <Button
                 variant="secondary"
                 onClick={handleShareCertificate}
+                size="sm"
+                className="flex-shrink-0"
               >
-                <Share className="w-4 h-4 mr-2" />
-                {t('certificate.share')}
+                <Share className="w-4 h-4 sm:mr-2" />
+                <span className="hidden sm:inline">{t('certificate.share')}</span>
               </Button>
               
               <Button
                 variant="secondary"
                 onClick={handlePrintCertificate}
+                size="sm"
+                className="flex-shrink-0"
               >
-                <Printer className="w-4 h-4 mr-2" />
-                {t('certificate.print')}
+                <Printer className="w-4 h-4 sm:mr-2" />
+                <span className="hidden sm:inline">{t('certificate.print')}</span>
               </Button>
               
               <Button
                 onClick={handleDownloadPDF}
                 disabled={isGenerating}
-                className="flex items-center gap-2"
+                size="sm"
+                className="flex items-center gap-1 sm:gap-2 flex-shrink-0"
               >
                 {isGenerating ? (
                   <>
                     <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                    {t('certificate.generating')}
+                    <span className="hidden sm:inline">{t('certificate.generating')}</span>
                   </>
                 ) : (
                   <>
                     <Download className="w-4 h-4" />
-                    {t('certificate.downloadPDF')}
+                    <span className="hidden sm:inline">{t('certificate.downloadPDF')}</span>
                   </>
                 )}
               </Button>
@@ -293,41 +304,41 @@ export const CertificateGeneration: React.FC = () => {
       {/* Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Registration Summary */}
-        <div className="bg-white rounded-lg shadow-sm border p-6 mb-8">
+        <div className="bg-white rounded-lg shadow-sm border p-4 sm:p-6 mb-6 sm:mb-8">
           <h2 className="text-lg font-semibold text-gray-900 mb-4">
             {t('certificate.registrationSummary')}
           </h2>
           
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="sm:col-span-2 lg:col-span-1">
+              <label className="block text-sm font-medium text-gray-700 mb-1">
                 {t('registration.childName')}
               </label>
-              <p className="text-lg font-semibold text-gray-900">
+              <p className="text-lg font-semibold text-gray-900 break-words">
                 {registration.childDetails.firstName} {registration.childDetails.lastName}
               </p>
             </div>
             
             <div>
-              <label className="block text-sm font-medium text-gray-700">
+              <label className="block text-sm font-medium text-gray-700 mb-1">
                 {t('registration.registrationNumber')}
               </label>
-              <p className="text-lg font-semibold text-blue-600">
+              <p className="text-lg font-semibold text-blue-600 break-all">
                 {registration.registrationNumber}
               </p>
             </div>
             
-            <div>
-              <label className="block text-sm font-medium text-gray-700">
+            <div className="sm:col-span-2 lg:col-span-1">
+              <label className="block text-sm font-medium text-gray-700 mb-1">
                 {t('certificate.serialNumber')}
               </label>
-              <div className="flex items-center space-x-2">
-                <p className="text-lg font-semibold text-green-600">{serialNumber}</p>
+              <div className="flex flex-col sm:flex-row sm:items-center space-y-2 sm:space-y-0 sm:space-x-2">
+                <p className="text-lg font-semibold text-green-600 break-all">{serialNumber}</p>
                 <Button
                   variant="ghost"
                   size="sm"
                   onClick={handleGenerateNewCertificate}
-                  className="text-xs"
+                  className="text-xs self-start sm:self-auto"
                 >
                   {t('certificate.regenerate')}
                 </Button>
@@ -338,8 +349,8 @@ export const CertificateGeneration: React.FC = () => {
 
         {/* Certificate Preview */}
         {showPreview && (
-          <div className="bg-white rounded-lg shadow-sm border p-6">
-            <div className="flex items-center justify-between mb-6">
+          <div className="bg-white rounded-lg shadow-sm border p-4 sm:p-6">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 sm:mb-6 space-y-2 sm:space-y-0">
               <h2 className="text-lg font-semibold text-gray-900">
                 {t('certificate.preview')}
               </h2>
@@ -349,26 +360,35 @@ export const CertificateGeneration: React.FC = () => {
               </div>
             </div>
             
-            <div className="flex justify-center">
-              <div 
-                id="birth-certificate" 
-                ref={certificateRef}
-                className="transform scale-75 origin-top"
-                style={{ width: '210mm', transformOrigin: 'top center' }}
-              >
-                <BirthCertificate 
-                  registration={registration} 
-                  serialNumber={serialNumber}
-                />
+            {/* Optimized certificate container for better screen fit */}
+            <div className="w-full overflow-x-auto">
+              <div className="flex justify-center min-w-full">
+                <div 
+                  id="birth-certificate" 
+                  ref={certificateRef}
+                  className="w-full max-w-5xl mx-auto"
+                  style={{ 
+                    // Adjusted dimensions: wider and shorter for better screen fit
+                    transform: 'scale(1.1) scaleY(0.8)',
+                    transformOrigin: 'top center',
+                    marginBottom: '-15%',
+                    maxHeight: '80vh'
+                  }}
+                >
+                  <BirthCertificate 
+                    registration={registration} 
+                    serialNumber={serialNumber}
+                  />
+                </div>
               </div>
             </div>
             
             {/* Actions below certificate */}
-            <div className="flex justify-center space-x-4 mt-8 pt-6 border-t">
+            <div className="flex flex-col sm:flex-row justify-center space-y-2 sm:space-y-0 sm:space-x-4 mt-6 sm:mt-8 pt-4 sm:pt-6 border-t">
               <Button
                 variant="secondary"
                 onClick={handlePrintCertificate}
-                className="flex items-center gap-2"
+                className="flex items-center justify-center gap-2 w-full sm:w-auto"
               >
                 <Printer className="w-4 h-4" />
                 {t('certificate.print')}
@@ -377,7 +397,7 @@ export const CertificateGeneration: React.FC = () => {
               <Button
                 onClick={handleDownloadPDF}
                 disabled={isGenerating}
-                className="flex items-center gap-2"
+                className="flex items-center justify-center gap-2 w-full sm:w-auto"
               >
                 {isGenerating ? (
                   <>
@@ -396,12 +416,12 @@ export const CertificateGeneration: React.FC = () => {
         )}
 
         {/* Additional Actions */}
-        <div className="mt-8 bg-blue-50 rounded-lg p-6">
+        <div className="mt-6 sm:mt-8 bg-blue-50 rounded-lg p-4 sm:p-6">
           <h3 className="text-lg font-semibold text-gray-900 mb-4">
             {t('certificate.nextSteps')}
           </h3>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <div>
               <h4 className="font-medium text-gray-900 mb-2">
                 {t('certificate.officialUse')}
@@ -413,6 +433,7 @@ export const CertificateGeneration: React.FC = () => {
                 variant="secondary"
                 onClick={handleDownloadPDF}
                 disabled={isGenerating}
+                className="w-full sm:w-auto"
               >
                 {t('certificate.downloadOfficial')}
               </Button>
@@ -428,6 +449,7 @@ export const CertificateGeneration: React.FC = () => {
               <Button
                 variant="ghost"
                 onClick={() => window.open(`https://verify.birthlink-ghana.gov.gh/${serialNumber}`, '_blank')}
+                className="w-full sm:w-auto"
               >
                 {t('certificate.verifyOnline')}
               </Button>

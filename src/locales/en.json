@@ -195,7 +195,11 @@
     "updateRegistration": "Update Registration",
     "registrationCreated": "Registration created successfully",
     "registrationUpdated": "Registration updated successfully",
-    "registrationError": "Error processing registration"
+    "registrationError": "Error processing registration",
+    "registrarInfo": "Registration Information",
+    "registrationLocation": "Registration Location",
+    "childName": "Child Name",
+    "nationality": "Nationality"
   },
   "validation": {
     "required": "This field is required",
@@ -372,6 +376,9 @@
     "regenerate": "New Serial",
     "preview": "Certificate Preview",
     "previewNote": "This is a preview of the official birth certificate",
+    "livePreview": "Certificate updates as you fill the form",
+    "enterChildName": "Enter child name to see certificate preview",
+    "previewPlaceholder": "Certificate preview will appear here",
     "print": "Print Certificate",
     "downloadPDF": "Download PDF",
     "generating": "Generating...",

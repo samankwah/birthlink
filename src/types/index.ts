@@ -58,6 +58,7 @@ export interface ParentDetails {
   dateOfBirth: Date;
   occupation?: string;
   phoneNumber?: string;
+  nationality?: string;
 }
 
 export interface RegistrarInfo {
@@ -97,6 +98,7 @@ export interface RegistrationFormData {
   childDetails: Omit<ChildDetails, 'dateOfBirth'> & { dateOfBirth: string };
   motherDetails: Omit<ParentDetails, 'dateOfBirth'> & { dateOfBirth: string };
   fatherDetails: Omit<ParentDetails, 'dateOfBirth'> & { dateOfBirth: string };
+  registrarInfo?: Omit<RegistrarInfo, 'registrarId' | 'registrationDate'>;
 }
 
 // API Response Types

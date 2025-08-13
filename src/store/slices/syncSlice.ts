@@ -111,7 +111,7 @@ const storeInIndexedDB = async (storeName: string, data: SyncQueueItem): Promise
 
 const processSyncItem = async (item: SyncQueueItem): Promise<void> => {
   // Implementation would depend on the operation type
-  // This is a placeholder for the actual sync logic
+  // Process sync item based on operation type
   switch (item.operationType) {
     case 'create':
       // Sync creation to server

@@ -1,11 +1,12 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
-import { CertificateQuickTest } from '../components/molecules';
+import { useNavigate } from 'react-router-dom';
 import type { RootState } from '../store';
 
 export const Dashboard: React.FC = () => {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const { user } = useSelector((state: RootState) => state.auth);
 
   const stats = [
@@ -39,7 +40,7 @@ export const Dashboard: React.FC = () => {
       </div>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
         {stats.map((stat, index) => (
           <div key={index} className="bg-white shadow rounded-lg p-6">
             <div className="flex items-center">
@@ -58,15 +59,21 @@ export const Dashboard: React.FC = () => {
         <h2 className="text-lg font-medium text-gray-900 mb-4">
           {t('dashboard.quickActions')}
         </h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <button className="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <button 
+            onClick={() => navigate('/registrations/new')}
+            className="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500"
+          >
             <div className="text-2xl mr-3">📝</div>
             <div className="text-left">
               <p className="font-medium text-gray-900">{t('registration.newRegistration')}</p>
               <p className="text-sm text-gray-500">Create a new birth registration</p>
             </div>
           </button>
-          <button className="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+          <button 
+            onClick={() => navigate('/registrations')}
+            className="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500"
+          >
             <div className="text-2xl mr-3">🔍</div>
             <div className="text-left">
               <p className="font-medium text-gray-900">{t('navigation.registrations')}</p>
@@ -94,11 +101,6 @@ export const Dashboard: React.FC = () => {
             </div>
           ))}
         </div>
-      </div>
-      
-      {/* Certificate Test Section */}
-      <div className="mt-8">
-        <CertificateQuickTest />
       </div>
     </div>
   );

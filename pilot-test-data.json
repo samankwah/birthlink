@@ -1,0 +1,291 @@
+{
+  "pilotProgram": {
+    "phase": "Phase 3",
+    "startDate": "2025-08-13",
+    "endDate": "2025-10-13",
+    "duration": "8 weeks",
+    "targetDistricts": ["Kumasi", "Tamale", "Ho"],
+    "targetRegistrars": 50,
+    "targetRegistrations": 1000
+  },
+  
+  "pilotRegistrars": [
+    {
+      "id": "reg_001",
+      "firstName": "Kwame",
+      "lastName": "Asante",
+      "email": "kwame.asante@ghanahealth.gov.gh",
+      "phone": "+233241234567",
+      "role": "registrar",
+      "district": "Kumasi",
+      "region": "Ashanti",
+      "status": "active",
+      "trainingCompleted": true,
+      "trainingDate": "2025-08-14",
+      "specialization": "Community Health",
+      "yearsExperience": 5,
+      "languages": ["English", "Twi"]
+    },
+    {
+      "id": "reg_002",
+      "firstName": "Ama",
+      "lastName": "Nyong",
+      "email": "ama.nyong@ghanahealth.gov.gh",
+      "phone": "+233241234568",
+      "role": "registrar",
+      "district": "Tamale",
+      "region": "Northern",
+      "status": "active",
+      "trainingCompleted": true,
+      "trainingDate": "2025-08-14",
+      "specialization": "Maternal Health",
+      "yearsExperience": 8,
+      "languages": ["English", "Twi", "Dagbani"]
+    },
+    {
+      "id": "reg_003",
+      "firstName": "Edem",
+      "lastName": "Kpedekpo",
+      "email": "edem.kpedekpo@ghanahealth.gov.gh",
+      "phone": "+233241234569",
+      "role": "registrar",
+      "district": "Ho",
+      "region": "Volta",
+      "status": "active",
+      "trainingCompleted": true,
+      "trainingDate": "2025-08-15",
+      "specialization": "Public Health",
+      "yearsExperience": 3,
+      "languages": ["English", "Ewe"]
+    },
+    {
+      "id": "admin_001",
+      "firstName": "Dr. Kofi",
+      "lastName": "Mensah",
+      "email": "kofi.mensah@birthregistry.gov.gh",
+      "phone": "+233501234567",
+      "role": "admin",
+      "district": "Accra",
+      "region": "Greater Accra",
+      "status": "active",
+      "trainingCompleted": true,
+      "trainingDate": "2025-08-13",
+      "specialization": "Registry Administration",
+      "yearsExperience": 15,
+      "languages": ["English", "Twi", "Ga"]
+    }
+  ],
+  
+  "sampleRegistrations": [
+    {
+      "id": "birth_001",
+      "registrationNumber": "GHA-2025-001001",
+      "childDetails": {
+        "firstName": "Akosua",
+        "lastName": "Boateng",
+        "dateOfBirth": "2025-01-15",
+        "placeOfBirth": "Kumasi Teaching Hospital",
+        "gender": "Female",
+        "hospitalOfBirth": "Kumasi Teaching Hospital"
+      },
+      "motherDetails": {
+        "firstName": "Adwoa",
+        "lastName": "Boateng",
+        "nationalId": "GHA-123456789-1",
+        "dateOfBirth": "1995-05-20",
+        "occupation": "Teacher"
+      },
+      "fatherDetails": {
+        "firstName": "Yaw",
+        "lastName": "Boateng",
+        "nationalId": "GHA-987654321-1",
+        "dateOfBirth": "1990-03-10",
+        "occupation": "Engineer"
+      },
+      "registrarInfo": {
+        "registrarId": "reg_001",
+        "registrationDate": "2025-08-13",
+        "location": "Kumasi Health Center"
+      },
+      "status": "approved",
+      "createdOffline": false,
+      "syncStatus": "synced"
+    },
+    {
+      "id": "birth_002",
+      "registrationNumber": "GHA-2025-001002",
+      "childDetails": {
+        "firstName": "Mohammed",
+        "lastName": "Ibrahim",
+        "dateOfBirth": "2025-02-08",
+        "placeOfBirth": "Tamale Regional Hospital",
+        "gender": "Male",
+        "hospitalOfBirth": "Tamale Regional Hospital"
+      },
+      "motherDetails": {
+        "firstName": "Zainab",
+        "lastName": "Ibrahim",
+        "nationalId": null,
+        "dateOfBirth": "1998-12-15",
+        "occupation": "Trader"
+      },
+      "fatherDetails": {
+        "firstName": "Abdul",
+        "lastName": "Ibrahim",
+        "nationalId": "GHA-555666777-1",
+        "dateOfBirth": "1992-08-22",
+        "occupation": "Farmer"
+      },
+      "registrarInfo": {
+        "registrarId": "reg_002",
+        "registrationDate": "2025-08-13",
+        "location": "Tamale Community Health"
+      },
+      "status": "approved",
+      "createdOffline": true,
+      "syncStatus": "synced"
+    },
+    {
+      "id": "birth_003",
+      "registrationNumber": "GHA-2025-001003",
+      "childDetails": {
+        "firstName": "Elikem",
+        "lastName": "Agbeko",
+        "dateOfBirth": "2025-03-12",
+        "placeOfBirth": "Ho Municipal Hospital",
+        "gender": "Male"
+      },
+      "motherDetails": {
+        "firstName": "Selorm",
+        "lastName": "Agbeko",
+        "nationalId": "GHA-111222333-1",
+        "dateOfBirth": "1994-11-08",
+        "occupation": "Nurse"
+      },
+      "fatherDetails": {
+        "firstName": "Kodjo",
+        "lastName": "Agbeko",
+        "nationalId": "GHA-444555666-1",
+        "dateOfBirth": "1989-07-25",
+        "occupation": "Electrician"
+      },
+      "registrarInfo": {
+        "registrarId": "reg_003",
+        "registrationDate": "2025-08-13",
+        "location": "Ho Health Directorate"
+      },
+      "status": "pending",
+      "createdOffline": false,
+      "syncStatus": "synced"
+    }
+  ],
+  
+  "trainingSchedule": {
+    "week1": {
+      "dates": "2025-08-14 to 2025-08-18",
+      "focus": "Basic Training - 25 registrars",
+      "sessions": [
+        {
+          "day": "Monday",
+          "topic": "Application Overview & PWA Installation",
+          "duration": "2 hours",
+          "participants": "First cohort (Kumasi district)"
+        },
+        {
+          "day": "Tuesday", 
+          "topic": "Authentication & Birth Registration Workflow",
+          "duration": "3 hours",
+          "participants": "First cohort (Kumasi district)"
+        },
+        {
+          "day": "Wednesday",
+          "topic": "Offline Functionality & Sync Management",
+          "duration": "2 hours",
+          "participants": "Second cohort (Tamale district)"
+        },
+        {
+          "day": "Thursday",
+          "topic": "Multi-language Features & Troubleshooting",
+          "duration": "2 hours",
+          "participants": "Third cohort (Ho district)"
+        },
+        {
+          "day": "Friday",
+          "topic": "Q&A Session & Feedback Collection",
+          "duration": "1 hour",
+          "participants": "All trained registrars"
+        }
+      ]
+    },
+    "week2": {
+      "dates": "2025-08-21 to 2025-08-25",
+      "focus": "Advanced Training & Remaining 25 registrars",
+      "sessions": [
+        {
+          "day": "Monday-Tuesday",
+          "topic": "Intensive 2-day training for remaining registrars",
+          "duration": "4 hours/day",
+          "participants": "Remaining 25 registrars"
+        },
+        {
+          "day": "Wednesday-Thursday",
+          "topic": "Hands-on Practice & Scenario Testing",
+          "duration": "3 hours/day", 
+          "participants": "All registrars"
+        },
+        {
+          "day": "Friday",
+          "topic": "Launch Preparation & Final Q&A",
+          "duration": "2 hours",
+          "participants": "All registrars + supervisors"
+        }
+      ]
+    }
+  },
+  
+  "successMetrics": {
+    "week1_targets": {
+      "registrars_trained": 25,
+      "pwa_installations": 20,
+      "test_registrations": 50,
+      "feedback_responses": 15
+    },
+    "week2_targets": {
+      "registrars_trained": 50,
+      "pwa_installations": 40,
+      "test_registrations": 100,
+      "feedback_responses": 30
+    },
+    "month1_targets": {
+      "active_registrars": 45,
+      "daily_registrations": 50,
+      "sync_success_rate": "95%",
+      "user_satisfaction": "80%"
+    },
+    "phase3_completion": {
+      "total_registrations": 1000,
+      "error_rate": "<5%",
+      "government_approval": true,
+      "security_audit_passed": true
+    }
+  },
+  
+  "supportContacts": {
+    "technical_support": {
+      "email": "support@birthlink-ghana.org",
+      "phone": "+233501234567",
+      "hours": "8:00 AM - 6:00 PM (GMT)",
+      "whatsapp": "+233501234567"
+    },
+    "training_coordinator": {
+      "name": "Mrs. Akosua Darko",
+      "email": "training@birthlink-ghana.org",
+      "phone": "+233241234567"
+    },
+    "project_manager": {
+      "name": "Mr. Kwame Nkrumah",
+      "email": "pm@birthlink-ghana.org",
+      "phone": "+233201234567"
+    }
+  }
+}

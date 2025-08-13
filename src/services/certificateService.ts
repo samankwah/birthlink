@@ -5,6 +5,8 @@
 import { analyticsService } from './analytics';
 import { smsService } from './smsService';
 import type { BirthRegistration } from '../types';
+// Import the coat of arms image
+import ghanaCoatOfArms from '../assets/images/ghana-coat-of-arms.webp';
 
 interface CertificateTemplate {
   id: string;
@@ -219,63 +221,114 @@ export class CertificateService {
     }
   ): Promise<ArrayBuffer> {
     try {
-      // Create a high-quality certificate element for PDF generation
-      const certificateElement = await this.createCertificateElement(registration, certificateData);
-      
-      // Generate PDF using browser's print API with optimized settings
-      const pdfBuffer = await this.convertElementToPDF(certificateElement);
-      
-      // Clean up the temporary element
-      document.body.removeChild(certificateElement);
-      
-      return pdfBuffer;
+      // Generate proper certificate HTML that matches the target
+      const htmlContent = this.generateTargetMatchingHTML(registration, certificateData);
+      const pdfBuffer = new TextEncoder().encode(htmlContent);
+      return pdfBuffer.buffer;
     } catch (error) {
       console.error('PDF generation failed:', error);
-      // Fallback: Generate HTML content as buffer
+      // Fallback: Generate simple HTML
       const htmlContent = this.generateCertificateHTML(registration, certificateData);
       const pdfBuffer = new TextEncoder().encode(htmlContent);
       return pdfBuffer.buffer;
     }
   }
 
-  private async createCertificateElement(
+  // @ts-ignore
+  private async _createCertificateElement(
     registration: BirthRegistration,
     certificateData: any
   ): Promise<HTMLElement> {
-    // Create a temporary container for the certificate
-    const container = document.createElement('div');
-    container.style.position = 'absolute';
-    container.style.top = '-9999px';
-    container.style.left = '-9999px';
-    container.style.width = '210mm';
-    container.style.minHeight = '297mm';
-    container.style.backgroundColor = 'white';
-    container.style.fontFamily = 'Times, serif';
-    container.style.fontSize = '11pt';
-    container.style.lineHeight = '1.3';
-    container.style.padding = '15mm';
-    container.style.border = '2px solid black';
-    container.style.boxSizing = 'border-box';
+    // Get the current certificate element from DOM (the one being previewed)
+    const existingCertificate = document.getElementById('birth-certificate');
     
-    // Generate the certificate HTML content
-    container.innerHTML = this.generateOptimizedCertificateHTML(registration, certificateData);
-    
-    // Add to DOM temporarily for rendering
-    document.body.appendChild(container);
-    
-    // Wait for fonts and images to load
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    return container;
+    if (existingCertificate) {
+      // Clone the existing certificate element for PDF generation
+      const container = existingCertificate.cloneNode(true) as HTMLElement;
+      container.style.position = 'absolute';
+      container.style.top = '-9999px';
+      container.style.left = '-9999px';
+      container.style.transform = 'none'; // Remove any scaling transforms
+      container.style.width = '210mm';
+      container.style.minHeight = '297mm';
+      container.style.maxWidth = 'none';
+      container.style.padding = '15mm';
+      container.style.fontSize = '11pt';
+      container.style.boxSizing = 'border-box';
+      
+      // Update certificate number in the cloned element
+      const certNumberElement = container.querySelector('[class*="absolute"][class*="top-2"]');
+      if (certNumberElement) {
+        certNumberElement.textContent = `No ${certificateData.certificateNumber}`;
+      }
+      
+      // Add to DOM temporarily for rendering
+      document.body.appendChild(container);
+      
+      // Wait for fonts and images to load
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      return container;
+    } else {
+      // Fallback: create container with optimized HTML
+      const container = document.createElement('div');
+      container.style.position = 'absolute';
+      container.style.top = '-9999px';
+      container.style.left = '-9999px';
+      container.style.width = '210mm';
+      container.style.minHeight = '297mm';
+      container.style.backgroundColor = 'white';
+      container.style.fontFamily = 'Times, serif';
+      container.style.fontSize = '11pt';
+      container.style.lineHeight = '1.3';
+      container.style.padding = '15mm';
+      container.style.border = '2px solid black';
+      container.style.boxSizing = 'border-box';
+      
+      // Generate the certificate HTML content
+      container.innerHTML = this.generateOptimizedCertificateHTML(registration, certificateData);
+      
+      // Add to DOM temporarily for rendering
+      document.body.appendChild(container);
+      
+      // Wait for fonts and images to load
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      return container;
+    }
   }
 
-  private async convertElementToPDF(element: HTMLElement): Promise<ArrayBuffer> {
+  // @ts-ignore
+  private async _convertElementToPDF(element: HTMLElement): Promise<ArrayBuffer> {
     // Use the browser's print functionality for high-quality PDF generation
     return new Promise((resolve) => {
       const printWindow = window.open('', '_blank');
       if (!printWindow) {
         throw new Error('Could not open print window for PDF generation');
       }
+
+      // Get all stylesheets from the current document to maintain styling
+      const stylesheets = Array.from(document.styleSheets)
+        .map(sheet => {
+          try {
+            return Array.from(sheet.cssRules)
+              .map(rule => rule.cssText)
+              .join('\n');
+          } catch (e) {
+            // Cross-origin stylesheets might not be accessible
+            return '';
+          }
+        })
+        .join('\n');
+
+      // Clone the element to avoid affecting the original
+      const clonedElement = element.cloneNode(true) as HTMLElement;
+      
+      // Remove any transforms that might affect PDF layout
+      clonedElement.style.transform = 'none';
+      clonedElement.style.maxHeight = 'none';
+      clonedElement.style.width = '210mm';
+      clonedElement.style.minHeight = '297mm';
 
       const printHTML = `
         <!DOCTYPE html>
@@ -285,7 +338,7 @@ export class CertificateService {
             <style>
               @page { 
                 size: A4; 
-                margin: 0; 
+                margin: 15mm; 
                 -webkit-print-color-adjust: exact;
                 color-adjust: exact;
                 print-color-adjust: exact;
@@ -297,16 +350,20 @@ export class CertificateService {
                 -webkit-print-color-adjust: exact;
                 color-adjust: exact;
                 print-color-adjust: exact;
+                font-size: 11pt;
+                line-height: 1.4;
               }
               * { 
                 -webkit-print-color-adjust: exact !important; 
                 color-adjust: exact !important; 
                 print-color-adjust: exact !important; 
               }
+              /* Include existing styles */
+              ${stylesheets}
             </style>
           </head>
           <body>
-            ${element.innerHTML}
+            ${clonedElement.outerHTML}
           </body>
         </html>
       `;
@@ -322,9 +379,307 @@ export class CertificateService {
           // Return a buffer indicating successful PDF generation
           const buffer = new TextEncoder().encode('PDF_GENERATED_SUCCESSFULLY');
           resolve(buffer.buffer);
-        }, 500);
+        }, 1000); // Increased timeout for better rendering
       };
     });
+  }
+
+  private generateTargetMatchingHTML(
+    registration: BirthRegistration,
+    certificateData: any
+  ): string {
+    const getDayOfYear = (date: any) => {
+      let dateObj: Date;
+      if (typeof date === 'string') {
+        dateObj = new Date(date);
+      } else if (date && typeof date === 'object' && 'toDate' in date && typeof date.toDate === 'function') {
+        dateObj = date.toDate();
+      } else if (date instanceof Date) {
+        dateObj = date;
+      } else {
+        dateObj = new Date();
+      }
+      return dateObj.getDate();
+    };
+
+    const getMonthName = (date: any) => {
+      let dateObj: Date;
+      if (typeof date === 'string') {
+        dateObj = new Date(date);
+      } else if (date && typeof date === 'object' && 'toDate' in date && typeof date.toDate === 'function') {
+        dateObj = date.toDate();
+      } else if (date instanceof Date) {
+        dateObj = date;
+      } else {
+        dateObj = new Date();
+      }
+      return dateObj.toLocaleDateString('en-GB', { month: 'long' });
+    };
+
+    const getYear = (date: any) => {
+      let dateObj: Date;
+      if (typeof date === 'string') {
+        dateObj = new Date(date);
+      } else if (date && typeof date === 'object' && 'toDate' in date && typeof date.toDate === 'function') {
+        dateObj = date.toDate();
+      } else if (date instanceof Date) {
+        dateObj = date;
+      } else {
+        dateObj = new Date();
+      }
+      return dateObj.getFullYear();
+    };
+
+    return `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Birth Certificate - ${registration.childDetails.firstName} ${registration.childDetails.lastName}</title>
+  <style>
+    @page {
+      size: A4;
+      margin: 20mm;
+    }
+    
+    body {
+      font-family: 'Times New Roman', Times, serif;
+      font-size: 12pt;
+      line-height: 1.8;
+      margin: 0;
+      padding: 0;
+      color: black;
+    }
+    
+    .certificate-container {
+      width: 100%;
+      max-width: 170mm;
+      margin: 0 auto;
+      border: 3px solid black;
+      padding: 15mm;
+      position: relative;
+    }
+    
+    .header-text {
+      text-align: center;
+      font-size: 9pt;
+      font-weight: bold;
+      letter-spacing: 2px;
+      margin-bottom: 15px;
+    }
+    
+    .cert-number {
+      position: absolute;
+      top: 10px;
+      right: 15px;
+      font-weight: bold;
+      font-size: 14pt;
+    }
+    
+    .coat-of-arms {
+      text-align: center;
+      margin: 20px 0;
+    }
+    
+    .coat-of-arms img {
+      width: 60px;
+      height: 60px;
+    }
+    
+    .title-section {
+      text-align: center;
+      margin: 20px 0;
+    }
+    
+    .republic-title {
+      font-size: 14pt;
+      font-weight: bold;
+      margin: 10px 0;
+    }
+    
+    .birth-cert-title {
+      font-size: 20pt;
+      font-weight: bold;
+      letter-spacing: 4px;
+      margin: 10px 0;
+    }
+    
+    .act-reference {
+      font-size: 10pt;
+      margin: 5px 0;
+    }
+    
+    .main-statement {
+      text-align: center;
+      font-size: 16pt;
+      font-weight: bold;
+      margin: 30px 0;
+    }
+    
+    .form-line {
+      margin: 20px 0;
+      display: flex;
+      align-items: baseline;
+    }
+    
+    .dotted-line {
+      border-bottom: 1px dotted black;
+      flex: 1;
+      margin: 0 5px;
+      min-height: 20px;
+      display: inline-block;
+      text-align: center;
+      padding-bottom: 2px;
+      font-weight: bold;
+    }
+    
+    .right-align {
+      text-align: right;
+    }
+    
+    .footer-section {
+      margin-top: 40px;
+      display: flex;
+      justify-content: space-between;
+      align-items: end;
+    }
+    
+    .signature-line {
+      width: 200px;
+      border-bottom: 2px solid black;
+      margin: 20px 0 5px 0;
+    }
+    
+    .registrar-text {
+      text-align: center;
+      font-style: italic;
+    }
+    
+    .footer-info {
+      font-size: 9pt;
+      display: flex;
+      justify-content: space-between;
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+  <div class="certificate-container">
+    <!-- Header -->
+    <div class="header-text">STRICTLY FOR CHILDREN 0 — 12 MONTHS</div>
+    
+    <!-- Certificate Number -->
+    <div class="cert-number">No. ${certificateData.certificateNumber}</div>
+    
+    <!-- Coat of Arms -->
+    <div class="coat-of-arms">
+      <img src="${ghanaCoatOfArms}" alt="Ghana Coat of Arms" />
+    </div>
+    
+    <!-- Titles -->
+    <div class="title-section">
+      <div class="republic-title">REPUBLIC OF GHANA</div>
+      <div class="birth-cert-title">BIRTH CERTIFICATE</div>
+      <div class="act-reference">(Section 11 Act 301)</div>
+    </div>
+    
+    <!-- Main Statement -->
+    <div class="main-statement">This is to Certify that the Birth</div>
+    
+    <!-- Form Fields -->
+    <div class="form-line">
+      <span>of</span>
+      <span class="dotted-line">${registration.childDetails.firstName} ${registration.childDetails.lastName}</span>
+    </div>
+    
+    <div class="form-line">
+      <span>born at</span>
+      <span class="dotted-line">${registration.childDetails.placeOfBirth}</span>
+    </div>
+    
+    <div class="form-line">
+      <span>on the</span>
+      <span class="dotted-line" style="max-width: 50px;">${getDayOfYear(registration.childDetails.dateOfBirth)}</span>
+      <span>day of</span>
+      <span class="dotted-line" style="max-width: 120px;">${getMonthName(registration.childDetails.dateOfBirth)}</span>
+      <span>20</span>
+      <span class="dotted-line" style="max-width: 50px;">${getYear(registration.childDetails.dateOfBirth).toString().slice(-2)}</span>
+    </div>
+    
+    <div class="form-line">
+      <span>has been duly registered in the register of Births for</span>
+      <span class="dotted-line">${registration.registrarInfo?.region || 'Greater Accra'}</span>
+    </div>
+    
+    <div class="form-line right-align">
+      <span class="dotted-line">${registration.registrarInfo?.district || 'Accra Metropolitan'}</span>
+      <span>in the</span>
+    </div>
+    
+    <div class="form-line right-align">
+      <span class="dotted-line"></span>
+      <span>Registration District</span>
+    </div>
+    
+    <div class="form-line">
+      <span>The said</span>
+      <span class="dotted-line">${registration.childDetails.firstName} ${registration.childDetails.lastName}</span>
+    </div>
+    
+    <div class="form-line">
+      <span>is the ${registration.childDetails.gender.toLowerCase()} child of</span>
+      <span class="dotted-line">${registration.motherDetails.firstName} ${registration.motherDetails.lastName}</span>
+    </div>
+    
+    <div class="form-line">
+      <span class="dotted-line"></span>
+    </div>
+    
+    <div class="form-line">
+      <span>a National of</span>
+      <span class="dotted-line">${registration.motherDetails.nationality || 'Ghana'}</span>
+    </div>
+    
+    <div class="form-line">
+      <span>and</span>
+      <span class="dotted-line">${registration.fatherDetails.firstName} ${registration.fatherDetails.lastName}</span>
+    </div>
+    
+    <div class="form-line">
+      <span>a National of</span>
+      <span class="dotted-line">${registration.fatherDetails.nationality || 'Ghana'}</span>
+    </div>
+    
+    <div class="form-line">
+      <span>witness my hand this</span>
+      <span class="dotted-line" style="max-width: 50px;">${getDayOfYear(registration.registrarInfo?.registrationDate || new Date())}</span>
+      <span>day of</span>
+      <span class="dotted-line" style="max-width: 120px;">${getMonthName(registration.registrarInfo?.registrationDate || new Date())}</span>
+      <span>20</span>
+      <span class="dotted-line" style="max-width: 50px;">${getYear(registration.registrarInfo?.registrationDate || new Date()).toString().slice(-2)}</span>
+    </div>
+    
+    <!-- Footer -->
+    <div class="footer-section">
+      <div>
+        <span>Entry No.</span>
+        <span class="dotted-line" style="display: inline-block; width: 150px;">${registration.registrationNumber}</span>
+      </div>
+      
+      <div>
+        <div class="signature-line"></div>
+        <div class="registrar-text">Registrar</div>
+      </div>
+    </div>
+    
+    <div class="footer-info">
+      <div>BHP Counterfeit</div>
+      <div>Birth Certificate Form R</div>
+    </div>
+  </div>
+</body>
+</html>
+    `;
   }
 
   private generateOptimizedCertificateHTML(
@@ -389,10 +744,10 @@ export class CertificateService {
 
         <!-- Ghana Coat of Arms and Title -->
         <div style="text-align: center; margin-bottom: 24px;">
-          <!-- Coat of Arms Placeholder -->
+          <!-- Ghana Coat of Arms -->
           <div style="display: flex; justify-content: center; margin-bottom: 12px;">
-            <div style="width: 60px; height: 60px; border: 2px solid black; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 8pt; font-weight: bold;">
-              GHANA<br/>COAT<br/>OF<br/>ARMS
+            <div style="width: 60px; height: 60px; display: flex; align-items: center; justify-content: center;">
+              <img src="${ghanaCoatOfArms}" alt="Ghana Coat of Arms" style="width: 100%; height: 100%; object-fit: contain;" />
             </div>
           </div>
           
@@ -419,14 +774,14 @@ export class CertificateService {
           <!-- Form Fields with dotted lines -->
           <div style="margin-bottom: 15px;">
             <span>of</span>
-            <span style="border-bottom: 1px dotted black; display: inline-block; min-width: 400px; margin-left: 8px; padding-bottom: 2px;">
+            <span style="border-bottom: 1px dotted black; display: inline-block; min-width: 400px; margin-left: 8px; padding-bottom: 2px; text-align: center;">
               ${registration.childDetails.firstName} ${registration.childDetails.lastName}
             </span>
           </div>
 
           <div style="margin-bottom: 15px;">
             <span>born at</span>
-            <span style="border-bottom: 1px dotted black; display: inline-block; min-width: 400px; margin-left: 8px; padding-bottom: 2px;">
+            <span style="border-bottom: 1px dotted black; display: inline-block; min-width: 400px; margin-left: 8px; padding-bottom: 2px; text-align: center;">
               ${registration.childDetails.placeOfBirth}
             </span>
           </div>
@@ -437,7 +792,7 @@ export class CertificateService {
               ${getDayOfYear(registration.childDetails.dateOfBirth)}
             </span>
             <span style="margin: 0 8px;">day of</span>
-            <span style="border-bottom: 1px dotted black; display: inline-block; min-width: 150px; margin-right: 8px; padding-bottom: 2px;">
+            <span style="border-bottom: 1px dotted black; display: inline-block; min-width: 150px; margin-right: 8px; padding-bottom: 2px; text-align: center;">
               ${getMonthName(registration.childDetails.dateOfBirth)}
             </span>
             <span>20</span>
@@ -448,14 +803,14 @@ export class CertificateService {
 
           <div style="margin-bottom: 15px;">
             <span>has been duly registered in the register of Births for </span>
-            <span style="border-bottom: 1px dotted black; display: inline-block; min-width: 200px; margin-left: 8px; padding-bottom: 2px;">
-              ${registration.registrarInfo.district}
+            <span style="border-bottom: 1px dotted black; display: inline-block; min-width: 200px; margin-left: 8px; padding-bottom: 2px; text-align: center;">
+              ${registration.registrarInfo?.region || 'Greater Accra'}
             </span>
           </div>
 
           <div style="margin-bottom: 15px; text-align: right;">
-            <span style="border-bottom: 1px dotted black; display: inline-block; min-width: 150px; margin-right: 8px; padding-bottom: 2px;">
-              ${registration.registrarInfo.region}
+            <span style="border-bottom: 1px dotted black; display: inline-block; min-width: 150px; margin-right: 8px; padding-bottom: 2px; text-align: center;">
+              ${registration.registrarInfo?.district || 'Accra Metropolitan'}
             </span>
             <span> in the</span>
           </div>
@@ -469,14 +824,14 @@ export class CertificateService {
 
           <div style="margin-bottom: 15px;">
             <span>The said </span>
-            <span style="border-bottom: 1px dotted black; display: inline-block; min-width: 300px; margin-left: 8px; padding-bottom: 2px;">
+            <span style="border-bottom: 1px dotted black; display: inline-block; min-width: 300px; margin-left: 8px; padding-bottom: 2px; text-align: center;">
               ${registration.childDetails.firstName} ${registration.childDetails.lastName}
             </span>
           </div>
 
           <div style="margin-bottom: 15px;">
-            <span>is the ${registration.childDetails.gender.toLowerCase()}/female Child of </span>
-            <span style="border-bottom: 1px dotted black; display: inline-block; min-width: 250px; margin-left: 8px; padding-bottom: 2px;">
+            <span>is the ${registration.childDetails.gender.toLowerCase()} child of </span>
+            <span style="border-bottom: 1px dotted black; display: inline-block; min-width: 250px; margin-left: 8px; padding-bottom: 2px; text-align: center;">
               ${registration.motherDetails.firstName} ${registration.motherDetails.lastName}
             </span>
           </div>
@@ -489,37 +844,37 @@ export class CertificateService {
 
           <div style="margin-bottom: 15px;">
             <span>a National of </span>
-            <span style="border-bottom: 1px dotted black; display: inline-block; min-width: 200px; margin-left: 8px; padding-bottom: 2px;">
-              Ghana
+            <span style="border-bottom: 1px dotted black; display: inline-block; min-width: 200px; margin-left: 8px; padding-bottom: 2px; text-align: center;">
+              ${registration.motherDetails.nationality || 'Ghana'}
             </span>
           </div>
 
           <div style="margin-bottom: 15px;">
             <span>and </span>
-            <span style="border-bottom: 1px dotted black; display: inline-block; min-width: 400px; margin-left: 8px; padding-bottom: 2px;">
+            <span style="border-bottom: 1px dotted black; display: inline-block; min-width: 400px; margin-left: 8px; padding-bottom: 2px; text-align: center;">
               ${registration.fatherDetails.firstName} ${registration.fatherDetails.lastName}
             </span>
           </div>
 
           <div style="margin-bottom: 15px;">
-            <span>a National of</span>
-            <span style="border-bottom: 1px dotted black; display: inline-block; min-width: 200px; margin-left: 8px; padding-bottom: 2px;">
-              Ghana
+            <span>a National of </span>
+            <span style="border-bottom: 1px dotted black; display: inline-block; min-width: 200px; margin-left: 8px; padding-bottom: 2px; text-align: center;">
+              ${registration.fatherDetails.nationality || 'Ghana'}
             </span>
           </div>
 
           <div style="margin-bottom: 30px;">
             <span>witness my hand this </span>
             <span style="border-bottom: 1px dotted black; display: inline-block; min-width: 100px; margin-left: 8px; padding-bottom: 2px; text-align: center;">
-              ${new Date().getDate()}
+              ${getDayOfYear(registration.registrarInfo.registrationDate)}
             </span>
             <span style="margin: 0 8px;"> day of</span>
-            <span style="border-bottom: 1px dotted black; display: inline-block; min-width: 120px; margin-right: 8px; padding-bottom: 2px;">
-              ${new Date().toLocaleDateString('en-GB', { month: 'long' })}
+            <span style="border-bottom: 1px dotted black; display: inline-block; min-width: 120px; margin-right: 8px; padding-bottom: 2px; text-align: center;">
+              ${getMonthName(registration.registrarInfo.registrationDate)}
             </span>
             <span> 20</span>
             <span style="border-bottom: 1px dotted black; display: inline-block; min-width: 40px; margin-left: 4px; padding-bottom: 2px; text-align: center;">
-              ${new Date().getFullYear().toString().slice(-2)}
+              ${getYear(registration.registrarInfo.registrationDate).toString().slice(-2)}
             </span>
           </div>
 
@@ -537,7 +892,7 @@ export class CertificateService {
           <div style="display: flex; justify-content: space-between; font-size: 9pt;">
             <div>
               <span>Entry No.</span>
-              <span style="border-bottom: 1px dotted black; display: inline-block; min-width: 80px; margin-left: 8px; padding-bottom: 2px;">
+              <span style="border-bottom: 1px dotted black; display: inline-block; min-width: 80px; margin-left: 8px; padding-bottom: 2px; text-align: center;">
                 ${registration.registrationNumber}
               </span>
             </div>

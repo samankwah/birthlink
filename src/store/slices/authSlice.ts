@@ -44,9 +44,9 @@ export const loginUser = createAsyncThunk(
         email: email,
         role: 'registrar',
         profile: {
-          firstName: 'Demo',
-          lastName: 'User',
-          phoneNumber: '0243999631',
+          firstName: 'Test',
+          lastName: 'Registrar',
+          phoneNumber: '+233243999631',
           location: {
             region: 'Eastern',
             district: 'Fanteakwa'
@@ -62,7 +62,7 @@ export const loginUser = createAsyncThunk(
         firebaseUser: {
           uid: 'dev-user-123',
           email: email,
-          displayName: 'Demo User'
+          displayName: 'Test Registrar'
         }
       };
       
@@ -100,9 +100,9 @@ export const loginUser = createAsyncThunk(
         email: email,
         role: 'registrar',
         profile: {
-          firstName: 'Demo',
-          lastName: 'User',
-          phoneNumber: '0243999631',
+          firstName: 'Test',
+          lastName: 'Registrar',
+          phoneNumber: '+233243999631',
           location: {
             region: 'Eastern',
             district: 'Fanteakwa'
@@ -118,7 +118,7 @@ export const loginUser = createAsyncThunk(
         firebaseUser: {
           uid: 'dev-user-123',
           email: email,
-          displayName: 'Demo User'
+          displayName: 'Test Registrar'
         }
       };
       

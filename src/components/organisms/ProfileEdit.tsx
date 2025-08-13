@@ -24,7 +24,7 @@ export const ProfileEdit: React.FC<ProfileEditProps> = ({ onSave, onCancel }) =>
   const fileInputRef = useRef<HTMLInputElement>(null);
   
   const [formData, setFormData] = useState<UserProfile>({
-    firstName: user?.profile.firstName || 'Demo',
+    firstName: user?.profile.firstName || '',
     lastName: user?.profile.lastName || 'User',
     phoneNumber: user?.profile.phoneNumber || '0243999631',
     region: user?.profile.region || user?.profile.location?.region || 'Eastern',
@@ -526,26 +526,6 @@ export const ProfileEdit: React.FC<ProfileEditProps> = ({ onSave, onCancel }) =>
           Debug
         </Button>
         
-        {/* Test save button - temporary */}
-        <Button
-          type="button"
-          variant="secondary"
-          onClick={async () => {
-            console.log('🧪 Test save clicked');
-            try {
-              await dispatch(addNotification({
-                type: 'info',
-                message: 'Test notification from profile save'
-              }));
-              console.log('✅ Test notification dispatched');
-              onSave();
-            } catch (error) {
-              console.error('❌ Test save failed:', error);
-            }
-          }}
-        >
-          Test Save
-        </Button>
         
         <Button
           type="submit"

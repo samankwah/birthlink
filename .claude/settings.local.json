@@ -27,7 +27,13 @@
       "Bash(firebase:*)",
       "Bash(wget:*)",
       "Bash(npx eslint:*)",
-      "Bash(touch:*)"
+      "Bash(touch:*)",
+      "Bash(cd:*)",
+      "Bash(cd:*)",
+      "Bash(cd:*)",
+      "Bash(timeout 10s npm run dev)",
+      "Bash(fg)",
+      "Bash(npm audit:*)"
     ],
     "deny": []
   }
