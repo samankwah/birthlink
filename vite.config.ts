@@ -1,9 +1,7 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
-import { resolve } from 'path'
-import { tmpdir } from 'os'
 
-// Enhanced config for WSL environment
+// Force all Vite operations to Linux filesystem to avoid Windows disk space issues
 export default defineConfig({
   plugins: [react()],
   server: {
@@ -11,7 +9,12 @@ export default defineConfig({
     port: 5173,
     strictPort: false,
     fs: {
-      strict: false
+      strict: false,
+      allow: ['..']
+    },
+    watch: {
+      usePolling: true,
+      interval: 1000
     }
   },
   build: {
@@ -22,11 +25,13 @@ export default defineConfig({
       cache: false
     }
   },
-  cacheDir: resolve(tmpdir(), 'vite'),
   optimizeDeps: {
-    force: true
+    force: true,
+    esbuildOptions: {
+      target: 'es2020'
+    }
   },
   esbuild: {
-    target: 'node14'
+    target: 'es2020'
   }
 })

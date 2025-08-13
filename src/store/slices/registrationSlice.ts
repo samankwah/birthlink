@@ -6,6 +6,7 @@ import {
   updateDoc, 
   getDocs, 
   getDoc,
+  deleteDoc,
   query,
   where,
   orderBy,
@@ -190,6 +191,15 @@ export const fetchRegistrationById = createAsyncThunk(
   }
 );
 
+export const deleteRegistration = createAsyncThunk(
+  'registrations/delete',
+  async (id: string) => {
+    const docRef = doc(db, 'registrations', id);
+    await deleteDoc(docRef);
+    return id;
+  }
+);
+
 const registrationSlice = createSlice({
   name: 'registrations',
   initialState,
@@ -268,6 +278,13 @@ const registrationSlice = createSlice({
       .addCase(fetchRegistrationById.rejected, (state, action) => {
         state.isLoading = false;
         state.error = action.error.message || 'Failed to fetch registration';
+      })
+      // Delete Registration
+      .addCase(deleteRegistration.fulfilled, (state, action) => {
+        state.registrations = state.registrations.filter(r => r.id !== action.payload);
+        if (state.currentRegistration?.id === action.payload) {
+          state.currentRegistration = null;
+        }
       });
   }
 });

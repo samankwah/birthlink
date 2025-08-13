@@ -6,6 +6,7 @@ import type { RootState, AppDispatch } from '../../store';
 import { toggleSidebar } from '../../store/slices/uiSlice';
 import { Button } from '../atoms';
 import { OfflineStatusBar, FeedbackModal, ProfileDropdown } from '../molecules';
+import { Footer } from '../organisms';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -65,7 +66,7 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
     },
     {
       name: t('certificate.title'),
-      href: '/certificate',
+      href: '/registrations/new',
       icon: '📜'
     },
     {
@@ -247,6 +248,9 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
         <main className="flex-1 overflow-y-auto bg-gray-50 p-4 sm:p-6">
           {children}
         </main>
+
+        {/* Footer */}
+        <Footer />
 
         {/* Feedback Modal */}
         <FeedbackModal

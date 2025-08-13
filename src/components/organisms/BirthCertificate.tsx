@@ -167,36 +167,27 @@ export const BirthCertificate = forwardRef<HTMLDivElement, BirthCertificateProps
             </span>
           </div>
 
-          {/* Registration Region */}
+          {/* Registration Region and District */}
           <div className="flex items-baseline" style={{ margin: '20px 0' }}>
             <span>has been duly registered in the register of Births for</span>
             <span 
               className="border-b border-dotted border-black flex-1 mx-2 text-center font-bold"
               style={{ minHeight: '20px', paddingBottom: '2px' }}
             >
-              {registration.registrarInfo?.region || 'Greater Accra'}
+              {registration.registrarInfo?.region}
             </span>
+            <span>, in the</span>
           </div>
 
-          {/* District line with "in the" */}
-          <div className="flex items-baseline justify-end" style={{ margin: '20px 0' }}>
+          {/* District Registration Line */}
+          <div className="flex items-baseline" style={{ margin: '20px 0' }}>
             <span 
               className="border-b border-dotted border-black flex-1 mr-2 text-center font-bold"
               style={{ minHeight: '20px', paddingBottom: '2px' }}
             >
-              {registration.registrarInfo?.district || 'Accra Metropolitan'}
+              {registration.registrarInfo?.district}
             </span>
-            <span>in the</span>
-          </div>
-
-          {/* Registration District Line */}
-          <div className="flex items-baseline justify-end" style={{ margin: '20px 0' }}>
-            <span 
-              className="border-b border-dotted border-black flex-1 mr-2 text-center"
-              style={{ minHeight: '20px', paddingBottom: '2px' }}
-            >
-            </span>
-            <span>Registration District</span>
+            <span>Registration District.</span>
           </div>
 
           {/* Child Name Again */}

@@ -19,7 +19,8 @@ import {
   UserManagement,
   Profile,
   Settings,
-  CertificateGeneration 
+  CertificateGeneration,
+  CertificateList 
 } from './pages';
 import './locales/i18n';
 
@@ -80,8 +81,17 @@ const AppRouter: React.FC = () => {
             </ProtectedRoute>
           } />
 
-          {/* Certificate Generation Route */}
+          {/* Certificate List Route (Original) */}
           <Route path="/certificate" element={
+            <ProtectedRoute>
+              <Layout>
+                <CertificateList />
+              </Layout>
+            </ProtectedRoute>
+          } />
+
+          {/* Certificate Generation Route */}
+          <Route path="/certificate/generate" element={
             <ProtectedRoute>
               <Layout>
                 <CertificateGeneration />

@@ -12,6 +12,99 @@ import { useOfflineRegistrations } from '../../hooks/useOfflineRegistrations';
 import type { RegistrationFormData, BirthRegistration } from '../../types';
 import { validateRegistrationForm, getFieldError, type ValidationError } from '../../utils/validation';
 
+// Regional data structure for Ghana
+const REGIONS_DISTRICTS = {
+  'Greater Accra': [
+    'Accra Metropolitan', 'Tema Metropolitan', 'Ga East Municipal', 'Ga West Municipal',
+    'Ga Central Municipal', 'Ga South Municipal', 'Ga North Municipal', 'Kpone Katamanso Municipal',
+    'Ashaiman Municipal', 'Ledzokuku Municipal', 'Krowor Municipal', 'Adenta Municipal',
+    'La-Nkwantanang-Madina Municipal', 'Shai-Osudoku', 'Ningo-Prampram'
+  ],
+  'Ashanti': [
+    'Kumasi Metropolitan', 'Obuasi Municipal', 'Ejisu Municipal', 'Juaben Municipal',
+    'Bosomtwe', 'Atwima Kwanwoma', 'Atwima Mponua', 'Atwima Nwabiagya North',
+    'Atwima Nwabiagya South', 'Afigya Kwabre North', 'Afigya Kwabre South',
+    'Asante Akim North Municipal', 'Asante Akim South Municipal', 'Bekwai Municipal',
+    'Bosome Freho', 'Ejura Sekyedumase Municipal', 'Mampong Municipal', 'Offinso Municipal',
+    'Offinso North', 'Asokore Mampong Municipal', 'Adansi North', 'Adansi South',
+    'Oforikrom Municipal', 'Old Tafo Municipal', 'Suame Municipal'
+  ],
+  'Western': [
+    'Sekondi-Takoradi Metropolitan', 'Shama', 'Ahanta West', 'Nzema East Municipal',
+    'Ellembelle', 'Jomoro', 'Wassa East', 'Wassa Amenfi West', 'Wassa Amenfi Central',
+    'Wassa Amenfi East Municipal', 'Mpohor', 'Tarkwa-Nsuaem Municipal', 'Prestea Huni-Valley Municipal'
+  ],
+  'Central': [
+    'Cape Coast Metropolitan', 'Elmina', 'Komenda-Edina-Eguafo-Abirem Municipal',
+    'Abura-Asebu-Kwamankese', 'Mfantsiman Municipal', 'Gomoa West', 'Gomoa Central',
+    'Gomoa East', 'Effutu Municipal', 'Awutu Senya East Municipal', 'Awutu Senya West',
+    'Agona West Municipal', 'Agona East', 'Nyendokyere', 'Assin Central Municipal',
+    'Assin North', 'Assin South', 'Twifo Atti-Morkwa', 'Twifo-Heman-Lower Denkyira',
+    'Upper Denkyira East Municipal', 'Upper Denkyira West'
+  ],
+  'Eastern': [
+    'New-Juaben South Municipal', 'New-Juaben North Municipal', 'Nsawam-Adoagyir Municipal',
+    'Akuapim North Municipal', 'Akuapim South', 'Okere', 'Yilo Krobo Municipal',
+    'Lower Manya Krobo Municipal', 'Upper Manya Krobo', 'Asuogyaman', 'West Akim Municipal',
+    'East Akim Municipal', 'Birim North', 'Birim South', 'Atiwa West', 'Atiwa East',
+    'Fanteakwa North', 'Fanteakwa South', 'Suhum Municipal', 'Akwatia', 'Denkyembour',
+    'Kwaebibirem Municipal', 'Abuakwa North Municipal', 'Abuakwa South Municipal'
+  ],
+  'Volta': [
+    'Ho Municipal', 'Ho West', 'Adaklu', 'Agotime Ziope', 'South Dayi', 'North Dayi',
+    'Hohoe Municipal', 'Jasikan', 'Kadjebi', 'Biakoye', 'Nkwanta South Municipal',
+    'Nkwanta North', 'Krachi East Municipal', 'Krachi West', 'Krachi Nchumuru'
+  ],
+  'Northern': [
+    'Tamale Metropolitan', 'Sagnarigu Municipal', 'Tatale Sanguli', 'Zabzugu',
+    'Kumbungu', 'Tolon', 'Savelugu Municipal', 'Nanton', 'Karaga', 'Gushagu Municipal',
+    'Saboba', 'Chereponi', 'East Gonja Municipal', 'Central Gonja', 'West Gonja Municipal',
+    'North Gonja', 'Bunkpurugu Nyankpanduri', 'Yunyoo', 'Mamprugu Moagduri'
+  ],
+  'Upper East': [
+    'Bolgatanga Municipal', 'Talensi', 'Nabdam', 'Builsa North Municipal', 'Builsa South',
+    'Kassena Nankana West', 'Kassena Nankana Municipal', 'Bawku West', 'Bawku Municipal',
+    'Pusiga', 'Garu', 'Tempane', 'Binduri'
+  ],
+  'Upper West': [
+    'Wa Municipal', 'Wa East', 'Wa West', 'Nadowli-Kaleo', 'Jirapa Municipal',
+    'Lambussie Karni', 'Lawra Municipal', 'Nandom Municipal', 'Sissala East Municipal',
+    'Sissala West'
+  ],
+  'Brong Ahafo': [
+    'Sunyani Municipal', 'Sunyani West', 'Berekum Municipal', 'Dormaa Central Municipal',
+    'Dormaa East', 'Dormaa West', 'Jaman North', 'Jaman South Municipal', 'Tain',
+    'Wenchi Municipal', 'Techiman Municipal', 'Techiman North', 'Nkoranza North',
+    'Nkoranza South Municipal', 'Kintampo North Municipal', 'Kintampo South',
+    'Atebubu-Amantin Municipal', 'Sene West', 'Sene East', 'Pru West', 'Pru East'
+  ],
+  'Western North': [
+    'Sefwi Wiawso Municipal', 'Sefwi Akontombra', 'Bodi', 'Juaboso',
+    'Bia West', 'Bia East'
+  ],
+  'Ahafo': [
+    'Goaso Municipal', 'Asutifi North', 'Asutifi South', 'Tano North Municipal',
+    'Tano South'
+  ],
+  'Bono East': [
+    'Techiman Municipal', 'Techiman North', 'Nkoranza North', 'Nkoranza South Municipal',
+    'Kintampo North Municipal', 'Kintampo South', 'Atebubu-Amantin Municipal',
+    'Sene West', 'Sene East', 'Pru West', 'Pru East'
+  ],
+  'North East': [
+    'Nalerigu-Gambaga', 'Bunkpurugu Nyankpanduri', 'Yunyoo', 'Mamprugu Moagduri',
+    'East Mamprusi Municipal', 'West Mamprusi Municipal'
+  ],
+  'Savannah': [
+    'Damongo Municipal', 'Sawla-Tuna-Kalba', 'West Gonja Municipal', 'North Gonja',
+    'Central Gonja', 'East Gonja Municipal', 'Bole', 'Yapei-Kusawgu'
+  ],
+  'Oti': [
+    'Dambai', 'Krachi East Municipal', 'Krachi West', 'Krachi Nchumuru',
+    'Nkwanta South Municipal', 'Nkwanta North', 'Kadjebi', 'Biakoye'
+  ]
+};
+
 interface BirthRegistrationFormProps {
   initialData?: Partial<RegistrationFormData>;
   mode?: 'create' | 'edit';
@@ -26,11 +119,11 @@ export const BirthRegistrationForm: React.FC<BirthRegistrationFormProps> = ({
   const { t } = useTranslation();
   const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
-  const { isLoading } = useSelector((state: RootState) => state.registrations);
   const { createOfflineRegistration, isOnline } = useOfflineRegistrations();
   
   const [currentStep, setCurrentStep] = useState(1);
   const [validationErrors, setValidationErrors] = useState<ValidationError[]>([]);
+  const [availableDistricts, setAvailableDistricts] = useState<Array<{value: string; label: string}>>([]);
   
   const [formData, setFormData] = useState<RegistrationFormData>({
     childDetails: {
@@ -59,7 +152,7 @@ export const BirthRegistrationForm: React.FC<BirthRegistrationFormProps> = ({
     },
     // Add registrar info fields
     registrarInfo: {
-      region: initialData?.registrarInfo?.region || 'Greater Accra',
+      region: initialData?.registrarInfo?.region || '',
       district: initialData?.registrarInfo?.district || '',
       location: initialData?.registrarInfo?.location || ''
     }
@@ -89,8 +182,8 @@ export const BirthRegistrationForm: React.FC<BirthRegistrationFormProps> = ({
         registrarId: 'preview-registrar',
         registrationDate: new Date(),
         location: data.registrarInfo?.location || data.childDetails.placeOfBirth || 'Ghana',
-        region: data.registrarInfo?.region || 'Greater Accra',
-        district: data.registrarInfo?.district || 'Accra Metropolitan'
+        region: data.registrarInfo?.region || '',
+        district: data.registrarInfo?.district || ''
       },
       syncStatus: 'pending' as const,
       status: 'draft' as const,
@@ -123,6 +216,21 @@ export const BirthRegistrationForm: React.FC<BirthRegistrationFormProps> = ({
     const fieldPath = `${section}.${field}`;
     if (validationErrors.some(e => e.field === fieldPath)) {
       setValidationErrors(prev => prev.filter(e => e.field !== fieldPath));
+    }
+
+    // Handle region change to update available districts
+    if (section === 'registrarInfo' && field === 'region') {
+      const districts = REGIONS_DISTRICTS[value as keyof typeof REGIONS_DISTRICTS] || [];
+      setAvailableDistricts(districts.map(district => ({ value: district, label: district })));
+      
+      // Clear district field when region changes
+      setFormData(prev => ({
+        ...prev,
+        registrarInfo: {
+          ...prev.registrarInfo,
+          district: ''
+        }
+      }));
     }
   };
 
@@ -167,6 +275,245 @@ export const BirthRegistrationForm: React.FC<BirthRegistrationFormProps> = ({
     }
   };
 
+  const generatePrintableCertificate = (registration: BirthRegistration) => {
+    const printWindow = window.open('', '_blank');
+    if (!printWindow) return;
+
+    const certificateHTML = `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <meta charset="UTF-8">
+          <title>Birth Certificate - ${registration.childDetails.firstName} ${registration.childDetails.lastName}</title>
+          <style>
+            @page {
+              size: A4;
+              margin: 20mm;
+            }
+            
+            body {
+              font-family: 'Times New Roman', Times, serif;
+              font-size: 12pt;
+              line-height: 1.8;
+              margin: 0;
+              padding: 0;
+              color: black;
+            }
+            
+            .certificate-container {
+              width: 100%;
+              border: 4px solid black;
+              padding: 20mm;
+              position: relative;
+              min-height: 250mm;
+            }
+            
+            .header-text {
+              text-align: center;
+              font-size: 9pt;
+              font-weight: bold;
+              letter-spacing: 2px;
+              margin-bottom: 15px;
+            }
+            
+            .cert-number {
+              position: absolute;
+              top: 15px;
+              right: 20px;
+              font-weight: bold;
+              font-size: 14pt;
+            }
+            
+            .title-section {
+              text-align: center;
+              margin: 30px 0;
+            }
+            
+            .republic-title {
+              font-size: 14pt;
+              font-weight: bold;
+              margin: 10px 0;
+            }
+            
+            .birth-cert-title {
+              font-size: 20pt;
+              font-weight: bold;
+              letter-spacing: 4px;
+              margin: 10px 0;
+            }
+            
+            .act-reference {
+              font-size: 10pt;
+              margin: 5px 0;
+            }
+            
+            .main-statement {
+              text-align: center;
+              font-size: 16pt;
+              font-weight: bold;
+              margin: 30px 0;
+            }
+            
+            .form-line {
+              margin: 20px 0;
+              display: flex;
+              align-items: baseline;
+            }
+            
+            .dotted-line {
+              border-bottom: 1px dotted black;
+              flex: 1;
+              margin: 0 5px;
+              min-height: 20px;
+              text-align: center;
+              padding-bottom: 2px;
+              font-weight: bold;
+            }
+            
+            .footer-section {
+              margin-top: 40px;
+              display: flex;
+              justify-content: space-between;
+              align-items: end;
+            }
+            
+            .signature-line {
+              width: 200px;
+              border-bottom: 2px solid black;
+              margin: 20px 0 5px 0;
+              height: 30px;
+            }
+            
+            .registrar-text {
+              text-align: center;
+              font-style: italic;
+            }
+            
+            .footer-info {
+              font-size: 9pt;
+              display: flex;
+              justify-content: space-between;
+              margin-top: 20px;
+            }
+            
+            .short-line {
+              width: 50px;
+              display: inline-block;
+            }
+            
+            .medium-line {
+              width: 120px;
+              display: inline-block;
+            }
+          </style>
+        </head>
+        <body onload="window.print(); window.close();">
+          <div class="certificate-container">
+            <div class="header-text">STRICTLY FOR CHILDREN 0 — 12 MONTHS</div>
+            
+            <div class="cert-number">No. ${registration.registrationNumber}</div>
+            
+            <div class="title-section">
+              <div class="republic-title">REPUBLIC OF GHANA</div>
+              <div class="birth-cert-title">BIRTH CERTIFICATE</div>
+              <div class="act-reference">(Section 11 Act 301)</div>
+            </div>
+            
+            <div class="main-statement">This is to Certify that the Birth</div>
+            
+            <div class="form-line">
+              <span>of</span>
+              <span class="dotted-line">${registration.childDetails.firstName} ${registration.childDetails.lastName}</span>
+            </div>
+            
+            <div class="form-line">
+              <span>born at</span>
+              <span class="dotted-line">${registration.childDetails.placeOfBirth}</span>
+            </div>
+            
+            <div class="form-line">
+              <span>on the</span>
+              <span class="dotted-line short-line">${new Date(registration.childDetails.dateOfBirth).getDate()}</span>
+              <span>day of</span>
+              <span class="dotted-line medium-line">${new Date(registration.childDetails.dateOfBirth).toLocaleDateString('en-GB', { month: 'long' })}</span>
+              <span>20</span>
+              <span class="dotted-line short-line">${new Date(registration.childDetails.dateOfBirth).getFullYear().toString().slice(-2)}</span>
+            </div>
+            
+            <div class="form-line">
+              <span>has been duly registered in the register of Births for</span>
+              <span class="dotted-line">${registration.registrarInfo?.region || ''}</span>
+              <span>, in the</span>
+            </div>
+            
+            <div class="form-line">
+              <span class="dotted-line">${registration.registrarInfo?.district || ''}</span>
+              <span>Registration District.</span>
+            </div>
+            
+            <div class="form-line">
+              <span>The said</span>
+              <span class="dotted-line">${registration.childDetails.firstName} ${registration.childDetails.lastName}</span>
+            </div>
+            
+            <div class="form-line">
+              <span>is the ${registration.childDetails.gender.toLowerCase()} child of</span>
+              <span class="dotted-line">${registration.motherDetails.firstName} ${registration.motherDetails.lastName}</span>
+            </div>
+            
+            <div class="form-line">
+              <span class="dotted-line"></span>
+            </div>
+            
+            <div class="form-line">
+              <span>a National of</span>
+              <span class="dotted-line">${registration.motherDetails.nationality || 'Ghana'}</span>
+            </div>
+            
+            <div class="form-line">
+              <span>and</span>
+              <span class="dotted-line">${registration.fatherDetails.firstName} ${registration.fatherDetails.lastName}</span>
+            </div>
+            
+            <div class="form-line">
+              <span>a National of</span>
+              <span class="dotted-line">${registration.fatherDetails.nationality || 'Ghana'}</span>
+            </div>
+            
+            <div class="form-line">
+              <span>witness my hand this</span>
+              <span class="dotted-line short-line">${new Date().getDate()}</span>
+              <span>day of</span>
+              <span class="dotted-line medium-line">${new Date().toLocaleDateString('en-GB', { month: 'long' })}</span>
+              <span>20</span>
+              <span class="dotted-line short-line">${new Date().getFullYear().toString().slice(-2)}</span>
+            </div>
+            
+            <div class="footer-section">
+              <div>
+                <span>Entry No.</span>
+                <span class="dotted-line" style="display: inline-block; width: 150px; margin-left: 10px;">${registration.registrationNumber}</span>
+              </div>
+              
+              <div>
+                <div class="signature-line"></div>
+                <div class="registrar-text">Registrar</div>
+              </div>
+            </div>
+            
+            <div class="footer-info">
+              <div>BHP Counterfeit</div>
+              <div>Birth Certificate Form R</div>
+            </div>
+          </div>
+        </body>
+      </html>
+    `;
+
+    printWindow.document.write(certificateHTML);
+    printWindow.document.close();
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -182,40 +529,30 @@ export const BirthRegistrationForm: React.FC<BirthRegistrationFormProps> = ({
     }
 
     try {
-      console.log('Submitting form data:', formData);
+      console.log('Generating certificate from form data:', formData);
+      
+      let registrationData: BirthRegistration;
       
       if (isOnline) {
         // Try online creation first
         console.log('Attempting online registration...');
         const result = await dispatch(createRegistration(formData)).unwrap();
         console.log('Registration created successfully:', result);
+        registrationData = result;
         
         dispatch(addNotification({
           type: 'success',
-          message: t('registration.registrationCreated', 'Registration created successfully!')
+          message: 'Registration saved successfully!'
         }));
-        
-        // Store registration data for certificate generation
-        localStorage.setItem('lastRegistration', JSON.stringify(result));
-        
-        // Navigate to certificate generation
-        navigate('/certificate', { 
-          state: { registration: result },
-          replace: true 
-        });
       } else {
         // Use offline creation
         console.log('Using offline registration...');
         await createOfflineRegistration(formData);
-        dispatch(addNotification({
-          type: 'success',
-          message: 'Registration saved offline and will sync when connection is restored'
-        }));
         
-        // For offline registrations, create a mock registration object for certificate
-        const offlineRegistration = {
+        // Create registration object for certificate generation
+        registrationData = {
           id: `offline-${Date.now()}`,
-          registrationNumber: `TEMP-${Date.now()}`,
+          registrationNumber: `GHA-${new Date().getFullYear()}-${Math.random().toString(36).substr(2, 6).toUpperCase()}`,
           childDetails: {
             firstName: formData.childDetails.firstName,
             lastName: formData.childDetails.lastName,
@@ -230,7 +567,8 @@ export const BirthRegistrationForm: React.FC<BirthRegistrationFormProps> = ({
             dateOfBirth: new Date(formData.motherDetails.dateOfBirth),
             nationalId: formData.motherDetails.nationalId,
             occupation: formData.motherDetails.occupation,
-            phoneNumber: formData.motherDetails.phoneNumber
+            nationality: formData.motherDetails.nationality,
+            phoneNumber: formData.motherDetails.phoneNumber || ''
           },
           fatherDetails: {
             firstName: formData.fatherDetails.firstName,
@@ -238,27 +576,34 @@ export const BirthRegistrationForm: React.FC<BirthRegistrationFormProps> = ({
             dateOfBirth: new Date(formData.fatherDetails.dateOfBirth),
             nationalId: formData.fatherDetails.nationalId,
             occupation: formData.fatherDetails.occupation,
-            phoneNumber: formData.fatherDetails.phoneNumber
+            nationality: formData.fatherDetails.nationality,
+            phoneNumber: formData.fatherDetails.phoneNumber || ''
           },
           registrarInfo: {
             registrarId: 'current-user',
             registrationDate: new Date(),
-            location: 'Current Location',
-            region: 'Eastern',
-            district: 'Fanteakwa'
+            location: formData.registrarInfo?.location || 'Ghana',
+            region: formData.registrarInfo?.region || '',
+            district: formData.registrarInfo?.district || ''
           },
           status: 'submitted' as const,
           syncStatus: 'pending' as const,
-          createdAt: new Date(),
-          updatedAt: new Date()
+          createdAt: { seconds: Date.now() / 1000, nanoseconds: 0 } as any,
+          updatedAt: { seconds: Date.now() / 1000, nanoseconds: 0 } as any
         };
         
-        localStorage.setItem('lastRegistration', JSON.stringify(offlineRegistration));
-        navigate('/certificate', { 
-          state: { registration: offlineRegistration },
-          replace: true 
-        });
+        dispatch(addNotification({
+          type: 'success',
+          message: 'Registration saved offline successfully!'
+        }));
       }
+      
+      // Store registration data for future access
+      localStorage.setItem('lastRegistration', JSON.stringify(registrationData));
+      
+      // Redirect to certificate list page
+      navigate('/birth-certificate');
+      
     } catch (error: any) {
       console.error('Registration submission error:', error);
       
@@ -271,7 +616,7 @@ export const BirthRegistrationForm: React.FC<BirthRegistrationFormProps> = ({
             type: 'warning',
             message: 'Registration saved offline due to connection issues. Will sync automatically.'
           }));
-          navigate('/registrations');
+          navigate('/birth-certificate');
         } catch {
           dispatch(addNotification({
             type: 'error',
@@ -547,10 +892,11 @@ export const BirthRegistrationForm: React.FC<BirthRegistrationFormProps> = ({
           name="region"
           type="select"
           required
-          value={formData.registrarInfo?.region || 'Greater Accra'}
+          value={formData.registrarInfo?.region || ''}
           onChange={(e) => handleInputChange('registrarInfo', 'region', e.target.value)}
           error={getFieldError(validationErrors, 'registrarInfo.region')}
           options={[
+            { value: '', label: 'Select Region...' },
             { value: 'Greater Accra', label: 'Greater Accra Region' },
             { value: 'Ashanti', label: 'Ashanti Region' },
             { value: 'Western', label: 'Western Region' },
@@ -560,18 +906,29 @@ export const BirthRegistrationForm: React.FC<BirthRegistrationFormProps> = ({
             { value: 'Northern', label: 'Northern Region' },
             { value: 'Upper East', label: 'Upper East Region' },
             { value: 'Upper West', label: 'Upper West Region' },
-            { value: 'Brong Ahafo', label: 'Brong Ahafo Region' }
+            { value: 'Brong Ahafo', label: 'Brong Ahafo Region' },
+            { value: 'Western North', label: 'Western North Region' },
+            { value: 'Ahafo', label: 'Ahafo Region' },
+            { value: 'Bono East', label: 'Bono East Region' },
+            { value: 'North East', label: 'North East Region' },
+            { value: 'Savannah', label: 'Savannah Region' },
+            { value: 'Oti', label: 'Oti Region' }
           ]}
         />
         
         <FormField
           label={t('registration.district', 'District')}
           name="district"
-          type="text"
+          type="select"
           required
           value={formData.registrarInfo?.district || ''}
           onChange={(e) => handleInputChange('registrarInfo', 'district', e.target.value)}
           error={getFieldError(validationErrors, 'registrarInfo.district')}
+          options={[
+            { value: '', label: formData.registrarInfo?.region ? 'Select District...' : 'Select Region First' },
+            ...availableDistricts
+          ]}
+          disabled={!formData.registrarInfo?.region}
         />
         
         <FormField
@@ -660,12 +1017,10 @@ export const BirthRegistrationForm: React.FC<BirthRegistrationFormProps> = ({
                 ) : (
                   <Button
                     type="submit"
-                    isLoading={isLoading}
-                    disabled={isLoading}
                     className="w-full sm:w-auto"
                   >
                     {mode === 'create' 
-                      ? t('registration.createRegistration') 
+                      ? 'Generate' 
                       : t('registration.updateRegistration')
                     }
                   </Button>
@@ -678,9 +1033,11 @@ export const BirthRegistrationForm: React.FC<BirthRegistrationFormProps> = ({
         {/* Certificate Preview */}
         <div className="bg-white shadow-lg rounded-lg p-4 sm:p-6">
           <div className="mb-4 sm:mb-6">
-            <h2 className="text-lg font-semibold text-gray-900 mb-2">
-              {t('certificate.preview')}
-            </h2>
+            <div className="flex justify-between items-center mb-2">
+              <h2 className="text-lg font-semibold text-gray-900">
+                {t('certificate.preview')}
+              </h2>
+            </div>
             <p className="text-sm text-gray-600">
               {showPreview 
                 ? t('certificate.livePreview', 'Certificate updates as you fill the form')
@@ -696,16 +1053,16 @@ export const BirthRegistrationForm: React.FC<BirthRegistrationFormProps> = ({
               <div 
                 className="mx-auto border border-gray-200 shadow-sm overflow-hidden rounded-lg"
                 style={{
-                  // Increased dimensions for better preview visibility
+                  // Expanded dimensions for better preview visibility
                   width: '100%',
-                  maxWidth: '700px', // Increased from 500px
-                  height: '550px', // Increased from 400px
-                  minHeight: '550px'
+                  maxWidth: '900px', // Increased from 800px
+                  height: '700px', // Increased from 600px
+                  minHeight: '700px'
                 }}
               >
-                <div className="w-full h-full overflow-auto">
+                <div className="w-full h-full overflow-hidden">
                   {showPreview && previewRegistration ? (
-                    <div className="transform scale-[0.35] sm:scale-[0.4] md:scale-[0.45] lg:scale-[0.5] xl:scale-[0.55] origin-top-left w-[286%] sm:w-[250%] md:w-[222%] lg:w-[200%] xl:w-[182%] h-[286%] sm:h-[250%] md:h-[222%] lg:h-[200%] xl:h-[182%]">
+                    <div className="transform scale-[0.5] origin-top-left w-[200%] h-[200%]">
                       <BirthCertificate 
                         registration={previewRegistration} 
                         serialNumber="PREVIEW-2024-000001"

@@ -33,7 +33,16 @@
       "Bash(cd:*)",
       "Bash(timeout 10s npm run dev)",
       "Bash(fg)",
-      "Bash(npm audit:*)"
+      "Bash(npm audit:*)",
+      "Bash(export VITE_CACHE_DIR=/tmp/vite-cache)",
+      "Bash(npx vite:*)",
+      "Bash(mv:*)",
+      "Bash(sudo chown:*)",
+      "Bash(export NODE_ENV=development)",
+      "Bash(export VITE_CACHE_DIR=$HOME/.vite-cache)",
+      "Bash(TMPDIR=/tmp TMP=/tmp TEMP=/tmp npm run dev)",
+      "Bash(TMPDIR=/tmp TMP=/tmp TEMP=/tmp VITE_NODE_MODULES_DIR=/tmp/node_modules VITE_CACHE_DIR=/tmp/birthlink-vite-cache npm run dev)",
+      "Bash(jobs)"
     ],
     "deny": []
   }

@@ -10,3 +10,4 @@ export { UserProfile } from './UserProfile';
 export { Settings } from './Settings';
 export { Profile } from './Profile';
 export { CertificateGeneration } from './CertificateGeneration';
+export { CertificateList } from './CertificateList';
