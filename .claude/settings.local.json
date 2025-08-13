@@ -16,7 +16,18 @@
       "Bash(grep:*)",
       "Bash(sed:*)",
       "Bash(cd:*)",
-      "Bash(cd:*)"
+      "Bash(cd:*)",
+      "Bash(chmod:*)",
+      "Bash(cd:*)",
+      "Bash(npm run lint)",
+      "Bash(firebase --version)",
+      "Bash(firebase emulators:start:*)",
+      "Bash(sudo apt:*)",
+      "Bash(sudo apt install:*)",
+      "Bash(firebase:*)",
+      "Bash(wget:*)",
+      "Bash(npx eslint:*)",
+      "Bash(touch:*)"
     ],
     "deny": []
   }

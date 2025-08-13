@@ -10,8 +10,19 @@ export interface UserProfile {
   firstName: string;
   lastName: string;
   phoneNumber: string;
-  region: string;
-  district: string;
+  region?: string;
+  district?: string;
+  location?: {
+    region: string;
+    district: string;
+  };
+  profilePicture?: string;
+  bio?: string;
+  dateOfBirth?: Date;
+  nationalId?: string;
+  occupation?: string;
+  department?: string;
+  organization?: string;
 }
 
 export interface UserPreferences {
@@ -46,6 +57,7 @@ export interface ParentDetails {
   nationalId?: string;
   dateOfBirth: Date;
   occupation?: string;
+  phoneNumber?: string;
 }
 
 export interface RegistrarInfo {

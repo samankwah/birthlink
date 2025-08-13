@@ -8,7 +8,19 @@ import { useAuth } from './hooks/useAuth';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { Layout } from './components/templates/Layout';
 import { NotificationSystem } from './components/organisms';
-import { Dashboard, Login, Registrations, NewRegistration } from './pages';
+import { 
+  Dashboard, 
+  Login, 
+  Register,
+  ForgotPassword,
+  Registrations, 
+  NewRegistration, 
+  Monitoring,
+  UserManagement,
+  Profile,
+  Settings,
+  CertificateGeneration 
+} from './pages';
 import './locales/i18n';
 
 // Loading component for PersistGate
@@ -39,6 +51,8 @@ const AppRouter: React.FC = () => {
         <Routes>
           {/* Public Routes */}
           <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
           
           {/* Protected Routes */}
           <Route path="/dashboard" element={
@@ -65,36 +79,48 @@ const AppRouter: React.FC = () => {
               </Layout>
             </ProtectedRoute>
           } />
+
+          {/* Certificate Generation Route */}
+          <Route path="/certificate" element={
+            <ProtectedRoute>
+              <Layout>
+                <CertificateGeneration />
+              </Layout>
+            </ProtectedRoute>
+          } />
+
+          {/* Monitoring Route */}
+          <Route path="/monitoring" element={
+            <ProtectedRoute requiredRole="admin">
+              <Layout>
+                <Monitoring />
+              </Layout>
+            </ProtectedRoute>
+          } />
           
+          {/* User Management Route */}
+          <Route path="/users" element={
+            <ProtectedRoute requiredRole="admin">
+              <Layout>
+                <UserManagement />
+              </Layout>
+            </ProtectedRoute>
+          } />
+          
+          {/* User Profile Route */}
           <Route path="/profile" element={
             <ProtectedRoute>
               <Layout>
-                <div className="text-center py-12">
-                  <h1 className="text-2xl font-bold text-gray-900">Profile</h1>
-                  <p className="mt-2 text-gray-600">User profile page</p>
-                </div>
+                <Profile />
               </Layout>
             </ProtectedRoute>
           } />
           
+          {/* Settings Route */}
           <Route path="/settings" element={
-            <ProtectedRoute>
-              <Layout>
-                <div className="text-center py-12">
-                  <h1 className="text-2xl font-bold text-gray-900">Settings</h1>
-                  <p className="mt-2 text-gray-600">Application settings</p>
-                </div>
-              </Layout>
-            </ProtectedRoute>
-          } />
-          
-          <Route path="/admin" element={
             <ProtectedRoute requiredRole="admin">
               <Layout>
-                <div className="text-center py-12">
-                  <h1 className="text-2xl font-bold text-gray-900">Admin Panel</h1>
-                  <p className="mt-2 text-gray-600">Administrator dashboard</p>
-                </div>
+                <Settings />
               </Layout>
             </ProtectedRoute>
           } />

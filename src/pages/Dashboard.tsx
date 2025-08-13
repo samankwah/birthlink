@@ -1,6 +1,7 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
+import { CertificateQuickTest } from '../components/molecules';
 import type { RootState } from '../store';
 
 export const Dashboard: React.FC = () => {
@@ -93,6 +94,11 @@ export const Dashboard: React.FC = () => {
             </div>
           ))}
         </div>
+      </div>
+      
+      {/* Certificate Test Section */}
+      <div className="mt-8">
+        <CertificateQuickTest />
       </div>
     </div>
   );

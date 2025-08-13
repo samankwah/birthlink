@@ -125,25 +125,89 @@ export const BirthRegistrationForm: React.FC<BirthRegistrationFormProps> = ({
     }
 
     try {
+      console.log('Submitting form data:', formData);
+      
       if (isOnline) {
         // Try online creation first
-        await dispatch(createRegistration(formData)).unwrap();
+        console.log('Attempting online registration...');
+        const result = await dispatch(createRegistration(formData)).unwrap();
+        console.log('Registration created successfully:', result);
+        
         dispatch(addNotification({
           type: 'success',
-          message: t('registration.registrationCreated')
+          message: t('registration.registrationCreated', 'Registration created successfully!')
         }));
+        
+        // Store registration data for certificate generation
+        localStorage.setItem('lastRegistration', JSON.stringify(result));
+        
+        // Navigate to certificate generation
+        navigate('/certificate', { 
+          state: { registration: result },
+          replace: true 
+        });
       } else {
         // Use offline creation
+        console.log('Using offline registration...');
         await createOfflineRegistration(formData);
         dispatch(addNotification({
           type: 'success',
           message: 'Registration saved offline and will sync when connection is restored'
         }));
+        
+        // For offline registrations, create a mock registration object for certificate
+        const offlineRegistration = {
+          id: `offline-${Date.now()}`,
+          registrationNumber: `TEMP-${Date.now()}`,
+          childDetails: {
+            firstName: formData.childDetails.firstName,
+            lastName: formData.childDetails.lastName,
+            dateOfBirth: new Date(formData.childDetails.dateOfBirth),
+            placeOfBirth: formData.childDetails.placeOfBirth,
+            gender: formData.childDetails.gender,
+            hospitalOfBirth: formData.childDetails.hospitalOfBirth
+          },
+          motherDetails: {
+            firstName: formData.motherDetails.firstName,
+            lastName: formData.motherDetails.lastName,
+            dateOfBirth: new Date(formData.motherDetails.dateOfBirth),
+            nationalId: formData.motherDetails.nationalId,
+            occupation: formData.motherDetails.occupation,
+            phoneNumber: formData.motherDetails.phoneNumber
+          },
+          fatherDetails: {
+            firstName: formData.fatherDetails.firstName,
+            lastName: formData.fatherDetails.lastName,
+            dateOfBirth: new Date(formData.fatherDetails.dateOfBirth),
+            nationalId: formData.fatherDetails.nationalId,
+            occupation: formData.fatherDetails.occupation,
+            phoneNumber: formData.fatherDetails.phoneNumber
+          },
+          registrarInfo: {
+            registrarId: 'current-user',
+            registrationDate: new Date(),
+            location: 'Current Location',
+            region: 'Eastern',
+            district: 'Fanteakwa'
+          },
+          status: 'submitted' as const,
+          syncStatus: 'pending' as const,
+          createdAt: new Date(),
+          updatedAt: new Date()
+        };
+        
+        localStorage.setItem('lastRegistration', JSON.stringify(offlineRegistration));
+        navigate('/certificate', { 
+          state: { registration: offlineRegistration },
+          replace: true 
+        });
       }
-      navigate('/registrations');
-    } catch {
+    } catch (error: any) {
+      console.error('Registration submission error:', error);
+      
       // Fallback to offline if online creation fails
       if (isOnline) {
+        console.log('Online registration failed, trying offline...');
         try {
           await createOfflineRegistration(formData);
           dispatch(addNotification({

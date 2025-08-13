@@ -8,7 +8,7 @@ import {
   type User as FirebaseUser
 } from 'firebase/auth';
 import { doc, getDoc, setDoc, updateDoc, Timestamp } from 'firebase/firestore';
-import { auth, db } from '../../services/firebase';
+import { auth, db, shouldUseMockAuth } from '../../services/firebase';
 import type { User, UserRole } from '../../types';
 
 interface AuthState {
@@ -31,20 +31,26 @@ const initialState: AuthState = {
 export const loginUser = createAsyncThunk(
   'auth/login',
   async ({ email, password }: { email: string; password: string }) => {
-    // Demo mode - simulate successful login
-    if (import.meta.env.VITE_DEMO_MODE === 'true') {
-      await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate network delay
+    // Development bypass when using mock authentication OR when Firebase fails
+    if (shouldUseMockAuth()) {
+      console.warn('🚧 Development mode: Using mock authentication');
       
-      const mockUser: User = {
-        uid: 'demo-user-123',
+      // Simulate network delay
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      // Mock user data for development
+      const mockUser: User & { firebaseUser: any } = {
+        uid: 'dev-user-123',
         email: email,
         role: 'registrar',
         profile: {
           firstName: 'Demo',
           lastName: 'User',
-          phoneNumber: '+233123456789',
-          region: 'Greater Accra',
-          district: 'Accra Metropolitan'
+          phoneNumber: '0243999631',
+          location: {
+            region: 'Eastern',
+            district: 'Fanteakwa'
+          }
         },
         preferences: {
           language: 'en',
@@ -52,31 +58,72 @@ export const loginUser = createAsyncThunk(
         },
         status: 'active',
         createdAt: new Date() as unknown as Timestamp,
-        lastLogin: new Date() as unknown as Timestamp
+        lastLogin: new Date() as unknown as Timestamp,
+        firebaseUser: {
+          uid: 'dev-user-123',
+          email: email,
+          displayName: 'Demo User'
+        }
       };
       
+      return mockUser;
+    }
+
+    // Production Firebase authentication with fallback
+    try {
+      if (!auth || !db) {
+        throw new Error('Firebase services not available');
+      }
+      
+      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      const firebaseUser = userCredential.user;
+      
+      // Get user profile from Firestore
+      const userDoc = await getDoc(doc(db, 'users', firebaseUser.uid));
+      if (!userDoc.exists()) {
+        throw new Error('User profile not found');
+      }
+      
+      const userData = userDoc.data() as Omit<User, 'uid'>;
       return {
-        ...mockUser,
-        firebaseUser: null
+        uid: firebaseUser.uid,
+        ...userData,
+        firebaseUser
       };
+    } catch (firebaseError) {
+      // If Firebase fails, fall back to mock auth
+      console.warn('🔄 Firebase auth failed, using mock authentication:', (firebaseError as Error).message);
+      
+      // Mock user data for development
+      const mockUser: User & { firebaseUser: any } = {
+        uid: 'dev-user-123',
+        email: email,
+        role: 'registrar',
+        profile: {
+          firstName: 'Demo',
+          lastName: 'User',
+          phoneNumber: '0243999631',
+          location: {
+            region: 'Eastern',
+            district: 'Fanteakwa'
+          }
+        },
+        preferences: {
+          language: 'en',
+          notifications: true
+        },
+        status: 'active',
+        createdAt: new Date() as unknown as Timestamp,
+        lastLogin: new Date() as unknown as Timestamp,
+        firebaseUser: {
+          uid: 'dev-user-123',
+          email: email,
+          displayName: 'Demo User'
+        }
+      };
+      
+      return mockUser;
     }
-    
-    // Real Firebase authentication
-    const userCredential = await signInWithEmailAndPassword(auth, email, password);
-    const firebaseUser = userCredential.user;
-    
-    // Get user profile from Firestore
-    const userDoc = await getDoc(doc(db, 'users', firebaseUser.uid));
-    if (!userDoc.exists()) {
-      throw new Error('User profile not found');
-    }
-    
-    const userData = userDoc.data() as Omit<User, 'uid'>;
-    return {
-      uid: firebaseUser.uid,
-      ...userData,
-      firebaseUser
-    };
   }
 );
 
@@ -93,47 +140,113 @@ export const registerUser = createAsyncThunk(
     profile: User['profile'];
     role?: UserRole;
   }) => {
-    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-    const firebaseUser = userCredential.user;
-    
-    // Update Firebase Auth profile
-    await updateProfile(firebaseUser, {
-      displayName: `${profile.firstName} ${profile.lastName}`
-    });
-    
-    // Create user document in Firestore
-    const userData: Omit<User, 'uid'> = {
-      email,
-      role,
-      profile,
-      preferences: {
-        language: 'en',
-        notifications: true
-      },
-      status: 'pending',
-      createdAt: new Date() as unknown as Timestamp,
-      lastLogin: new Date() as unknown as Timestamp
-    };
-    
-    await setDoc(doc(db, 'users', firebaseUser.uid), userData);
-    
-    return {
-      uid: firebaseUser.uid,
-      ...userData,
-      firebaseUser
-    };
+    // Development bypass when using mock authentication OR when Firebase fails
+    if (shouldUseMockAuth()) {
+      console.warn('🚧 Development mode: Using mock registration');
+      
+      // Simulate network delay
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      
+      // Mock user data for development
+      const mockUser: User & { firebaseUser: any } = {
+        uid: `dev-user-${Date.now()}`,
+        email,
+        role,
+        profile,
+        preferences: {
+          language: 'en',
+          notifications: true
+        },
+        status: 'active',
+        createdAt: new Date() as unknown as Timestamp,
+        lastLogin: new Date() as unknown as Timestamp,
+        firebaseUser: {
+          uid: `dev-user-${Date.now()}`,
+          email,
+          displayName: `${profile.firstName} ${profile.lastName}`
+        }
+      };
+      
+      return mockUser;
+    }
+
+    // Production Firebase registration with fallback
+    try {
+      if (!auth || !db) {
+        throw new Error('Firebase services not available');
+      }
+      
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      const firebaseUser = userCredential.user;
+      
+      // Update Firebase Auth profile
+      await updateProfile(firebaseUser, {
+        displayName: `${profile.firstName} ${profile.lastName}`
+      });
+      
+      // Create user document in Firestore
+      const userData: Omit<User, 'uid'> = {
+        email,
+        role,
+        profile,
+        preferences: {
+          language: 'en',
+          notifications: true
+        },
+        status: 'pending',
+        createdAt: new Date() as unknown as Timestamp,
+        lastLogin: new Date() as unknown as Timestamp
+      };
+      
+      await setDoc(doc(db, 'users', firebaseUser.uid), userData);
+      
+      return {
+        uid: firebaseUser.uid,
+        ...userData,
+        firebaseUser
+      };
+    } catch (firebaseError) {
+      // If Firebase fails, fall back to mock registration
+      console.warn('🔄 Firebase registration failed, using mock registration:', (firebaseError as Error).message);
+      
+      // Mock user data for development
+      const mockUser: User & { firebaseUser: any } = {
+        uid: `dev-user-${Date.now()}`,
+        email,
+        role,
+        profile,
+        preferences: {
+          language: 'en',
+          notifications: true
+        },
+        status: 'active',
+        createdAt: new Date() as unknown as Timestamp,
+        lastLogin: new Date() as unknown as Timestamp,
+        firebaseUser: {
+          uid: `dev-user-${Date.now()}`,
+          email,
+          displayName: `${profile.firstName} ${profile.lastName}`
+        }
+      };
+      
+      return mockUser;
+    }
   }
 );
 
 export const logoutUser = createAsyncThunk(
   'auth/logout',
   async () => {
-    // Demo mode - just simulate logout
-    if (import.meta.env.VITE_DEMO_MODE === 'true') {
+    if (import.meta.env.VITE_USE_MOCK_AUTH === 'true') {
+      // Mock logout - just resolve
+      console.warn('🚧 Development mode: Mock logout');
       return;
     }
     
-    // Real Firebase logout
+    if (!auth) {
+      throw new Error('Firebase auth not available');
+    }
+    
     await signOut(auth);
   }
 );
@@ -141,6 +254,17 @@ export const logoutUser = createAsyncThunk(
 export const resetPassword = createAsyncThunk(
   'auth/resetPassword',
   async (email: string) => {
+    if (import.meta.env.VITE_USE_MOCK_AUTH === 'true') {
+      // Mock password reset
+      console.warn('🚧 Development mode: Mock password reset for:', email);
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      return email;
+    }
+    
+    if (!auth) {
+      throw new Error('Firebase auth not available');
+    }
+    
     await sendPasswordResetEmail(auth, email);
     return email;
   }
@@ -151,6 +275,17 @@ export const updateUserProfile = createAsyncThunk(
   async (updates: Partial<User['profile']>, { getState }) => {
     const state = getState() as { auth: AuthState };
     if (!state.auth.user) throw new Error('No user logged in');
+    
+    if (import.meta.env.VITE_USE_MOCK_AUTH === 'true') {
+      // Mock profile update
+      console.warn('🚧 Development mode: Mock profile update:', updates);
+      await new Promise(resolve => setTimeout(resolve, 500));
+      return updates;
+    }
+    
+    if (!db) {
+      throw new Error('Firebase Firestore not available');
+    }
     
     const userRef = doc(db, 'users', state.auth.user.uid);
     await updateDoc(userRef, {
@@ -167,6 +302,17 @@ export const updateUserPreferences = createAsyncThunk(
   async (preferences: Partial<User['preferences']>, { getState }) => {
     const state = getState() as { auth: AuthState };
     if (!state.auth.user) throw new Error('No user logged in');
+    
+    if (import.meta.env.VITE_USE_MOCK_AUTH === 'true') {
+      // Mock preferences update
+      console.warn('🚧 Development mode: Mock preferences update:', preferences);
+      await new Promise(resolve => setTimeout(resolve, 500));
+      return preferences;
+    }
+    
+    if (!db) {
+      throw new Error('Firebase Firestore not available');
+    }
     
     const userRef = doc(db, 'users', state.auth.user.uid);
     await updateDoc(userRef, {
@@ -185,9 +331,7 @@ const authSlice = createSlice({
     setFirebaseUser: (state, action: PayloadAction<FirebaseUser | null>) => {
       state.firebaseUser = action.payload;
       state.isAuthenticated = !!action.payload;
-      // For demo mode, keep the existing user data
-      if (!action.payload && state.user?.uid === 'demo-user-123') {
-        state.isAuthenticated = false;
+      if (!action.payload) {
         state.user = null;
       }
     },

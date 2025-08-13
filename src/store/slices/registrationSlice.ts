@@ -45,47 +45,67 @@ const generateRegistrationNumber = async (): Promise<string> => {
 // Async thunks
 export const createRegistration = createAsyncThunk(
   'registrations/create',
-  async (formData: RegistrationFormData, { getState }) => {
-    const state = getState() as { auth: { user: import('../../types').User | null } };
-    const userId = state.auth.user?.uid;
-    
-    if (!userId) throw new Error('User not authenticated');
-    
-    const registrationNumber = await generateRegistrationNumber();
-    
-    const registrationData: Omit<BirthRegistration, 'id'> = {
-      registrationNumber,
-      childDetails: {
-        ...formData.childDetails,
-        dateOfBirth: new Date(formData.childDetails.dateOfBirth)
-      },
-      motherDetails: {
-        ...formData.motherDetails,
-        dateOfBirth: new Date(formData.motherDetails.dateOfBirth)
-      },
-      fatherDetails: {
-        ...formData.fatherDetails,
-        dateOfBirth: new Date(formData.fatherDetails.dateOfBirth)
-      },
-      registrarInfo: {
-        registrarId: userId,
-        registrationDate: new Date(),
-        location: state.auth.user?.profile.district || 'Unknown',
-        region: state.auth.user?.profile.region || 'Unknown',
-        district: state.auth.user?.profile.district || 'Unknown'
-      },
-      status: 'draft',
-      syncStatus: 'pending',
-      createdAt: Timestamp.now(),
-      updatedAt: Timestamp.now()
-    };
-    
-    const docRef = await addDoc(collection(db, 'registrations'), registrationData);
-    
-    return {
-      id: docRef.id,
-      ...registrationData
-    } as BirthRegistration;
+  async (formData: RegistrationFormData, { getState, rejectWithValue }) => {
+    try {
+      const state = getState() as { auth: { user: import('../../types').User | null } };
+      const userId = state.auth.user?.uid;
+      
+      if (!userId) {
+        throw new Error('User not authenticated');
+      }
+      
+      console.log('Creating registration with data:', formData);
+      
+      const registrationNumber = await generateRegistrationNumber();
+      
+      const registrationData: Omit<BirthRegistration, 'id'> = {
+        registrationNumber,
+        childDetails: {
+          ...formData.childDetails,
+          dateOfBirth: new Date(formData.childDetails.dateOfBirth)
+        },
+        motherDetails: {
+          ...formData.motherDetails,
+          dateOfBirth: new Date(formData.motherDetails.dateOfBirth)
+        },
+        fatherDetails: {
+          ...formData.fatherDetails,
+          dateOfBirth: new Date(formData.fatherDetails.dateOfBirth)
+        },
+        registrarInfo: {
+          registrarId: userId,
+          registrationDate: new Date(),
+          location: state.auth.user?.profile.location?.district || state.auth.user?.profile.district || 'Unknown',
+          region: state.auth.user?.profile.location?.region || state.auth.user?.profile.region || 'Unknown',
+          district: state.auth.user?.profile.location?.district || state.auth.user?.profile.district || 'Unknown'
+        },
+        status: 'draft',
+        syncStatus: 'pending',
+        createdAt: Timestamp.now(),
+        updatedAt: Timestamp.now()
+      };
+      
+      console.log('Adding document to Firestore:', registrationData);
+      
+      // Check if we have a valid db connection
+      if (!db) {
+        throw new Error('Database connection not available');
+      }
+      
+      const docRef = await addDoc(collection(db, 'registrations'), registrationData);
+      
+      console.log('Document created with ID:', docRef.id);
+      
+      const result = {
+        id: docRef.id,
+        ...registrationData
+      } as BirthRegistration;
+      
+      return result;
+    } catch (error: any) {
+      console.error('Registration creation failed:', error);
+      return rejectWithValue(error.message || 'Failed to create registration');
+    }
   }
 );
 

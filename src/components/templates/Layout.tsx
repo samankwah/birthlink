@@ -1,12 +1,11 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSelector, useDispatch } from 'react-redux';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import type { RootState, AppDispatch } from '../../store';
-import { logoutUser } from '../../store/slices/authSlice';
 import { toggleSidebar } from '../../store/slices/uiSlice';
 import { Button } from '../atoms';
-import { OfflineStatusBar } from '../molecules';
+import { OfflineStatusBar, FeedbackModal, ProfileDropdown } from '../molecules';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -15,16 +14,12 @@ interface LayoutProps {
 export const Layout: React.FC<LayoutProps> = ({ children }) => {
   const { t } = useTranslation();
   const location = useLocation();
-  const navigate = useNavigate();
   const dispatch = useDispatch<AppDispatch>();
+  const [feedbackModalOpen, setFeedbackModalOpen] = useState(false);
   
   const { user } = useSelector((state: RootState) => state.auth);
   const { sidebarOpen } = useSelector((state: RootState) => state.ui);
 
-  const handleLogout = async () => {
-    await dispatch(logoutUser());
-    navigate('/login');
-  };
 
   const navigationItems = [
     {
@@ -43,6 +38,11 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
       icon: '➕'
     },
     {
+      name: t('certificate.title'),
+      href: '/certificate',
+      icon: '📜'
+    },
+    {
       name: t('navigation.profile'),
       href: '/profile',
       icon: '👤'
@@ -55,6 +55,11 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
   ];
 
   if (user?.role === 'admin') {
+    navigationItems.push({
+      name: t('navigation.monitoring'),
+      href: '/monitoring',
+      icon: '📊'
+    });
     navigationItems.push({
       name: t('navigation.admin'),
       href: '/admin',
@@ -156,22 +161,25 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
             </div>
 
             <div className="flex items-center space-x-4">
-              {/* Language Switcher - Placeholder */}
-              <select className="text-sm border border-gray-300 rounded px-2 py-1">
-                <option value="en">English</option>
-                <option value="tw">Twi</option>
-                <option value="ga">Ga</option>
-                <option value="ee">Ewe</option>
-              </select>
+              {/* Pilot Phase Badge */}
+              {import.meta.env.VITE_PILOT_MODE === 'true' && (
+                <div className="px-3 py-1 bg-yellow-100 text-yellow-800 text-xs font-medium rounded-full">
+                  🧪 {t('pilot.badge', 'Pilot Phase 3')}
+                </div>
+              )}
 
-              {/* Logout Button */}
+              {/* Feedback Button */}
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={handleLogout}
+                onClick={() => setFeedbackModalOpen(true)}
+                className="text-blue-600 hover:text-blue-700"
               >
-                {t('auth.logout')}
+                📝 {t('feedback.button', 'Feedback')}
               </Button>
+
+              {/* Gmail-style Profile Dropdown */}
+              <ProfileDropdown />
             </div>
           </div>
         </header>
@@ -180,6 +188,13 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
         <main className="flex-1 overflow-y-auto bg-gray-50 p-6">
           {children}
         </main>
+
+        {/* Feedback Modal */}
+        <FeedbackModal
+          isOpen={feedbackModalOpen}
+          onClose={() => setFeedbackModalOpen(false)}
+          context="general"
+        />
       </div>
     </div>
   );

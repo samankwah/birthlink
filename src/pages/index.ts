@@ -1,4 +1,12 @@
 export { Dashboard } from './Dashboard';
 export { Login } from './Login';
+export { Register } from './Register';
+export { ForgotPassword } from './ForgotPassword';
 export { Registrations } from './Registrations';
 export { NewRegistration } from './NewRegistration';
+export { Monitoring } from './Monitoring';
+export { UserManagement } from './UserManagement';
+export { UserProfile } from './UserProfile';
+export { Settings } from './Settings';
+export { Profile } from './Profile';
+export { CertificateGeneration } from './CertificateGeneration';
