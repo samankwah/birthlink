@@ -5,6 +5,7 @@
 import React, { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import type { RootState } from '../../store';
+import { MetricCard, DashboardSection } from '../molecules';
 
 interface PilotMetrics {
   activeUsers: number;
@@ -87,41 +88,6 @@ export const MonitoringDashboard: React.FC = () => {
     }
   };
 
-  const MetricCard: React.FC<{
-    title: string;
-    value: string | number;
-    subtitle?: string;
-    status?: 'good' | 'warning' | 'critical';
-    trend?: 'up' | 'down' | 'stable';
-  }> = ({ title, value, subtitle, status = 'good', trend }) => {
-    const statusColors = {
-      good: 'border-green-200 bg-green-50',
-      warning: 'border-yellow-200 bg-yellow-50',
-      critical: 'border-red-200 bg-red-50'
-    };
-
-    return (
-      <div className={`p-6 rounded-lg border-2 ${statusColors[status]}`}>
-        <div className="flex items-center justify-between">
-          <div>
-            <p className="text-sm font-medium text-gray-600">{title}</p>
-            <p className="text-3xl font-bold text-gray-900">{value}</p>
-            {subtitle && <p className="text-sm text-gray-500">{subtitle}</p>}
-          </div>
-          {trend && (
-            <div className={`ml-4 ${
-              trend === 'up' ? 'text-green-600' : 
-              trend === 'down' ? 'text-red-600' : 'text-gray-600'
-            }`}>
-              {trend === 'up' && '↗'}
-              {trend === 'down' && '↘'}
-              {trend === 'stable' && '→'}
-            </div>
-          )}
-        </div>
-      </div>
-    );
-  };
 
   // Only show dashboard to admin users
   if (!user || user.role !== 'admin') {
@@ -211,8 +177,7 @@ export const MonitoringDashboard: React.FC = () => {
         {/* Detailed Metrics */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* Pilot Progress */}
-          <div className="bg-white p-6 rounded-lg shadow">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">📊 Pilot Progress</h3>
+          <DashboardSection title="📊 Pilot Progress">
             <div className="space-y-4">
               <div>
                 <div className="flex justify-between text-sm">
@@ -245,11 +210,10 @@ export const MonitoringDashboard: React.FC = () => {
                 <span className="text-sm font-medium">Kumasi, Tamale, Accra</span>
               </div>
             </div>
-          </div>
+          </DashboardSection>
 
           {/* System Performance */}
-          <div className="bg-white p-6 rounded-lg shadow">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">⚡ System Performance</h3>
+          <DashboardSection title="⚡ System Performance">
             <div className="space-y-3">
               <div className="flex justify-between">
                 <span className="text-sm text-gray-600">Offline Users:</span>
@@ -270,12 +234,11 @@ export const MonitoringDashboard: React.FC = () => {
                 <span className="text-sm font-medium">42%</span>
               </div>
             </div>
-          </div>
+          </DashboardSection>
         </div>
 
         {/* Actions */}
-        <div className="mt-8 bg-white p-6 rounded-lg shadow">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">🔧 Quick Actions</h3>
+        <DashboardSection title="🔧 Quick Actions" className="mt-8">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <button className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition">
               📊 Export Analytics
@@ -287,7 +250,7 @@ export const MonitoringDashboard: React.FC = () => {
               🚨 View Alerts
             </button>
           </div>
-        </div>
+        </DashboardSection>
 
         {/* Footer */}
         <div className="mt-8 text-center text-sm text-gray-500">

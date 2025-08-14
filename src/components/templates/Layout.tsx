@@ -66,7 +66,7 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
     },
     {
       name: t('certificate.title'),
-      href: '/registrations/new',
+      href: '/certificate',
       icon: '📜'
     },
     {
