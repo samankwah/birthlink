@@ -1,7 +1,6 @@
 import { forwardRef } from 'react';
 import type { BirthRegistration } from '../../types';
-// Import the coat of arms image
-import ghanaCoatOfArms from '../../assets/images/ghana-coat-of-arms.webp';
+import ghanaCoatOfArms from '../../assets/Coat_of_arms_of_Ghana.svg.webp';
 
 interface BirthCertificateProps {
   registration: BirthRegistration;
@@ -77,24 +76,12 @@ export const BirthCertificate = forwardRef<HTMLDivElement, BirthCertificateProps
         </div>
 
         {/* Ghana Coat of Arms */}
-        <div className="text-center mb-6">
-          <div className="flex justify-center mb-4">
+        <div className="text-center mb-4">
+          <div className="flex justify-center mb-3">
             <img 
               src={ghanaCoatOfArms} 
               alt="Ghana Coat of Arms"
-              style={{ width: '60px', height: '60px' }}
-              onError={(e) => {
-                // Fallback to text if image fails to load
-                const target = e.target as HTMLImageElement;
-                const parent = target.parentElement;
-                if (parent) {
-                  parent.innerHTML = `
-                    <div style="width: 60px; height: 60px; border: 2px solid black; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 8pt; font-weight: bold;">
-                      GHANA<br/>COAT<br/>OF<br/>ARMS
-                    </div>
-                  `;
-                }
-              }}
+              style={{ width: '50px', height: '50px' }}
             />
           </div>
           
@@ -117,11 +104,11 @@ export const BirthCertificate = forwardRef<HTMLDivElement, BirthCertificateProps
           This is to Certify that the Birth
         </div>
 
-        {/* Form Fields with dotted lines - matching target exactly */}
-        <div className="space-y-5">
+        {/* Form Fields with dotted lines - optimized spacing */}
+        <div className="space-y-3">
           
           {/* Child Name */}
-          <div className="flex items-baseline" style={{ margin: '20px 0' }}>
+          <div className="flex items-baseline" style={{ margin: '12px 0' }}>
             <span>of</span>
             <span 
               className="border-b border-dotted border-black flex-1 mx-2 text-center font-bold"
@@ -132,7 +119,7 @@ export const BirthCertificate = forwardRef<HTMLDivElement, BirthCertificateProps
           </div>
 
           {/* Place of Birth */}
-          <div className="flex items-baseline" style={{ margin: '20px 0' }}>
+          <div className="flex items-baseline" style={{ margin: '12px 0' }}>
             <span>born at</span>
             <span 
               className="border-b border-dotted border-black flex-1 mx-2 text-center font-bold"
@@ -143,7 +130,7 @@ export const BirthCertificate = forwardRef<HTMLDivElement, BirthCertificateProps
           </div>
 
           {/* Date of Birth */}
-          <div className="flex items-baseline" style={{ margin: '20px 0' }}>
+          <div className="flex items-baseline" style={{ margin: '12px 0' }}>
             <span>on the</span>
             <span 
               className="border-b border-dotted border-black mx-2 text-center font-bold"
@@ -168,7 +155,7 @@ export const BirthCertificate = forwardRef<HTMLDivElement, BirthCertificateProps
           </div>
 
           {/* Registration Region and District */}
-          <div className="flex items-baseline" style={{ margin: '20px 0' }}>
+          <div className="flex items-baseline" style={{ margin: '12px 0' }}>
             <span>has been duly registered in the register of Births for</span>
             <span 
               className="border-b border-dotted border-black flex-1 mx-2 text-center font-bold"
@@ -180,7 +167,7 @@ export const BirthCertificate = forwardRef<HTMLDivElement, BirthCertificateProps
           </div>
 
           {/* District Registration Line */}
-          <div className="flex items-baseline" style={{ margin: '20px 0' }}>
+          <div className="flex items-baseline" style={{ margin: '12px 0' }}>
             <span 
               className="border-b border-dotted border-black flex-1 mr-2 text-center font-bold"
               style={{ minHeight: '20px', paddingBottom: '2px' }}
@@ -191,7 +178,7 @@ export const BirthCertificate = forwardRef<HTMLDivElement, BirthCertificateProps
           </div>
 
           {/* Child Name Again */}
-          <div className="flex items-baseline" style={{ margin: '20px 0' }}>
+          <div className="flex items-baseline" style={{ margin: '12px 0' }}>
             <span>The said</span>
             <span 
               className="border-b border-dotted border-black flex-1 mx-2 text-center font-bold"
@@ -202,7 +189,7 @@ export const BirthCertificate = forwardRef<HTMLDivElement, BirthCertificateProps
           </div>
 
           {/* Mother Details */}
-          <div className="flex items-baseline" style={{ margin: '20px 0' }}>
+          <div className="flex items-baseline" style={{ margin: '12px 0' }}>
             <span>is the {registration.childDetails.gender.toLowerCase()} child of</span>
             <span 
               className="border-b border-dotted border-black flex-1 mx-2 text-center font-bold"
@@ -213,7 +200,7 @@ export const BirthCertificate = forwardRef<HTMLDivElement, BirthCertificateProps
           </div>
 
           {/* Empty Line */}
-          <div className="flex items-baseline" style={{ margin: '20px 0' }}>
+          <div className="flex items-baseline" style={{ margin: '12px 0' }}>
             <span 
               className="border-b border-dotted border-black w-full text-center"
               style={{ minHeight: '20px', paddingBottom: '2px' }}
@@ -222,7 +209,7 @@ export const BirthCertificate = forwardRef<HTMLDivElement, BirthCertificateProps
           </div>
 
           {/* Mother Nationality */}
-          <div className="flex items-baseline" style={{ margin: '20px 0' }}>
+          <div className="flex items-baseline" style={{ margin: '12px 0' }}>
             <span>a National of</span>
             <span 
               className="border-b border-dotted border-black flex-1 mx-2 text-center font-bold"
@@ -233,7 +220,7 @@ export const BirthCertificate = forwardRef<HTMLDivElement, BirthCertificateProps
           </div>
 
           {/* Father Details */}
-          <div className="flex items-baseline" style={{ margin: '20px 0' }}>
+          <div className="flex items-baseline" style={{ margin: '12px 0' }}>
             <span>and</span>
             <span 
               className="border-b border-dotted border-black flex-1 mx-2 text-center font-bold"
@@ -244,7 +231,7 @@ export const BirthCertificate = forwardRef<HTMLDivElement, BirthCertificateProps
           </div>
 
           {/* Father Nationality */}
-          <div className="flex items-baseline" style={{ margin: '20px 0' }}>
+          <div className="flex items-baseline" style={{ margin: '12px 0' }}>
             <span>a National of</span>
             <span 
               className="border-b border-dotted border-black flex-1 mx-2 text-center font-bold"
@@ -255,7 +242,7 @@ export const BirthCertificate = forwardRef<HTMLDivElement, BirthCertificateProps
           </div>
 
           {/* Witness Line */}
-          <div className="flex items-baseline" style={{ margin: '20px 0' }}>
+          <div className="flex items-baseline" style={{ margin: '12px 0' }}>
             <span>witness my hand this</span>
             <span 
               className="border-b border-dotted border-black mx-2 text-center font-bold"

@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '../atoms';
 import { FormField } from '../molecules';
 import { BirthCertificate } from './BirthCertificate';
-import type { RootState, AppDispatch } from '../../store';
+import type { AppDispatch } from '../../store';
 import { createRegistration } from '../../store/slices/registrationSlice';
 import { addNotification } from '../../store/slices/uiSlice';
 import { useOfflineRegistrations } from '../../hooks/useOfflineRegistrations';
@@ -227,7 +227,8 @@ export const BirthRegistrationForm: React.FC<BirthRegistrationFormProps> = ({
       setFormData(prev => ({
         ...prev,
         registrarInfo: {
-          ...prev.registrarInfo,
+          location: prev.registrarInfo?.location || '',
+          region: prev.registrarInfo?.region || '',
           district: ''
         }
       }));
@@ -275,244 +276,6 @@ export const BirthRegistrationForm: React.FC<BirthRegistrationFormProps> = ({
     }
   };
 
-  const generatePrintableCertificate = (registration: BirthRegistration) => {
-    const printWindow = window.open('', '_blank');
-    if (!printWindow) return;
-
-    const certificateHTML = `
-      <!DOCTYPE html>
-      <html>
-        <head>
-          <meta charset="UTF-8">
-          <title>Birth Certificate - ${registration.childDetails.firstName} ${registration.childDetails.lastName}</title>
-          <style>
-            @page {
-              size: A4;
-              margin: 20mm;
-            }
-            
-            body {
-              font-family: 'Times New Roman', Times, serif;
-              font-size: 12pt;
-              line-height: 1.8;
-              margin: 0;
-              padding: 0;
-              color: black;
-            }
-            
-            .certificate-container {
-              width: 100%;
-              border: 4px solid black;
-              padding: 20mm;
-              position: relative;
-              min-height: 250mm;
-            }
-            
-            .header-text {
-              text-align: center;
-              font-size: 9pt;
-              font-weight: bold;
-              letter-spacing: 2px;
-              margin-bottom: 15px;
-            }
-            
-            .cert-number {
-              position: absolute;
-              top: 15px;
-              right: 20px;
-              font-weight: bold;
-              font-size: 14pt;
-            }
-            
-            .title-section {
-              text-align: center;
-              margin: 30px 0;
-            }
-            
-            .republic-title {
-              font-size: 14pt;
-              font-weight: bold;
-              margin: 10px 0;
-            }
-            
-            .birth-cert-title {
-              font-size: 20pt;
-              font-weight: bold;
-              letter-spacing: 4px;
-              margin: 10px 0;
-            }
-            
-            .act-reference {
-              font-size: 10pt;
-              margin: 5px 0;
-            }
-            
-            .main-statement {
-              text-align: center;
-              font-size: 16pt;
-              font-weight: bold;
-              margin: 30px 0;
-            }
-            
-            .form-line {
-              margin: 20px 0;
-              display: flex;
-              align-items: baseline;
-            }
-            
-            .dotted-line {
-              border-bottom: 1px dotted black;
-              flex: 1;
-              margin: 0 5px;
-              min-height: 20px;
-              text-align: center;
-              padding-bottom: 2px;
-              font-weight: bold;
-            }
-            
-            .footer-section {
-              margin-top: 40px;
-              display: flex;
-              justify-content: space-between;
-              align-items: end;
-            }
-            
-            .signature-line {
-              width: 200px;
-              border-bottom: 2px solid black;
-              margin: 20px 0 5px 0;
-              height: 30px;
-            }
-            
-            .registrar-text {
-              text-align: center;
-              font-style: italic;
-            }
-            
-            .footer-info {
-              font-size: 9pt;
-              display: flex;
-              justify-content: space-between;
-              margin-top: 20px;
-            }
-            
-            .short-line {
-              width: 50px;
-              display: inline-block;
-            }
-            
-            .medium-line {
-              width: 120px;
-              display: inline-block;
-            }
-          </style>
-        </head>
-        <body onload="window.print(); window.close();">
-          <div class="certificate-container">
-            <div class="header-text">STRICTLY FOR CHILDREN 0 — 12 MONTHS</div>
-            
-            <div class="cert-number">No. ${registration.registrationNumber}</div>
-            
-            <div class="title-section">
-              <div class="republic-title">REPUBLIC OF GHANA</div>
-              <div class="birth-cert-title">BIRTH CERTIFICATE</div>
-              <div class="act-reference">(Section 11 Act 301)</div>
-            </div>
-            
-            <div class="main-statement">This is to Certify that the Birth</div>
-            
-            <div class="form-line">
-              <span>of</span>
-              <span class="dotted-line">${registration.childDetails.firstName} ${registration.childDetails.lastName}</span>
-            </div>
-            
-            <div class="form-line">
-              <span>born at</span>
-              <span class="dotted-line">${registration.childDetails.placeOfBirth}</span>
-            </div>
-            
-            <div class="form-line">
-              <span>on the</span>
-              <span class="dotted-line short-line">${new Date(registration.childDetails.dateOfBirth).getDate()}</span>
-              <span>day of</span>
-              <span class="dotted-line medium-line">${new Date(registration.childDetails.dateOfBirth).toLocaleDateString('en-GB', { month: 'long' })}</span>
-              <span>20</span>
-              <span class="dotted-line short-line">${new Date(registration.childDetails.dateOfBirth).getFullYear().toString().slice(-2)}</span>
-            </div>
-            
-            <div class="form-line">
-              <span>has been duly registered in the register of Births for</span>
-              <span class="dotted-line">${registration.registrarInfo?.region || ''}</span>
-              <span>, in the</span>
-            </div>
-            
-            <div class="form-line">
-              <span class="dotted-line">${registration.registrarInfo?.district || ''}</span>
-              <span>Registration District.</span>
-            </div>
-            
-            <div class="form-line">
-              <span>The said</span>
-              <span class="dotted-line">${registration.childDetails.firstName} ${registration.childDetails.lastName}</span>
-            </div>
-            
-            <div class="form-line">
-              <span>is the ${registration.childDetails.gender.toLowerCase()} child of</span>
-              <span class="dotted-line">${registration.motherDetails.firstName} ${registration.motherDetails.lastName}</span>
-            </div>
-            
-            <div class="form-line">
-              <span class="dotted-line"></span>
-            </div>
-            
-            <div class="form-line">
-              <span>a National of</span>
-              <span class="dotted-line">${registration.motherDetails.nationality || 'Ghana'}</span>
-            </div>
-            
-            <div class="form-line">
-              <span>and</span>
-              <span class="dotted-line">${registration.fatherDetails.firstName} ${registration.fatherDetails.lastName}</span>
-            </div>
-            
-            <div class="form-line">
-              <span>a National of</span>
-              <span class="dotted-line">${registration.fatherDetails.nationality || 'Ghana'}</span>
-            </div>
-            
-            <div class="form-line">
-              <span>witness my hand this</span>
-              <span class="dotted-line short-line">${new Date().getDate()}</span>
-              <span>day of</span>
-              <span class="dotted-line medium-line">${new Date().toLocaleDateString('en-GB', { month: 'long' })}</span>
-              <span>20</span>
-              <span class="dotted-line short-line">${new Date().getFullYear().toString().slice(-2)}</span>
-            </div>
-            
-            <div class="footer-section">
-              <div>
-                <span>Entry No.</span>
-                <span class="dotted-line" style="display: inline-block; width: 150px; margin-left: 10px;">${registration.registrationNumber}</span>
-              </div>
-              
-              <div>
-                <div class="signature-line"></div>
-                <div class="registrar-text">Registrar</div>
-              </div>
-            </div>
-            
-            <div class="footer-info">
-              <div>BHP Counterfeit</div>
-              <div>Birth Certificate Form R</div>
-            </div>
-          </div>
-        </body>
-      </html>
-    `;
-
-    printWindow.document.write(certificateHTML);
-    printWindow.document.close();
-  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -601,8 +364,8 @@ export const BirthRegistrationForm: React.FC<BirthRegistrationFormProps> = ({
       // Store registration data for future access
       localStorage.setItem('lastRegistration', JSON.stringify(registrationData));
       
-      // Redirect to certificate list page
-      navigate('/birth-certificate');
+      // Redirect to certificate generation page
+      navigate('/certificate/generate', { state: { registration: registrationData } });
       
     } catch (error: any) {
       console.error('Registration submission error:', error);
@@ -616,7 +379,7 @@ export const BirthRegistrationForm: React.FC<BirthRegistrationFormProps> = ({
             type: 'warning',
             message: 'Registration saved offline due to connection issues. Will sync automatically.'
           }));
-          navigate('/birth-certificate');
+          navigate('/certificate/generate');
         } catch {
           dispatch(addNotification({
             type: 'error',

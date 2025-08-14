@@ -3,3 +3,7 @@ export { Notification } from './Notification';
 export { OfflineStatusBar } from './OfflineStatusBar';
 export { FeedbackModal } from './FeedbackModal';
 export { ProfileDropdown } from './ProfileDropdown';
+export { StatCard } from './StatCard';
+export { QuickActionCard } from './QuickActionCard';
+export { MetricCard } from './MetricCard';
+export { DashboardSection } from './DashboardSection';

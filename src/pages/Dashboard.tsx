@@ -1,107 +1,142 @@
-import React from 'react';
-import { useTranslation } from 'react-i18next';
-import { useSelector } from 'react-redux';
-import { useNavigate } from 'react-router-dom';
-import type { RootState } from '../store';
+import React from "react";
+import { useTranslation } from "react-i18next";
+import { useSelector } from "react-redux";
+import type { RootState } from "../store";
+import {
+  StatCard,
+  QuickActionCard,
+  DashboardSection,
+} from "../components/molecules";
+import {
+  useDashboardStats,
+  useRecentRegistrations,
+  useQuickActions,
+} from "../hooks";
 
 export const Dashboard: React.FC = () => {
   const { t } = useTranslation();
-  const navigate = useNavigate();
   const { user } = useSelector((state: RootState) => state.auth);
-
-  const stats = [
-    {
-      label: t('dashboard.totalRegistrations'),
-      value: '1,234',
-      icon: '📊'
-    },
-    {
-      label: t('dashboard.pendingApprovals'),
-      value: '23',
-      icon: '⏳'
-    },
-    {
-      label: t('dashboard.monthlyStats'),
-      value: '156',
-      icon: '📈'
-    }
-  ];
+  const {
+    stats,
+    isLoading: statsLoading,
+    error: statsError,
+    refresh: refreshStats,
+  } = useDashboardStats();
+  const {
+    registrations,
+    isLoading: recentLoading,
+    error: recentError,
+  } = useRecentRegistrations(3);
+  const quickActions = useQuickActions();
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       {/* Welcome Header */}
-      <div className="bg-white shadow rounded-lg p-6">
-        <h1 className="text-2xl font-bold text-gray-900">
-          {t('dashboard.welcome', { name: user?.profile.firstName })}
+      <div className="bg-white shadow rounded-lg p-4 sm:p-6">
+        <h1 className="text-xl sm:text-2xl font-bold text-gray-900">
+          {t("dashboard.welcome", { name: user?.profile?.firstName || "User" })}
         </h1>
-        <p className="mt-2 text-gray-600">
+        <p className="mt-2 text-sm sm:text-base text-gray-600">
           Welcome to BirthLink Ghana - Birth Registration System
         </p>
       </div>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-        {stats.map((stat, index) => (
-          <div key={index} className="bg-white shadow rounded-lg p-6">
-            <div className="flex items-center">
-              <div className="text-3xl mr-4">{stat.icon}</div>
-              <div>
-                <p className="text-sm font-medium text-gray-600">{stat.label}</p>
-                <p className="text-2xl font-bold text-gray-900">{stat.value}</p>
-              </div>
-            </div>
+      <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+        {statsError ? (
+          <div className="col-span-full bg-red-50 border border-red-200 rounded-lg p-4">
+            <p className="text-red-600 text-sm">{statsError}</p>
+            <button
+              onClick={refreshStats}
+              className="text-red-700 underline text-sm mt-1"
+            >
+              Try again
+            </button>
           </div>
-        ))}
+        ) : (
+          stats.map((stat, index) => (
+            <StatCard
+              key={index}
+              label={stat.label}
+              value={stat.value}
+              icon={stat.icon}
+              isLoading={statsLoading}
+            />
+          ))
+        )}
       </div>
 
       {/* Quick Actions */}
-      <div className="bg-white shadow rounded-lg p-6">
-        <h2 className="text-lg font-medium text-gray-900 mb-4">
-          {t('dashboard.quickActions')}
-        </h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <button 
-            onClick={() => navigate('/registrations/new')}
-            className="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500"
-          >
-            <div className="text-2xl mr-3">📝</div>
-            <div className="text-left">
-              <p className="font-medium text-gray-900">{t('registration.newRegistration')}</p>
-              <p className="text-sm text-gray-500">Create a new birth registration</p>
-            </div>
-          </button>
-          <button 
-            onClick={() => navigate('/registrations')}
-            className="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500"
-          >
-            <div className="text-2xl mr-3">🔍</div>
-            <div className="text-left">
-              <p className="font-medium text-gray-900">{t('navigation.registrations')}</p>
-              <p className="text-sm text-gray-500">View and manage registrations</p>
-            </div>
-          </button>
-        </div>
-      </div>
-
-      {/* Recent Registrations */}
-      <div className="bg-white shadow rounded-lg p-6">
-        <h2 className="text-lg font-medium text-gray-900 mb-4">
-          {t('dashboard.recentRegistrations')}
-        </h2>
-        <div className="space-y-3">
-          {[1, 2, 3].map((item) => (
-            <div key={item} className="flex items-center justify-between p-3 border border-gray-200 rounded-lg">
-              <div>
-                <p className="font-medium text-gray-900">Registration #{item}234</p>
-                <p className="text-sm text-gray-500">John Doe - 2 days ago</p>
-              </div>
-              <div className="text-sm text-green-600 font-medium">
-                {t('registration.approved')}
-              </div>
-            </div>
+      <DashboardSection title={t("dashboard.quickActions")}>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {quickActions.map((action) => (
+            <QuickActionCard
+              key={action.id}
+              title={action.title}
+              description={action.description}
+              icon={action.icon}
+              onClick={action.action}
+              disabled={action.disabled}
+              variant={action.variant}
+            />
           ))}
         </div>
-      </div>
+      </DashboardSection>
+
+      {/* Recent Registrations */}
+      <DashboardSection title={t("dashboard.recentRegistrations")}>
+        {recentError ? (
+          <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+            <p className="text-red-600 text-sm">{recentError}</p>
+          </div>
+        ) : recentLoading ? (
+          <div className="space-y-3">
+            {[1, 2, 3].map((i) => (
+              <div
+                key={i}
+                className="animate-pulse flex items-center justify-between p-3 border border-gray-200 rounded-lg"
+              >
+                <div>
+                  <div className="h-4 bg-gray-200 rounded w-32 mb-2"></div>
+                  <div className="h-3 bg-gray-200 rounded w-24"></div>
+                </div>
+                <div className="h-4 bg-gray-200 rounded w-16"></div>
+              </div>
+            ))}
+          </div>
+        ) : registrations.length === 0 ? (
+          <div className="text-center py-8 text-gray-500">
+            <p>No recent registrations found</p>
+          </div>
+        ) : (
+          <div className="space-y-3">
+            {registrations.map((registration) => (
+              <div
+                key={registration.id}
+                className="flex items-center justify-between p-3 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+              >
+                <div className="min-w-0 flex-1">
+                  <p className="font-medium text-gray-900 truncate">
+                    Registration {registration.registrationNumber}
+                  </p>
+                  <p className="text-sm text-gray-500 truncate">
+                    {registration.childName} - {registration.timeAgo}
+                  </p>
+                </div>
+                <div
+                  className={`text-sm font-medium ${
+                    (registration as any).statusDisplay?.className ||
+                    "text-gray-600"
+                  }`}
+                >
+                  {(registration as any).statusDisplay?.text ||
+                    registration.status}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </DashboardSection>
     </div>
   );
 };

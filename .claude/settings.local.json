@@ -44,6 +44,7 @@
       "Bash(TMPDIR=/tmp TMP=/tmp TEMP=/tmp VITE_NODE_MODULES_DIR=/tmp/node_modules VITE_CACHE_DIR=/tmp/birthlink-vite-cache npm run dev)",
       "Bash(jobs)"
     ],
-    "deny": []
+    "deny": [],
+    "defaultMode": "acceptEdits"
   }
 }
