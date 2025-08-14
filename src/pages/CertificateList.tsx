@@ -44,7 +44,8 @@ export const CertificateList: React.FC = () => {
   >("all");
   const [viewMode, setViewMode] = useState<"list" | "grid">("list");
   const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage, setItemsPerPage] = useState(10);
+  // Removed unused setter
+  const [itemsPerPage] = useState(10);
 
   useEffect(() => {
     // Fetch registrations for the current user
@@ -81,7 +82,10 @@ export const CertificateList: React.FC = () => {
   const totalPages = Math.ceil(totalItems / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = startIndex + itemsPerPage;
-  const paginatedRegistrations = filteredRegistrations.slice(startIndex, endIndex);
+  const paginatedRegistrations = filteredRegistrations.slice(
+    startIndex,
+    endIndex
+  );
 
   // Reset to first page when filters change
   useEffect(() => {
@@ -883,7 +887,7 @@ export const CertificateList: React.FC = () => {
             {/* Mobile Pagination */}
             <div className="flex items-center justify-between md:hidden">
               <Button
-                variant="outline"
+                variant="secondary" // changed from outline
                 size="sm"
                 onClick={() => setCurrentPage(currentPage - 1)}
                 disabled={currentPage === 1}
@@ -892,7 +896,7 @@ export const CertificateList: React.FC = () => {
                 <ChevronLeft className="w-4 h-4" />
                 Previous
               </Button>
-              
+
               <div className="flex items-center gap-2">
                 <span className="text-sm font-medium text-gray-700">
                   Page {currentPage} of {totalPages}
@@ -900,7 +904,7 @@ export const CertificateList: React.FC = () => {
               </div>
 
               <Button
-                variant="outline"
+                variant="secondary" // changed from outline
                 size="sm"
                 onClick={() => setCurrentPage(currentPage + 1)}
                 disabled={currentPage === totalPages}
@@ -915,15 +919,18 @@ export const CertificateList: React.FC = () => {
             <div className="hidden md:flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <p className="text-sm text-gray-700">
-                  Showing <span className="font-semibold">{startIndex + 1}</span> to{' '}
-                  <span className="font-semibold">{Math.min(endIndex, totalItems)}</span> of{' '}
-                  <span className="font-semibold">{totalItems}</span> results
+                  Showing{" "}
+                  <span className="font-semibold">{startIndex + 1}</span> to{" "}
+                  <span className="font-semibold">
+                    {Math.min(endIndex, totalItems)}
+                  </span>{" "}
+                  of <span className="font-semibold">{totalItems}</span> results
                 </p>
               </div>
 
               <nav className="flex items-center gap-1" aria-label="Pagination">
                 <Button
-                  variant="outline"
+                  variant="secondary" // changed from outline
                   size="sm"
                   onClick={() => setCurrentPage(currentPage - 1)}
                   disabled={currentPage === 1}
@@ -936,40 +943,36 @@ export const CertificateList: React.FC = () => {
                 <div className="flex items-center">
                   {(() => {
                     const pages: (number | string)[] = [];
-                    
+
                     if (totalPages <= 7) {
-                      // Show all pages if 7 or fewer
                       for (let i = 1; i <= totalPages; i++) {
                         pages.push(i);
                       }
                     } else {
-                      // Always show first page
                       pages.push(1);
-                      
+
                       if (currentPage > 4) {
-                        pages.push('...');
+                        pages.push("...");
                       }
-                      
-                      // Show pages around current page
+
                       const start = Math.max(2, currentPage - 1);
                       const end = Math.min(totalPages - 1, currentPage + 1);
-                      
+
                       for (let i = start; i <= end; i++) {
                         pages.push(i);
                       }
-                      
+
                       if (currentPage < totalPages - 3) {
-                        pages.push('...');
+                        pages.push("...");
                       }
-                      
-                      // Always show last page
+
                       if (totalPages > 1) {
                         pages.push(totalPages);
                       }
                     }
 
                     return pages.map((page, index) => {
-                      if (page === '...') {
+                      if (page === "...") {
                         return (
                           <span
                             key={`ellipsis-${index}`}
@@ -986,7 +989,7 @@ export const CertificateList: React.FC = () => {
                       return (
                         <Button
                           key={pageNum}
-                          variant={isCurrent ? "default" : "ghost"}
+                          variant={isCurrent ? "primary" : "ghost"} // changed from default to primary
                           size="sm"
                           onClick={() => setCurrentPage(pageNum)}
                           className={`min-w-[40px] h-10 ${
@@ -1003,7 +1006,7 @@ export const CertificateList: React.FC = () => {
                 </div>
 
                 <Button
-                  variant="outline"
+                  variant="secondary" // changed from outline
                   size="sm"
                   onClick={() => setCurrentPage(currentPage + 1)}
                   disabled={currentPage === totalPages}
