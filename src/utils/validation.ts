@@ -105,6 +105,14 @@ export const validateRegistrationForm = (formData: RegistrationFormData): Valida
     errors.push({ field: 'fatherDetails.nationalId', message: 'Invalid Ghana National ID format' });
   }
 
+  // Registrar Information Validation (Step 4)
+  if (!formData.registrarInfo?.region?.trim()) {
+    errors.push({ field: 'registrarInfo.region', message: 'Region is required' });
+  }
+  if (!formData.registrarInfo?.district?.trim()) {
+    errors.push({ field: 'registrarInfo.district', message: 'District is required' });
+  }
+
   return errors;
 };
 

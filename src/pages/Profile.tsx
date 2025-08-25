@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { type RootState } from '../store';
 import { Button } from '../components/atoms';
 import { ProfileEdit } from '../components/organisms';
-import { Camera, Edit, User, Phone, MapPin, Briefcase, Calendar, IdCard } from 'lucide-react';
+import { FaCamera as Camera, FaEdit as Edit, FaUser as User, FaPhone as Phone, FaMapMarkerAlt as MapPin, FaBriefcase as Briefcase, FaCalendar as Calendar, FaIdCard as IdCard } from 'react-icons/fa';
 
 export const Profile: React.FC = () => {
   const { t } = useTranslation();

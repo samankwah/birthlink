@@ -31,9 +31,19 @@ export const store = configureStore({
           'persist/PERSIST', 
           'persist/REHYDRATE',
           'sync/processSyncQueue/pending',
-          'sync/processSyncQueue/fulfilled'
+          'sync/processSyncQueue/fulfilled',
+          'auth/login/fulfilled',
+          'auth/register/fulfilled',
+          'auth/updateProfile/fulfilled',
+          'auth/updatePreferences/fulfilled',
+          'auth/setFirebaseUser'
         ],
-        ignoredPaths: ['sync.queue', 'registrations.lastDoc']
+        ignoredPaths: [
+          'sync.queue', 
+          'registrations.lastDoc',
+          'auth.user.createdAt',
+          'auth.user.lastLogin'
+        ]
       }
     }).concat(offlineMiddleware, persistenceMiddleware)
 });

@@ -192,14 +192,21 @@ export const BirthRegistrationForm: React.FC<BirthRegistrationFormProps> = ({
     };
   };
 
-  // Update preview registration when form data changes
+  // Check if form is completely filled
+  const isFormComplete = () => {
+    const errors = validateRegistrationForm(formData);
+    return errors.length === 0;
+  };
+
+  // Update preview registration only when form is complete
   useEffect(() => {
-    if (formData.childDetails.firstName || formData.childDetails.lastName) {
+    if (isFormComplete()) {
       const updatedRegistration = convertToRegistration(formData);
       setPreviewRegistration(updatedRegistration);
       setShowPreview(true);
     } else {
       setShowPreview(false);
+      setPreviewRegistration(null);
     }
   }, [formData]);
 
@@ -803,8 +810,8 @@ export const BirthRegistrationForm: React.FC<BirthRegistrationFormProps> = ({
             </div>
             <p className="text-sm text-gray-600">
               {showPreview 
-                ? t('certificate.livePreview', 'Certificate updates as you fill the form')
-                : t('certificate.enterChildName', 'Enter child name to see certificate preview')
+                ? t('certificate.previewReady', 'Certificate preview is ready')
+                : t('certificate.completeForm', 'Complete all required fields to preview certificate')
               }
             </p>
           </div>
@@ -835,8 +842,11 @@ export const BirthRegistrationForm: React.FC<BirthRegistrationFormProps> = ({
                     <div className="w-full h-full flex items-center justify-center bg-gray-50">
                       <div className="text-center text-gray-400">
                         <div className="text-4xl mb-4">📜</div>
-                        <p className="text-sm">
-                          {t('certificate.previewPlaceholder', 'Certificate preview will appear here')}
+                        <p className="text-sm font-medium">
+                          {t('certificate.completeAllFields', 'Complete all required fields to preview certificate')}
+                        </p>
+                        <p className="text-xs mt-2">
+                          {t('certificate.requiredSteps', 'Fill all 4 steps: Child Details, Mother Details, Father Details, and Registration Info')}
                         </p>
                       </div>
                     </div>

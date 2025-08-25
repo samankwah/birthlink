@@ -55,14 +55,16 @@ export const BirthCertificate = forwardRef<HTMLDivElement, BirthCertificateProps
     return (
       <div 
         ref={ref}
-        className="bg-white relative w-full max-w-4xl mx-auto border-4 border-black print:w-full print:max-w-none"
+        className="bg-white relative w-full max-w-4xl mx-auto print:w-full print:max-w-none"
         style={{ 
           fontFamily: 'Times New Roman, Times, serif',
           fontSize: '12pt',
-          lineHeight: '1.8',
-          padding: '20mm',
+          lineHeight: '1.5',
+          padding: '15mm',
           boxSizing: 'border-box',
-          minHeight: '297mm'
+          minHeight: '297mm',
+          border: '3px solid black',
+          borderRadius: '0'
         }}
       >
         {/* Header */}
@@ -72,7 +74,7 @@ export const BirthCertificate = forwardRef<HTMLDivElement, BirthCertificateProps
 
         {/* Certificate Number - Top Right */}
         <div className="absolute top-4 right-6" style={{ fontSize: '14pt', fontWeight: 'bold' }}>
-          No. {serialNumber || registration.registrationNumber}
+          N° {serialNumber || registration.registrationNumber}
         </div>
 
         {/* Ghana Coat of Arms */}
@@ -81,85 +83,85 @@ export const BirthCertificate = forwardRef<HTMLDivElement, BirthCertificateProps
             <img 
               src={ghanaCoatOfArms} 
               alt="Ghana Coat of Arms"
-              style={{ width: '50px', height: '50px' }}
+              style={{ width: '60px', height: '60px' }}
             />
           </div>
           
           {/* Titles */}
-          <div style={{ fontSize: '14pt', fontWeight: 'bold', margin: '10px 0' }}>
+          <div style={{ fontSize: '13pt', fontWeight: 'bold', margin: '8px 0' }}>
             REPUBLIC OF GHANA
           </div>
           
-          <div style={{ fontSize: '20pt', fontWeight: 'bold', letterSpacing: '4px', margin: '10px 0' }}>
+          <div style={{ fontSize: '18pt', fontWeight: 'bold', letterSpacing: '3px', margin: '8px 0' }}>
             BIRTH CERTIFICATE
           </div>
           
-          <div style={{ fontSize: '10pt', margin: '5px 0' }}>
+          <div style={{ fontSize: '9pt', margin: '5px 0' }}>
             (Section 11 Act 301)
           </div>
         </div>
 
         {/* Main Statement */}
-        <div className="text-center mb-8" style={{ fontSize: '16pt', fontWeight: 'bold' }}>
+        <div className="text-center mb-6" style={{ fontSize: '14pt', fontWeight: 'bold' }}>
           This is to Certify that the Birth
         </div>
 
         {/* Form Fields with dotted lines - optimized spacing */}
-        <div className="space-y-3">
+        <div className="space-y-4">
           
           {/* Child Name */}
-          <div className="flex items-baseline" style={{ margin: '12px 0' }}>
+          <div className="flex items-baseline" style={{ margin: '14px 0' }}>
             <span>of</span>
             <span 
               className="border-b border-dotted border-black flex-1 mx-2 text-center font-bold"
-              style={{ minHeight: '20px', paddingBottom: '2px' }}
+              style={{ minHeight: '22px', paddingBottom: '3px', fontSize: '12pt' }}
             >
               {registration.childDetails.firstName} {registration.childDetails.lastName}
             </span>
           </div>
 
           {/* Place of Birth */}
-          <div className="flex items-baseline" style={{ margin: '12px 0' }}>
+          <div className="flex items-baseline" style={{ margin: '14px 0' }}>
             <span>born at</span>
             <span 
               className="border-b border-dotted border-black flex-1 mx-2 text-center font-bold"
-              style={{ minHeight: '20px', paddingBottom: '2px' }}
+              style={{ minHeight: '22px', paddingBottom: '3px', fontSize: '12pt' }}
             >
               {registration.childDetails.placeOfBirth}
             </span>
           </div>
 
           {/* Date of Birth */}
-          <div className="flex items-baseline" style={{ margin: '12px 0' }}>
+          <div className="flex items-baseline" style={{ margin: '14px 0' }}>
             <span>on the</span>
             <span 
               className="border-b border-dotted border-black mx-2 text-center font-bold"
-              style={{ minHeight: '20px', paddingBottom: '2px', width: '50px', display: 'inline-block' }}
+              style={{ minHeight: '22px', paddingBottom: '3px', width: '50px', display: 'inline-block', fontSize: '12pt' }}
             >
               {getDayOfYear(registration.childDetails.dateOfBirth)}
             </span>
             <span>day of</span>
             <span 
               className="border-b border-dotted border-black mx-2 text-center font-bold"
-              style={{ minHeight: '20px', paddingBottom: '2px', width: '120px', display: 'inline-block' }}
+              style={{ minHeight: '22px', paddingBottom: '3px', width: '120px', display: 'inline-block', fontSize: '12pt' }}
             >
               {getMonthName(registration.childDetails.dateOfBirth)}
             </span>
             <span>20</span>
             <span 
               className="border-b border-dotted border-black mx-2 text-center font-bold"
-              style={{ minHeight: '20px', paddingBottom: '2px', width: '50px', display: 'inline-block' }}
+              style={{ minHeight: '22px', paddingBottom: '3px', width: '50px', display: 'inline-block', fontSize: '12pt' }}
             >
               {getYear(registration.childDetails.dateOfBirth).toString().slice(-2)}
             </span>
           </div>
 
           {/* Registration Region and District */}
-          <div className="flex items-baseline" style={{ margin: '12px 0' }}>
+          <div className="flex items-baseline" style={{ margin: '14px 0' }}>
             <span>has been duly registered in the register of Births for</span>
             <span 
               className="border-b border-dotted border-black flex-1 mx-2 text-center font-bold"
-              style={{ minHeight: '20px', paddingBottom: '2px' }}
+              style={{ minHeight: '22px', paddingBottom: '3px', fontSize: '12pt' }}
             >
               {registration.registrarInfo?.region}
             </span>
@@ -167,10 +169,10 @@ export const BirthCertificate = forwardRef<HTMLDivElement, BirthCertificateProps
           </div>
 
           {/* District Registration Line */}
-          <div className="flex items-baseline" style={{ margin: '12px 0' }}>
+          <div className="flex items-baseline" style={{ margin: '14px 0' }}>
             <span 
               className="border-b border-dotted border-black flex-1 mr-2 text-center font-bold"
-              style={{ minHeight: '20px', paddingBottom: '2px' }}
+              style={{ minHeight: '22px', paddingBottom: '3px', fontSize: '12pt' }}
             >
               {registration.registrarInfo?.district}
             </span>
@@ -178,89 +180,89 @@ export const BirthCertificate = forwardRef<HTMLDivElement, BirthCertificateProps
           </div>
 
           {/* Child Name Again */}
-          <div className="flex items-baseline" style={{ margin: '12px 0' }}>
+          <div className="flex items-baseline" style={{ margin: '14px 0' }}>
             <span>The said</span>
             <span 
               className="border-b border-dotted border-black flex-1 mx-2 text-center font-bold"
-              style={{ minHeight: '20px', paddingBottom: '2px' }}
+              style={{ minHeight: '22px', paddingBottom: '3px', fontSize: '12pt' }}
             >
               {registration.childDetails.firstName} {registration.childDetails.lastName}
             </span>
           </div>
 
           {/* Mother Details */}
-          <div className="flex items-baseline" style={{ margin: '12px 0' }}>
+          <div className="flex items-baseline" style={{ margin: '14px 0' }}>
             <span>is the {registration.childDetails.gender.toLowerCase()} child of</span>
             <span 
               className="border-b border-dotted border-black flex-1 mx-2 text-center font-bold"
-              style={{ minHeight: '20px', paddingBottom: '2px' }}
+              style={{ minHeight: '22px', paddingBottom: '3px', fontSize: '12pt' }}
             >
               {registration.motherDetails.firstName} {registration.motherDetails.lastName}
             </span>
           </div>
 
           {/* Empty Line */}
-          <div className="flex items-baseline" style={{ margin: '12px 0' }}>
+          <div className="flex items-baseline" style={{ margin: '14px 0' }}>
             <span 
               className="border-b border-dotted border-black w-full text-center"
-              style={{ minHeight: '20px', paddingBottom: '2px' }}
+              style={{ minHeight: '22px', paddingBottom: '3px' }}
             >
             </span>
           </div>
 
           {/* Mother Nationality */}
-          <div className="flex items-baseline" style={{ margin: '12px 0' }}>
+          <div className="flex items-baseline" style={{ margin: '14px 0' }}>
             <span>a National of</span>
             <span 
               className="border-b border-dotted border-black flex-1 mx-2 text-center font-bold"
-              style={{ minHeight: '20px', paddingBottom: '2px' }}
+              style={{ minHeight: '22px', paddingBottom: '3px', fontSize: '12pt' }}
             >
               {registration.motherDetails.nationality || 'Ghana'}
             </span>
           </div>
 
           {/* Father Details */}
-          <div className="flex items-baseline" style={{ margin: '12px 0' }}>
+          <div className="flex items-baseline" style={{ margin: '14px 0' }}>
             <span>and</span>
             <span 
               className="border-b border-dotted border-black flex-1 mx-2 text-center font-bold"
-              style={{ minHeight: '20px', paddingBottom: '2px' }}
+              style={{ minHeight: '22px', paddingBottom: '3px', fontSize: '12pt' }}
             >
               {registration.fatherDetails.firstName} {registration.fatherDetails.lastName}
             </span>
           </div>
 
           {/* Father Nationality */}
-          <div className="flex items-baseline" style={{ margin: '12px 0' }}>
+          <div className="flex items-baseline" style={{ margin: '14px 0' }}>
             <span>a National of</span>
             <span 
               className="border-b border-dotted border-black flex-1 mx-2 text-center font-bold"
-              style={{ minHeight: '20px', paddingBottom: '2px' }}
+              style={{ minHeight: '22px', paddingBottom: '3px', fontSize: '12pt' }}
             >
               {registration.fatherDetails.nationality || 'Ghana'}
             </span>
           </div>
 
           {/* Witness Line */}
-          <div className="flex items-baseline" style={{ margin: '12px 0' }}>
+          <div className="flex items-baseline" style={{ margin: '14px 0' }}>
             <span>witness my hand this</span>
             <span 
               className="border-b border-dotted border-black mx-2 text-center font-bold"
-              style={{ minHeight: '20px', paddingBottom: '2px', width: '50px', display: 'inline-block' }}
+              style={{ minHeight: '22px', paddingBottom: '3px', width: '50px', display: 'inline-block', fontSize: '12pt' }}
             >
               {getDayOfYear(registration.registrarInfo?.registrationDate || new Date())}
             </span>
             <span>day of</span>
             <span 
               className="border-b border-dotted border-black mx-2 text-center font-bold"
-              style={{ minHeight: '20px', paddingBottom: '2px', width: '120px', display: 'inline-block' }}
+              style={{ minHeight: '22px', paddingBottom: '3px', width: '120px', display: 'inline-block', fontSize: '12pt' }}
             >
               {getMonthName(registration.registrarInfo?.registrationDate || new Date())}
             </span>
             <span>20</span>
             <span 
               className="border-b border-dotted border-black mx-2 text-center font-bold"
-              style={{ minHeight: '20px', paddingBottom: '2px', width: '50px', display: 'inline-block' }}
+              style={{ minHeight: '22px', paddingBottom: '3px', width: '50px', display: 'inline-block', fontSize: '12pt' }}
             >
               {getYear(registration.registrarInfo?.registrationDate || new Date()).toString().slice(-2)}
             </span>
@@ -268,12 +270,12 @@ export const BirthCertificate = forwardRef<HTMLDivElement, BirthCertificateProps
         </div>
 
         {/* Footer Section */}
-        <div className="flex justify-between items-end mt-12">
+        <div className="flex justify-between items-end mt-16">
           <div className="flex items-baseline">
             <span>Entry No.</span>
             <span 
               className="border-b border-dotted border-black mx-2 text-center font-bold"
-              style={{ minHeight: '20px', paddingBottom: '2px', width: '150px', display: 'inline-block' }}
+              style={{ minHeight: '22px', paddingBottom: '3px', width: '150px', display: 'inline-block', fontSize: '12pt' }}
             >
               {registration.registrationNumber}
             </span>
@@ -282,9 +284,9 @@ export const BirthCertificate = forwardRef<HTMLDivElement, BirthCertificateProps
           <div className="text-center">
             <div 
               className="border-b-2 border-black mb-2"
-              style={{ width: '200px', height: '30px' }}
+              style={{ width: '200px', height: '35px' }}
             ></div>
-            <div style={{ fontStyle: 'italic' }}>Registrar</div>
+            <div style={{ fontStyle: 'italic', fontSize: '11pt' }}>Registrar</div>
           </div>
         </div>
 

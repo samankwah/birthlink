@@ -11,22 +11,22 @@ import { addNotification } from "../store/slices/uiSlice";
 import type { RootState, AppDispatch } from "../store";
 import type { BirthRegistration } from "../types";
 import {
-  Edit3,
-  Trash2,
-  FileText,
-  Eye,
-  Grid3X3,
-  List,
-  Printer,
-  Search,
-  Filter,
-  BarChart3,
-  Users,
-  Calendar,
-  CheckCircle,
-  ChevronLeft,
-  ChevronRight,
-} from "lucide-react";
+  FaEdit as Edit3,
+  FaTrash as Trash2,
+  FaFileAlt as FileText,
+  FaEye as Eye,
+  FaTh as Grid3X3,
+  FaList as List,
+  FaPrint as Printer,
+  FaSearch as Search,
+  FaFilter as Filter,
+  FaChartBar as BarChart3,
+  FaUsers as Users,
+  FaCalendar as Calendar,
+  FaCheckCircle as CheckCircle,
+  FaChevronLeft as ChevronLeft,
+  FaChevronRight as ChevronRight,
+} from "react-icons/fa";
 
 export const CertificateList: React.FC = () => {
   const { t } = useTranslation();

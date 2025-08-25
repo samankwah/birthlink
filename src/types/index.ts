@@ -1,5 +1,11 @@
 import { Timestamp } from 'firebase/firestore';
 
+// Timestamp Types
+export interface SerializableTimestamp {
+  seconds: number;
+  nanoseconds: number;
+}
+
 // User Types
 export type UserRole = 'admin' | 'registrar' | 'viewer';
 export type UserStatus = 'active' | 'suspended' | 'pending';
@@ -37,8 +43,8 @@ export interface User {
   profile: UserProfile;
   preferences: UserPreferences;
   status: UserStatus;
-  createdAt: Timestamp;
-  lastLogin?: Timestamp;
+  createdAt: SerializableTimestamp;
+  lastLogin?: SerializableTimestamp;
 }
 
 // Birth Registration Types
@@ -71,8 +77,8 @@ export interface RegistrarInfo {
 
 export interface SyncMetadata {
   clientId: string;
-  clientTimestamp: Timestamp;
-  serverTimestamp: Timestamp;
+  clientTimestamp: SerializableTimestamp;
+  serverTimestamp: SerializableTimestamp;
   version: number;
 }
 
@@ -89,8 +95,8 @@ export interface BirthRegistration {
   syncMetadata?: SyncMetadata;
   status: RegistrationStatus;
   syncStatus: SyncStatus;
-  createdAt: Timestamp;
-  updatedAt: Timestamp;
+  createdAt: SerializableTimestamp;
+  updatedAt: SerializableTimestamp;
 }
 
 // Form Types
@@ -135,7 +141,7 @@ export interface SyncQueueItem {
   collectionName: string;
   documentId: string;
   data: Record<string, unknown>;
-  timestamp: Timestamp;
+  timestamp: SerializableTimestamp;
   retryCount: number;
   status: SyncQueueStatus;
 }

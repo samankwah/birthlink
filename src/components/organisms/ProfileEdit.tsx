@@ -10,7 +10,7 @@ import { type RootState, type AppDispatch } from '../../store';
 import { Button, Select } from '../atoms';
 import { FormField } from '../molecules';
 import { GHANA_REGIONS, type UserProfile, type Language } from '../../types';
-import { Camera, Upload, X, Save, User } from 'lucide-react';
+import { FaCamera as Camera, FaUpload as Upload, FaTimes as X, FaSave as Save, FaUser as User } from 'react-icons/fa';
 
 interface ProfileEditProps {
   onSave: () => void;
