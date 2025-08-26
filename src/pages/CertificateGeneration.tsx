@@ -25,20 +25,40 @@ export const CertificateGeneration: React.FC = () => {
   const [showPreview, setShowPreview] = useState(true);
 
   useEffect(() => {
-    // Get registration data from navigation state or localStorage
-    const registrationData = location.state?.registration || 
-                           JSON.parse(localStorage.getItem('lastRegistration') || 'null');
-    
-    if (registrationData) {
-      setRegistration(registrationData);
-      setSerialNumber(generateSerialNumber());
-    } else {
-      // No registration data, redirect to new registration
+    try {
+      // Get registration data from navigation state or localStorage
+      let registrationData = location.state?.registration;
+      
+      if (!registrationData) {
+        const storedData = localStorage.getItem('lastRegistration');
+        if (storedData) {
+          try {
+            registrationData = JSON.parse(storedData);
+          } catch (parseError) {
+            console.error('Failed to parse registration data from localStorage:', parseError);
+            localStorage.removeItem('lastRegistration'); // Clean up corrupted data
+          }
+        }
+      }
+      
+      if (registrationData && registrationData.id) {
+        setRegistration(registrationData);
+        setSerialNumber(generateSerialNumber());
+      } else {
+        // No valid registration data, redirect with helpful message
+        dispatch(addNotification({
+          type: 'warning',
+          message: 'Please select a certificate to view or create a new registration.'
+        }));
+        navigate('/certificate', { replace: true });
+      }
+    } catch (error) {
+      console.error('Error loading certificate data:', error);
       dispatch(addNotification({
         type: 'error',
-        message: t('certificate.noRegistrationData')
+        message: 'Failed to load certificate data. Please try again.'
       }));
-      navigate('/registrations/new');
+      navigate('/certificate', { replace: true });
     }
     
     setIsLoading(false);
@@ -268,10 +288,10 @@ export const CertificateGeneration: React.FC = () => {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">{t('certificate.loading')}</p>
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-gray-50 flex items-center justify-center">
+        <div className="text-center bg-white/80 backdrop-blur-sm rounded-lg p-8 shadow-lg border border-white/30">
+          <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-700 font-medium">Loading certificate...</p>
         </div>
       </div>
     );
@@ -279,20 +299,26 @@ export const CertificateGeneration: React.FC = () => {
 
   if (!registration) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-center">
-          <h2 className="text-xl font-semibold text-gray-900 mb-2">{t('certificate.noDataTitle')}</h2>
-          <p className="text-gray-600 mb-4">{t('certificate.noDataMessage')}</p>
-          <Button onClick={() => navigate('/registrations/new')}>
-            {t('certificate.createNewRegistration')}
-          </Button>
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-gray-50 flex items-center justify-center">
+        <div className="text-center bg-white/80 backdrop-blur-sm rounded-lg p-8 shadow-lg border border-white/30 max-w-md">
+          <div className="text-6xl mb-4">📋</div>
+          <h2 className="text-xl font-semibold text-gray-900 mb-2">No Certificate Data</h2>
+          <p className="text-gray-600 mb-6">Please select a certificate from the list to view it.</p>
+          <div className="space-y-3">
+            <Button onClick={() => navigate('/certificate')} className="w-full">
+              Back to Certificates
+            </Button>
+            <Button variant="secondary" onClick={() => navigate('/registrations/new')} className="w-full">
+              Create New Registration
+            </Button>
+          </div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-gray-50">
       {/* Header */}
       <div className="bg-white shadow-sm border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -300,12 +326,12 @@ export const CertificateGeneration: React.FC = () => {
             <div className="flex items-center">
               <Button 
                 variant="ghost" 
-                onClick={() => navigate('/registrations')}
-                className="mr-4"
+                onClick={() => navigate('/certificate')}
+                className="mr-4 transition-colors hover:bg-blue-50"
                 size="sm"
               >
                 <ArrowLeft className="w-4 h-4 mr-2" />
-                <span className="hidden sm:inline">{t('common.back')}</span>
+                <span className="hidden sm:inline">Back to Certificates</span>
               </Button>
               <h1 className="text-lg sm:text-xl font-semibold text-gray-900">
                 {t('certificate.pageTitle')}

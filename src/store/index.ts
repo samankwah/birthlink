@@ -36,13 +36,18 @@ export const store = configureStore({
           'auth/register/fulfilled',
           'auth/updateProfile/fulfilled',
           'auth/updatePreferences/fulfilled',
-          'auth/setFirebaseUser'
+          'auth/setFirebaseUser',
+          'registrations/fetchAll/fulfilled',
+          'registrations/fetchById/fulfilled',
+          'registrations/create/fulfilled'
         ],
         ignoredPaths: [
           'sync.queue', 
           'registrations.lastDoc',
           'auth.user.createdAt',
-          'auth.user.lastLogin'
+          'auth.user.lastLogin',
+          'registrations.registrations',
+          'registrations.currentRegistration'
         ]
       }
     }).concat(offlineMiddleware, persistenceMiddleware)

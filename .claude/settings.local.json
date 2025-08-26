@@ -46,6 +46,8 @@
       "Bash(npm cache clean:*)",
       "Bash(curl:*)",
       "Read(/C:\\Users\\CRAFT\\Pictures\\Screenshots/**)",
+      "Read(/C:\\Users\\CRAFT\\Pictures\\Screenshots/**)",
+      "Read(/C:\\Users\\CRAFT\\Pictures\\Screenshots/**)",
       "Read(/C:\\Users\\CRAFT\\Pictures\\Screenshots/**)"
     ],
     "deny": [],

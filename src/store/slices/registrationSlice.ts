@@ -15,7 +15,72 @@ import {
   Timestamp
 } from 'firebase/firestore';
 import { db } from '../../services/firebase';
-import type { BirthRegistration, RegistrationFormData } from '../../types';
+import type { BirthRegistration, RegistrationFormData, SerializableTimestamp } from '../../types';
+
+// Helper functions for timestamp conversion (similar to authSlice)
+const convertTimestampToSerializable = (timestamp: any): SerializableTimestamp => {
+  if (!timestamp) {
+    return {
+      seconds: Math.floor(Date.now() / 1000),
+      nanoseconds: 0
+    };
+  }
+  
+  if (timestamp.seconds !== undefined && timestamp.nanoseconds !== undefined) {
+    return {
+      seconds: timestamp.seconds,
+      nanoseconds: timestamp.nanoseconds
+    };
+  }
+  
+  if (timestamp.toDate && typeof timestamp.toDate === 'function') {
+    const date = timestamp.toDate();
+    return {
+      seconds: Math.floor(date.getTime() / 1000),
+      nanoseconds: 0
+    };
+  }
+  
+  const date = new Date(timestamp);
+  return {
+    seconds: Math.floor(date.getTime() / 1000),
+    nanoseconds: 0
+  };
+};
+
+const convertFirestoreDataToSerializable = (data: any): any => {
+  const converted = { ...data };
+  
+  // Convert timestamp fields to serializable format
+  if (converted.createdAt) {
+    converted.createdAt = convertTimestampToSerializable(converted.createdAt);
+  }
+  if (converted.updatedAt) {
+    converted.updatedAt = convertTimestampToSerializable(converted.updatedAt);
+  }
+  
+  // Convert date fields in child details
+  if (converted.childDetails?.dateOfBirth) {
+    converted.childDetails.dateOfBirth = convertTimestampToSerializable(converted.childDetails.dateOfBirth);
+  }
+  
+  // Convert date fields in mother details
+  if (converted.motherDetails?.dateOfBirth) {
+    converted.motherDetails.dateOfBirth = convertTimestampToSerializable(converted.motherDetails.dateOfBirth);
+  }
+  
+  // Convert date fields in father details  
+  if (converted.fatherDetails?.dateOfBirth) {
+    converted.fatherDetails.dateOfBirth = convertTimestampToSerializable(converted.fatherDetails.dateOfBirth);
+  }
+  
+  // Convert registrar info dates
+  if (converted.registrarInfo?.registrationDate) {
+    converted.registrarInfo.registrationDate = convertTimestampToSerializable(converted.registrarInfo.registrationDate);
+  }
+  
+  return converted;
+};
 
 interface RegistrationState {
   registrations: BirthRegistration[];
@@ -97,9 +162,11 @@ export const createRegistration = createAsyncThunk(
       
       console.log('Document created with ID:', docRef.id);
       
+      // Convert the Firebase timestamps to serializable format before returning
+      const convertedData = convertFirestoreDataToSerializable(registrationData);
       const result = {
         id: docRef.id,
-        ...registrationData
+        ...convertedData
       } as BirthRegistration;
       
       return result;
@@ -159,10 +226,14 @@ export const fetchRegistrations = createAsyncThunk(
     }
     
     const querySnapshot = await getDocs(q);
-    const registrations = querySnapshot.docs.map(doc => ({
-      id: doc.id,
-      ...doc.data()
-    } as BirthRegistration));
+    const registrations = querySnapshot.docs.map(doc => {
+      const rawData = doc.data();
+      const convertedData = convertFirestoreDataToSerializable(rawData);
+      return {
+        id: doc.id,
+        ...convertedData
+      } as BirthRegistration;
+    });
     
     const lastDocument = querySnapshot.docs[querySnapshot.docs.length - 1];
     
@@ -184,9 +255,11 @@ export const fetchRegistrationById = createAsyncThunk(
       throw new Error('Registration not found');
     }
     
+    const rawData = docSnap.data();
+    const convertedData = convertFirestoreDataToSerializable(rawData);
     return {
       id: docSnap.id,
-      ...docSnap.data()
+      ...convertedData
     } as BirthRegistration;
   }
 );
@@ -255,10 +328,21 @@ const registrationSlice = createSlice({
       })
       .addCase(fetchRegistrations.fulfilled, (state, action) => {
         state.isLoading = false;
+        
+        // Create a map of existing registrations for deduplication
+        const existingIds = new Set(state.registrations.map(r => r.id));
+        
+        // Filter out duplicates from new registrations
+        const newRegistrations = action.payload.registrations.filter(
+          registration => !existingIds.has(registration.id)
+        );
+        
+        // Add only unique registrations
         state.registrations = [
           ...state.registrations,
-          ...action.payload.registrations
+          ...newRegistrations
         ];
+        
         state.lastDoc = action.payload.lastDoc;
         state.hasMore = action.payload.hasMore;
       })

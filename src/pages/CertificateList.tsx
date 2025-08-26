@@ -881,13 +881,13 @@ export const CertificateList: React.FC = () => {
           </div>
         )}
 
-        {/* Pagination Controls */}
+        {/* Pagination Controls - Arrow Only */}
         {totalPages > 1 && (
           <div className="mt-8">
             {/* Mobile Pagination */}
             <div className="flex items-center justify-between md:hidden">
               <Button
-                variant="secondary" // changed from outline
+                variant="secondary"
                 size="sm"
                 onClick={() => setCurrentPage(currentPage - 1)}
                 disabled={currentPage === 1}
@@ -904,7 +904,7 @@ export const CertificateList: React.FC = () => {
               </div>
 
               <Button
-                variant="secondary" // changed from outline
+                variant="secondary"
                 size="sm"
                 onClick={() => setCurrentPage(currentPage + 1)}
                 disabled={currentPage === totalPages}
@@ -928,94 +928,35 @@ export const CertificateList: React.FC = () => {
                 </p>
               </div>
 
-              <nav className="flex items-center gap-1" aria-label="Pagination">
-                <Button
-                  variant="secondary" // changed from outline
-                  size="sm"
-                  onClick={() => setCurrentPage(currentPage - 1)}
-                  disabled={currentPage === 1}
-                  className="flex items-center gap-1 px-3 py-2"
-                >
-                  <ChevronLeft className="w-4 h-4" />
-                  Previous
-                </Button>
+              <div className="flex items-center gap-4">
+                <span className="text-sm font-medium text-gray-700">
+                  Page {currentPage} of {totalPages}
+                </span>
+                
+                <nav className="flex items-center gap-2" aria-label="Pagination">
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    onClick={() => setCurrentPage(currentPage - 1)}
+                    disabled={currentPage === 1}
+                    className="flex items-center gap-1 px-3 py-2"
+                  >
+                    <ChevronLeft className="w-4 h-4" />
+                    Previous
+                  </Button>
 
-                <div className="flex items-center">
-                  {(() => {
-                    const pages: (number | string)[] = [];
-
-                    if (totalPages <= 7) {
-                      for (let i = 1; i <= totalPages; i++) {
-                        pages.push(i);
-                      }
-                    } else {
-                      pages.push(1);
-
-                      if (currentPage > 4) {
-                        pages.push("...");
-                      }
-
-                      const start = Math.max(2, currentPage - 1);
-                      const end = Math.min(totalPages - 1, currentPage + 1);
-
-                      for (let i = start; i <= end; i++) {
-                        pages.push(i);
-                      }
-
-                      if (currentPage < totalPages - 3) {
-                        pages.push("...");
-                      }
-
-                      if (totalPages > 1) {
-                        pages.push(totalPages);
-                      }
-                    }
-
-                    return pages.map((page, index) => {
-                      if (page === "...") {
-                        return (
-                          <span
-                            key={`ellipsis-${index}`}
-                            className="px-3 py-2 text-gray-500 text-sm"
-                          >
-                            ...
-                          </span>
-                        );
-                      }
-
-                      const pageNum = page as number;
-                      const isCurrent = pageNum === currentPage;
-
-                      return (
-                        <Button
-                          key={pageNum}
-                          variant={isCurrent ? "primary" : "ghost"} // changed from default to primary
-                          size="sm"
-                          onClick={() => setCurrentPage(pageNum)}
-                          className={`min-w-[40px] h-10 ${
-                            isCurrent
-                              ? "bg-blue-600 text-white hover:bg-blue-700 font-semibold"
-                              : "text-gray-700 hover:bg-gray-100"
-                          }`}
-                        >
-                          {pageNum}
-                        </Button>
-                      );
-                    });
-                  })()}
-                </div>
-
-                <Button
-                  variant="secondary" // changed from outline
-                  size="sm"
-                  onClick={() => setCurrentPage(currentPage + 1)}
-                  disabled={currentPage === totalPages}
-                  className="flex items-center gap-1 px-3 py-2"
-                >
-                  Next
-                  <ChevronRight className="w-4 h-4" />
-                </Button>
-              </nav>
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    onClick={() => setCurrentPage(currentPage + 1)}
+                    disabled={currentPage === totalPages}
+                    className="flex items-center gap-1 px-3 py-2"
+                  >
+                    Next
+                    <ChevronRight className="w-4 h-4" />
+                  </Button>
+                </nav>
+              </div>
             </div>
           </div>
         )}
