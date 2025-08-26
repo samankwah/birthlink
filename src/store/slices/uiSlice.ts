@@ -2,7 +2,7 @@ import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
 import type { Language } from '../../types';
 
 interface UIState {
-  theme: 'light' | 'dark';
+  theme: 'light';
   language: Language;
   isLoading: boolean;
   notifications: Array<{
@@ -36,7 +36,7 @@ const uiSlice = createSlice({
   name: 'ui',
   initialState,
   reducers: {
-    setTheme: (state, action: PayloadAction<'light' | 'dark'>) => {
+    setTheme: (state, action: PayloadAction<'light'>) => {
       state.theme = action.payload;
     },
     setLanguage: (state, action: PayloadAction<Language>) => {

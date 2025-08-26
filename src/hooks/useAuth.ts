@@ -2,7 +2,7 @@ import { useEffect, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { onAuthStateChanged } from 'firebase/auth';
 import { doc, getDoc } from 'firebase/firestore';
-import { auth, db } from '../services/firebase';
+import { auth, db, shouldUseMockAuth } from '../services/firebase';
 import { setFirebaseUser, setUser, setLoading } from '../store/slices/authSlice';
 import type { RootState, AppDispatch } from '../store';
 import type { User } from '../types';
@@ -16,6 +16,12 @@ export const useAuth = () => {
     // Prevent multiple initializations
     if (isInitialized.current) return;
     isInitialized.current = true;
+
+    // If using mock auth, skip Firebase auth state listener
+    if (shouldUseMockAuth()) {
+      dispatch(setLoading(false));
+      return;
+    }
 
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       dispatch(setLoading(true));

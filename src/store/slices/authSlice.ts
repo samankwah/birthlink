@@ -38,12 +38,21 @@ const initialState: AuthState = {
 export const loginUser = createAsyncThunk(
   'auth/login',
   async ({ email, password }: { email: string; password: string }) => {
-    // Development bypass when using mock authentication OR when Firebase fails
+    // Development bypass when using mock authentication (only if Firebase not configured)
     if (shouldUseMockAuth()) {
-      console.warn('🚧 Development mode: Using mock authentication');
+      console.warn('🚧 Development mode: Using mock authentication - Firebase not configured');
       
       // Simulate network delay
       await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      // For mock auth, we still validate that the email looks reasonable
+      if (!email || !email.includes('@')) {
+        throw new Error('Please enter a valid email address');
+      }
+      
+      if (!password || password.length < 6) {
+        throw new Error('Please enter a password (minimum 6 characters)');
+      }
       
       // Mock user data for development
       const mockUser: User = {
@@ -122,12 +131,25 @@ export const registerUser = createAsyncThunk(
     profile: User['profile'];
     role?: UserRole;
   }) => {
-    // Development bypass when using mock authentication OR when Firebase fails
+    // Development bypass when using mock authentication (only if Firebase not configured)
     if (shouldUseMockAuth()) {
-      console.warn('🚧 Development mode: Using mock registration');
+      console.warn('🚧 Development mode: Using mock registration - Firebase not configured');
       
       // Simulate network delay
       await new Promise(resolve => setTimeout(resolve, 1500));
+      
+      // For mock auth, still validate registration fields
+      if (!email || !email.includes('@')) {
+        throw new Error('Please enter a valid email address');
+      }
+      
+      if (!password || password.length < 8) {
+        throw new Error('Password must be at least 8 characters long');
+      }
+      
+      if (!profile.firstName || !profile.lastName) {
+        throw new Error('First name and last name are required');
+      }
       
       // Mock user data for development
       const mockUser: User = {
@@ -204,7 +226,7 @@ export const registerUser = createAsyncThunk(
 export const logoutUser = createAsyncThunk(
   'auth/logout',
   async () => {
-    if (import.meta.env.VITE_USE_MOCK_AUTH === 'true') {
+    if (shouldUseMockAuth()) {
       // Mock logout - just resolve
       console.warn('🚧 Development mode: Mock logout');
       return;

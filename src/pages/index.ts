@@ -8,6 +8,8 @@ export { Monitoring } from './Monitoring';
 export { UserManagement } from './UserManagement';
 export { UserProfile } from './UserProfile';
 export { Settings } from './Settings';
+export { UserSettings } from './UserSettings';
+export { AdminSettings } from './AdminSettings';
 export { Profile } from './Profile';
 export { CertificateGeneration } from './CertificateGeneration';
 export { CertificateList } from './CertificateList';

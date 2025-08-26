@@ -4,6 +4,7 @@ import { Provider } from 'react-redux';
 import { PersistGate } from 'redux-persist/integration/react';
 import { useTranslation } from 'react-i18next';
 import { store, persistor } from './store';
+import { ThemeProvider } from './contexts';
 import { useAuth } from './hooks/useAuth';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { Layout } from './components/templates/Layout';
@@ -18,7 +19,8 @@ import {
   Monitoring,
   UserManagement,
   Profile,
-  Settings,
+  UserSettings,
+  AdminSettings,
   CertificateGeneration,
   CertificateList 
 } from './pages';
@@ -126,12 +128,24 @@ const AppRouter: React.FC = () => {
             </ProtectedRoute>
           } />
           
-          {/* Settings Route */}
+          {/* User Settings Route */}
           <Route path="/settings" element={
+            <ProtectedRoute>
+              <UserSettings />
+            </ProtectedRoute>
+          } />
+          
+          {/* Admin Settings Route */}
+          <Route path="/admin/settings" element={
             <ProtectedRoute requiredRole="admin">
-              <Layout>
-                <Settings />
-              </Layout>
+              <AdminSettings />
+            </ProtectedRoute>
+          } />
+          
+          {/* Legacy Settings Route - redirect to admin settings */}
+          <Route path="/system/settings" element={
+            <ProtectedRoute requiredRole="admin">
+              <AdminSettings />
             </ProtectedRoute>
           } />
           
@@ -161,7 +175,9 @@ const App: React.FC = () => {
   return (
     <Provider store={store}>
       <PersistGate loading={<Loading />} persistor={persistor}>
-        <AppRouter />
+        <ThemeProvider>
+          <AppRouter />
+        </ThemeProvider>
       </PersistGate>
     </Provider>
   );

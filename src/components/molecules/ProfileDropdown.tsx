@@ -1,14 +1,17 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import type { RootState, AppDispatch } from '../../store';
 import { logoutUser } from '../../store/slices/authSlice';
 
 export const ProfileDropdown: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
+  const { t, i18n } = useTranslation();
   const { user } = useSelector((state: RootState) => state.auth);
   const [isOpen, setIsOpen] = useState(false);
+  const [languageMenuOpen, setLanguageMenuOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   // Close dropdown when clicking outside
@@ -32,6 +35,21 @@ export const ProfileDropdown: React.FC = () => {
     } catch (error) {
       console.error('Logout failed:', error);
     }
+  };
+
+  const handleLanguageChange = (languageCode: string) => {
+    i18n.changeLanguage(languageCode);
+    setLanguageMenuOpen(false);
+  };
+
+  const getLanguageLabel = (code: string) => {
+    const languages = {
+      en: 'English',
+      tw: 'Twi',
+      ga: 'Ga',
+      ee: 'Ewe'
+    };
+    return languages[code as keyof typeof languages] || 'English';
   };
 
   const getInitials = (firstName?: string, lastName?: string) => {
@@ -148,9 +166,37 @@ export const ProfileDropdown: React.FC = () => {
             {/* Language Switcher */}
             <div className="border-t border-gray-200 mt-2 pt-2">
               <div className="px-4 py-2 text-xs text-gray-500 uppercase tracking-wider">Language</div>
-              <div className="flex items-center justify-between px-4 py-2">
-                <span className="text-sm text-gray-700">English</span>
-                <button className="text-xs text-blue-600 hover:text-blue-800">Change</button>
+              <div className="relative">
+                <button
+                  onClick={() => setLanguageMenuOpen(!languageMenuOpen)}
+                  className="w-full flex items-center justify-between px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                >
+                  <span>{getLanguageLabel(i18n.language)}</span>
+                  <svg className={`w-4 h-4 transition-transform ${languageMenuOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </button>
+                
+                {languageMenuOpen && (
+                  <div className="absolute right-0 mt-1 w-full bg-white border border-gray-200 rounded-md shadow-lg z-50">
+                    {[
+                      { code: 'en', label: 'English' },
+                      { code: 'tw', label: 'Twi' },
+                      { code: 'ga', label: 'Ga' },
+                      { code: 'ee', label: 'Ewe' }
+                    ].map((lang) => (
+                      <button
+                        key={lang.code}
+                        onClick={() => handleLanguageChange(lang.code)}
+                        className={`w-full px-4 py-2 text-sm text-left hover:bg-gray-100 ${
+                          i18n.language === lang.code ? 'bg-blue-50 text-blue-700' : 'text-gray-700'
+                        }`}
+                      >
+                        {lang.label}
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
 

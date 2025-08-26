@@ -5,19 +5,21 @@ import authSlice from './slices/authSlice';
 import registrationSlice from './slices/registrationSlice';
 import syncSlice from './slices/syncSlice';
 import uiSlice from './slices/uiSlice';
+import settingsSlice from './slices/settingsSlice';
 import { offlineMiddleware, persistenceMiddleware, initializeNetworkListener } from './middleware/offlineMiddleware';
 
 const persistConfig = {
   key: 'birthlink-root',
   storage,
-  whitelist: ['auth', 'registrations', 'ui', 'sync'] // Persist sync state for offline queue
+  whitelist: ['auth', 'registrations', 'ui', 'sync', 'settings'] // Persist sync state for offline queue
 };
 
 const rootReducer = combineReducers({
   auth: authSlice,
   registrations: registrationSlice,
   sync: syncSlice,
-  ui: uiSlice
+  ui: uiSlice,
+  settings: settingsSlice
 });
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);

@@ -5,7 +5,7 @@ import { Link, useLocation } from 'react-router-dom';
 import type { RootState, AppDispatch } from '../../store';
 import { toggleSidebar } from '../../store/slices/uiSlice';
 import { Button } from '../atoms';
-import { OfflineStatusBar, FeedbackModal, ProfileDropdown } from '../molecules';
+import { FeedbackModal, ProfileDropdown } from '../molecules';
 import { Footer } from '../organisms';
 
 interface LayoutProps {
@@ -190,9 +190,6 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
 
       {/* Main Content */}
       <div className="flex-1 flex flex-col overflow-hidden w-full lg:w-auto">
-        {/* Offline Status Bar */}
-        <OfflineStatusBar />
-        
         {/* Header */}
         <header className="bg-white shadow-sm border-b border-gray-200">
           <div className="flex items-center justify-between px-4 sm:px-6 py-4">
