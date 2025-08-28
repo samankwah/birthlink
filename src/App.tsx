@@ -6,6 +6,7 @@ import { useTranslation } from 'react-i18next';
 import { store, persistor } from './store';
 import { ThemeProvider } from './contexts';
 import { useAuth } from './hooks/useAuth';
+import { indexedDBService } from './services/indexedDB';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { Layout } from './components/templates/Layout';
 import { NotificationSystem } from './components/organisms';
@@ -26,12 +27,46 @@ import {
 } from './pages';
 import './locales/i18n';
 
-// Loading component for PersistGate
+// Loading component for PersistGate and IndexedDB
 const Loading: React.FC = () => (
   <div className="min-h-screen flex items-center justify-center">
-    <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
+    <div className="text-center">
+      <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600 mx-auto mb-4"></div>
+      <p className="text-gray-600">Initializing application...</p>
+    </div>
   </div>
 );
+
+// IndexedDB Initializer Component
+const IndexedDBProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const [isReady, setIsReady] = React.useState(false);
+  const [error, setError] = React.useState<string | null>(null);
+
+  React.useEffect(() => {
+    const initDB = async () => {
+      try {
+        await indexedDBService.init();
+        setIsReady(true);
+      } catch (err) {
+        console.error('Failed to initialize IndexedDB:', err);
+        setError(err instanceof Error ? err.message : 'Failed to initialize offline storage');
+        setIsReady(true); // Continue anyway, offline features won't work
+      }
+    };
+
+    initDB();
+  }, []);
+
+  if (!isReady) {
+    return <Loading />;
+  }
+
+  if (error) {
+    console.warn('IndexedDB initialization failed, continuing without offline features:', error);
+  }
+
+  return <>{children}</>;
+};
 
 // Auth Wrapper Component
 const AuthWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -175,9 +210,11 @@ const App: React.FC = () => {
   return (
     <Provider store={store}>
       <PersistGate loading={<Loading />} persistor={persistor}>
-        <ThemeProvider>
-          <AppRouter />
-        </ThemeProvider>
+        <IndexedDBProvider>
+          <ThemeProvider>
+            <AppRouter />
+          </ThemeProvider>
+        </IndexedDBProvider>
       </PersistGate>
     </Provider>
   );

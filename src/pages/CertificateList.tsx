@@ -174,7 +174,7 @@ export const CertificateList: React.FC = () => {
           <style>
             @page {
               size: A4;
-              margin: 15mm;
+              margin: 2mm;
               -webkit-print-color-adjust: exact;
               color-adjust: exact;
               print-color-adjust: exact;
@@ -182,10 +182,10 @@ export const CertificateList: React.FC = () => {
             
             body {
               font-family: 'Times New Roman', Times, serif;
-              font-size: 11pt;
-              line-height: 1.4;
+              font-size: 10pt;
+              line-height: 1.2;
               margin: 0;
-              padding: 0;
+              padding: 3mm;
               color: black;
               -webkit-print-color-adjust: exact;
               color-adjust: exact;
@@ -194,13 +194,20 @@ export const CertificateList: React.FC = () => {
             
             .certificate-container {
               width: 100%;
-              border: 3px solid black;
-              padding: 15mm;
+              max-width: 190mm;
+              max-height: 250mm;
+              border: none;
+              padding: 5mm;
               position: relative;
-              height: 267mm;
               box-sizing: border-box;
               display: flex;
               flex-direction: column;
+              overflow: hidden;
+            }
+            
+            /* Override all font sizes */
+            * {
+              font-size: 10pt !important;
             }
             
             .header-text {
@@ -373,7 +380,7 @@ export const CertificateList: React.FC = () => {
                 registration.childDetails.dateOfBirth
               )}</span>
               <span>day of</span>
-              <span class="dotted-line medium-line">${getMonthName(
+              <span class="dotted-line short-line">${getMonthName(
                 registration.childDetails.dateOfBirth
               )}</span>
               <span>20</span>
@@ -469,12 +476,12 @@ export const CertificateList: React.FC = () => {
               </div>
             </div>
             
-            <div class="footer-info">
+           
+          </div>
+        </body> <div class="footer-info">
               <div>BHP Counterfeit</div>
               <div>Birth Certificate Form R</div>
             </div>
-          </div>
-        </body>
       </html>
     `;
 
@@ -932,8 +939,11 @@ export const CertificateList: React.FC = () => {
                 <span className="text-sm font-medium text-gray-700">
                   Page {currentPage} of {totalPages}
                 </span>
-                
-                <nav className="flex items-center gap-2" aria-label="Pagination">
+
+                <nav
+                  className="flex items-center gap-2"
+                  aria-label="Pagination"
+                >
                   <Button
                     variant="secondary"
                     size="sm"

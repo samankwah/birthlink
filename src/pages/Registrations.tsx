@@ -3,9 +3,9 @@ import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '../components/atoms';
+import { ErrorBoundary } from '../components/ErrorBoundary';
 import type { RootState, AppDispatch } from '../store';
 import { fetchRegistrations, resetPagination } from '../store/slices/registrationSlice';
-import { useOfflineRegistrations } from '../hooks/useOfflineRegistrations';
 import type { BirthRegistration } from '../types';
 
 export const Registrations: React.FC = () => {
@@ -15,7 +15,6 @@ export const Registrations: React.FC = () => {
   
   const { registrations, isLoading, hasMore } = useSelector((state: RootState) => state.registrations);
   const { user } = useSelector((state: RootState) => state.auth);
-  const { offlineRegistrations, isOnline, pendingSyncCount } = useOfflineRegistrations();
   
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
@@ -37,10 +36,7 @@ export const Registrations: React.FC = () => {
     }
   };
 
-  // Combine online and offline registrations
-  const allRegistrations = [...registrations, ...offlineRegistrations];
-  
-  const filteredRegistrations = allRegistrations.filter((registration) => {
+  const filteredRegistrations = registrations.filter((registration) => {
     const matchesSearch = searchTerm === '' || 
       registration.childDetails.firstName.toLowerCase().includes(searchTerm.toLowerCase()) ||
       registration.childDetails.lastName.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -51,19 +47,6 @@ export const Registrations: React.FC = () => {
     return matchesSearch && matchesStatus;
   });
 
-  const getSyncStatusBadge = (syncStatus: BirthRegistration['syncStatus']) => {
-    const syncStatusClasses = {
-      pending: 'bg-yellow-100 text-yellow-800',
-      synced: 'bg-green-100 text-green-800', 
-      failed: 'bg-red-100 text-red-800'
-    };
-    
-    return (
-      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${syncStatusClasses[syncStatus]}`}>
-        {syncStatus === 'pending' ? 'Pending Sync' : syncStatus === 'synced' ? 'Synced' : 'Sync Failed'}
-      </span>
-    );
-  };
 
   const getStatusBadge = (status: BirthRegistration['status']) => {
     const statusClasses = {
@@ -94,7 +77,8 @@ export const Registrations: React.FC = () => {
   };
 
   return (
-    <div className="space-y-6">
+    <ErrorBoundary>
+      <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
@@ -164,20 +148,7 @@ export const Registrations: React.FC = () => {
 
       {/* Registrations List */}
       <div className="bg-white shadow rounded-lg overflow-hidden">
-        {/* Show offline status info */}
-        {!isOnline && (
-          <div className="px-6 py-4 bg-orange-50 border-b border-orange-200">
-            <div className="flex items-center space-x-2">
-              <div className="w-3 h-3 bg-orange-500 rounded-full"></div>
-              <span className="text-sm text-orange-800">
-                You're offline. Showing {offlineRegistrations.length} offline registrations.
-                {pendingSyncCount > 0 && ` ${pendingSyncCount} items will sync when you reconnect.`}
-              </span>
-            </div>
-          </div>
-        )}
-
-        {isLoading && allRegistrations.length === 0 ? (
+        {isLoading && registrations.length === 0 ? (
           <div className="flex items-center justify-center h-64">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
           </div>
@@ -188,12 +159,12 @@ export const Registrations: React.FC = () => {
               No registrations found
             </h3>
             <p className="text-gray-500 mb-6">
-              {allRegistrations.length === 0 
+              {registrations.length === 0 
                 ? "Get started by creating your first birth registration."
                 : "Try adjusting your search or filter criteria."
               }
             </p>
-            {allRegistrations.length === 0 && (user?.role === 'admin' || user?.role === 'registrar') && (
+            {registrations.length === 0 && (user?.role === 'admin' || user?.role === 'registrar') && (
               <Link to="/registrations/new">
                 <Button>
                   {t('registration.newRegistration')}
@@ -219,9 +190,6 @@ export const Registrations: React.FC = () => {
                     {t('registration.status')}
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Sync Status
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Created
                   </th>
                   <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -243,9 +211,6 @@ export const Registrations: React.FC = () => {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       {getStatusBadge(registration.status)}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      {getSyncStatusBadge(registration.syncStatus)}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                       {formatDate(registration.createdAt)}
@@ -288,6 +253,7 @@ export const Registrations: React.FC = () => {
           </div>
         )}
       </div>
-    </div>
+      </div>
+    </ErrorBoundary>
   );
 };

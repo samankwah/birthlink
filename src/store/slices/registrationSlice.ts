@@ -48,35 +48,44 @@ const convertTimestampToSerializable = (timestamp: any): SerializableTimestamp =
   };
 };
 
-const convertFirestoreDataToSerializable = (data: any): any => {
-  const converted = { ...data };
-  
-  // Convert timestamp fields to serializable format
-  if (converted.createdAt) {
-    converted.createdAt = convertTimestampToSerializable(converted.createdAt);
-  }
-  if (converted.updatedAt) {
-    converted.updatedAt = convertTimestampToSerializable(converted.updatedAt);
+const convertFirestoreDataToSerializable = (data: any, depth = 0, visited = new WeakSet()): any => {
+  // Prevent infinite recursion
+  if (depth > 10) {
+    return data;
   }
   
-  // Convert date fields in child details
-  if (converted.childDetails?.dateOfBirth) {
-    converted.childDetails.dateOfBirth = convertTimestampToSerializable(converted.childDetails.dateOfBirth);
+  // Handle null, undefined, or primitive types
+  if (data === null || data === undefined || typeof data !== 'object') {
+    return data;
   }
   
-  // Convert date fields in mother details
-  if (converted.motherDetails?.dateOfBirth) {
-    converted.motherDetails.dateOfBirth = convertTimestampToSerializable(converted.motherDetails.dateOfBirth);
+  // Check for circular references
+  if (visited.has(data)) {
+    return '[Circular Reference]';
+  }
+  visited.add(data);
+  
+  // Handle arrays
+  if (Array.isArray(data)) {
+    return data.map(item => convertFirestoreDataToSerializable(item, depth + 1, visited));
   }
   
-  // Convert date fields in father details  
-  if (converted.fatherDetails?.dateOfBirth) {
-    converted.fatherDetails.dateOfBirth = convertTimestampToSerializable(converted.fatherDetails.dateOfBirth);
+  // Handle Firestore timestamps
+  if (data && typeof data === 'object' && data.toDate && typeof data.toDate === 'function') {
+    return convertTimestampToSerializable(data);
   }
   
-  // Convert registrar info dates
-  if (converted.registrarInfo?.registrationDate) {
-    converted.registrarInfo.registrationDate = convertTimestampToSerializable(converted.registrarInfo.registrationDate);
+  // Handle Date objects
+  if (data instanceof Date) {
+    return convertTimestampToSerializable(data);
+  }
+  
+  // Handle plain objects
+  const converted: any = {};
+  for (const key in data) {
+    if (data.hasOwnProperty(key)) {
+      converted[key] = convertFirestoreDataToSerializable(data[key], depth + 1, visited);
+    }
   }
   
   return converted;
@@ -298,7 +307,7 @@ const registrationSlice = createSlice({
       })
       .addCase(createRegistration.fulfilled, (state, action) => {
         state.isLoading = false;
-        state.registrations.unshift(action.payload);
+        state.registrations = [action.payload, ...state.registrations];
         state.currentRegistration = action.payload;
       })
       .addCase(createRegistration.rejected, (state, action) => {
@@ -309,10 +318,15 @@ const registrationSlice = createSlice({
       .addCase(updateRegistration.fulfilled, (state, action) => {
         const index = state.registrations.findIndex(r => r.id === action.payload.id);
         if (index !== -1) {
-          state.registrations[index] = { 
+          const updatedRegistration = { 
             ...state.registrations[index], 
             ...action.payload.updates 
           };
+          state.registrations = [
+            ...state.registrations.slice(0, index),
+            updatedRegistration,
+            ...state.registrations.slice(index + 1)
+          ];
         }
         if (state.currentRegistration?.id === action.payload.id) {
           state.currentRegistration = { 
@@ -337,11 +351,8 @@ const registrationSlice = createSlice({
           registration => !existingIds.has(registration.id)
         );
         
-        // Add only unique registrations
-        state.registrations = [
-          ...state.registrations,
-          ...newRegistrations
-        ];
+        // Create new array instead of mutating existing one
+        state.registrations = [...state.registrations, ...newRegistrations];
         
         state.lastDoc = action.payload.lastDoc;
         state.hasMore = action.payload.hasMore;

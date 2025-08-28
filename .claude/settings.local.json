@@ -52,7 +52,21 @@
       "Bash(timeout 5s npm run dev)",
       "Read(/C:\\Users\\CRAFT\\Pictures\\Screenshots/**)",
       "Read(/C:\\Users\\CRAFT\\Pictures\\Screenshots/**)",
-      "Read(/C:\\Users\\CRAFT\\Pictures\\Screenshots/**)"
+      "Read(/C:\\Users\\CRAFT\\Pictures\\Screenshots/**)",
+      "Read(/C:\\Users\\CRAFT\\Pictures\\Screenshots/**)",
+      "Read(/C:\\Users\\CRAFT\\Pictures\\Screenshots/**)",
+      "Read(/C:\\Users\\CRAFT\\Pictures\\Screenshots/**)",
+      "Read(/C:\\Users\\CRAFT\\Pictures\\Screenshots/**)",
+      "Read(/C:\\Users\\CRAFT\\Pictures\\Screenshots/**)",
+      "Read(/C:\\Users\\CRAFT\\Pictures\\Screenshots/**)",
+      "Read(/C:\\Users\\CRAFT\\Pictures\\Screenshots/**)",
+      "Read(/C:\\Users\\CRAFT\\Pictures\\Screenshots/**)",
+      "Read(C:\\Users\\CRAFT\\Pictures\\Screenshots/**)",
+      "Read(C:\\Users\\CRAFT\\Pictures\\Screenshots/**)",
+      "Read(c:\\Users\\CRAFT\\Pictures\\Screenshots/**)",
+      "Read(c:\\Users\\CRAFT\\Pictures\\Screenshots/**)",
+      "Read(c:\\Users\\CRAFT\\Pictures\\Screenshots/**)",
+      "Read(c:\\Users\\CRAFT\\Pictures\\Screenshots/**)"
     ],
     "deny": [],
     "defaultMode": "acceptEdits"

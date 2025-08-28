@@ -78,11 +78,7 @@ export const offlineMiddleware: Middleware = (store) => (next) => (action: unkno
         });
         store.dispatch(syncAction as any);
 
-        // Show offline notification
-        store.dispatch(addNotification({
-          type: 'info',
-          message: 'Action queued for when you\'re back online'
-        }));
+        // Action queued silently - UI will show offline status
 
         // Don't pass the original action to prevent API calls
         return;
@@ -195,21 +191,13 @@ export const persistenceMiddleware: Middleware = (store) => (next) => (action) =
 export const initializeNetworkListener = (dispatch: import('@reduxjs/toolkit').Dispatch) => {
   const handleOnline = () => {
     dispatch(setOnlineStatus(true));
-    dispatch(addNotification({
-      type: 'success',
-      message: 'You\'re back online! Syncing data...'
-    }));
-    
-    // Trigger sync process
+    // Trigger sync process without notification
     dispatch({ type: 'sync/processSyncQueue' });
   };
 
   const handleOffline = () => {
     dispatch(setOnlineStatus(false));
-    dispatch(addNotification({
-      type: 'warning',
-      message: 'You\'re offline. Changes will be synced when you reconnect.'
-    }));
+    // Remove offline notification - users can see status from UI elements
   };
 
   window.addEventListener('online', handleOnline);

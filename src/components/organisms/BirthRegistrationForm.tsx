@@ -8,9 +8,16 @@ import { BirthCertificate } from './BirthCertificate';
 import type { AppDispatch } from '../../store';
 import { createRegistration } from '../../store/slices/registrationSlice';
 import { addNotification } from '../../store/slices/uiSlice';
-import { useOfflineRegistrations } from '../../hooks/useOfflineRegistrations';
 import type { RegistrationFormData, BirthRegistration } from '../../types';
 import { validateRegistrationForm, getFieldError, type ValidationError } from '../../utils/validation';
+import { useOnlineStatus } from '../../hooks';
+import { 
+  generateCertificateNumber, 
+  generateEntryNumber, 
+  validateChildAge, 
+  formatParentNationality,
+  generateRegistrationNumber
+} from '../../utils/certificateNumber';
 
 // Regional data structure for Ghana
 const REGIONS_DISTRICTS = {
@@ -105,6 +112,29 @@ const REGIONS_DISTRICTS = {
   ]
 };
 
+// Common nationalities for Ghana Birth Certificate
+const NATIONALITIES = [
+  'Ghana',
+  'Nigeria', 
+  'Burkina Faso',
+  'Ivory Coast',
+  'Togo',
+  'Mali',
+  'Niger',
+  'Liberia',
+  'Sierra Leone',
+  'Guinea',
+  'Senegal',
+  'Benin',
+  'United Kingdom',
+  'United States',
+  'Germany',
+  'France',
+  'Canada',
+  'Australia',
+  'Other'
+];
+
 interface BirthRegistrationFormProps {
   initialData?: Partial<RegistrationFormData>;
   mode?: 'create' | 'edit';
@@ -119,7 +149,7 @@ export const BirthRegistrationForm: React.FC<BirthRegistrationFormProps> = ({
   const { t } = useTranslation();
   const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
-  const { createOfflineRegistration, isOnline } = useOfflineRegistrations();
+  const isOnline = useOnlineStatus();
   
   const [currentStep, setCurrentStep] = useState(1);
   const [validationErrors, setValidationErrors] = useState<ValidationError[]>([]);
@@ -132,7 +162,8 @@ export const BirthRegistrationForm: React.FC<BirthRegistrationFormProps> = ({
       dateOfBirth: initialData?.childDetails?.dateOfBirth || '',
       placeOfBirth: initialData?.childDetails?.placeOfBirth || '',
       gender: initialData?.childDetails?.gender || 'Male',
-      hospitalOfBirth: initialData?.childDetails?.hospitalOfBirth || ''
+      hospitalOfBirth: initialData?.childDetails?.hospitalOfBirth || '',
+      registrationDistrict: initialData?.childDetails?.registrationDistrict || ''
     },
     motherDetails: {
       firstName: initialData?.motherDetails?.firstName || '',
@@ -225,6 +256,19 @@ export const BirthRegistrationForm: React.FC<BirthRegistrationFormProps> = ({
       setValidationErrors(prev => prev.filter(e => e.field !== fieldPath));
     }
 
+    // Special validation for child's date of birth (age restriction)
+    if (section === 'childDetails' && field === 'dateOfBirth' && value) {
+      const birthDate = new Date(value);
+      const ageValidation = validateChildAge(birthDate);
+      
+      if (!ageValidation.isValid && ageValidation.message) {
+        setValidationErrors(prev => [
+          ...prev.filter(e => e.field !== fieldPath),
+          { field: fieldPath, message: ageValidation.message }
+        ]);
+      }
+    }
+
     // Handle region change to update available districts
     if (section === 'registrarInfo' && field === 'region') {
       const districts = REGIONS_DISTRICTS[value as keyof typeof REGIONS_DISTRICTS] || [];
@@ -301,12 +345,27 @@ export const BirthRegistrationForm: React.FC<BirthRegistrationFormProps> = ({
     try {
       console.log('Generating certificate from form data:', formData);
       
+      // Generate certificate and entry numbers
+      const district = formData.registrarInfo?.district || formData.childDetails.placeOfBirth || 'Unknown';
+      const certificateNumber = await generateCertificateNumber(district);
+      const entryNumber = await generateEntryNumber('current-registrar-id');
+      const registrationNumber = generateRegistrationNumber(certificateNumber);
+      
+      console.log('Generated certificate number:', certificateNumber);
+      console.log('Generated entry number:', entryNumber);
+      
       let registrationData: BirthRegistration;
       
       if (isOnline) {
         // Try online creation first
         console.log('Attempting online registration...');
-        const result = await dispatch(createRegistration(formData)).unwrap();
+        const enhancedFormData = {
+          ...formData,
+          certificateNumber,
+          entryNumber,
+          registrationNumber
+        };
+        const result = await dispatch(createRegistration(enhancedFormData)).unwrap();
         console.log('Registration created successfully:', result);
         registrationData = result;
         
@@ -317,12 +376,12 @@ export const BirthRegistrationForm: React.FC<BirthRegistrationFormProps> = ({
       } else {
         // Use offline creation
         console.log('Using offline registration...');
-        await createOfflineRegistration(formData);
+        await dispatch(createRegistration(formData)).unwrap();
         
         // Create registration object for certificate generation
         registrationData = {
           id: `offline-${Date.now()}`,
-          registrationNumber: `GHA-${new Date().getFullYear()}-${Math.random().toString(36).substr(2, 6).toUpperCase()}`,
+          registrationNumber,
           childDetails: {
             firstName: formData.childDetails.firstName,
             lastName: formData.childDetails.lastName,
@@ -354,7 +413,9 @@ export const BirthRegistrationForm: React.FC<BirthRegistrationFormProps> = ({
             registrationDate: new Date(),
             location: formData.registrarInfo?.location || 'Ghana',
             region: formData.registrarInfo?.region || '',
-            district: formData.registrarInfo?.district || ''
+            district: formData.registrarInfo?.district || '',
+            certificateNumber,
+            entryNumber
           },
           status: 'submitted' as const,
           syncStatus: 'pending' as const,
@@ -381,7 +442,7 @@ export const BirthRegistrationForm: React.FC<BirthRegistrationFormProps> = ({
       if (isOnline) {
         console.log('Online registration failed, trying offline...');
         try {
-          await createOfflineRegistration(formData);
+          await dispatch(createRegistration(formData)).unwrap();
           dispatch(addNotification({
             type: 'warning',
             message: 'Registration saved offline due to connection issues. Will sync automatically.'

@@ -439,25 +439,32 @@ export class CertificateService {
   <style>
     @page {
       size: A4;
-      margin: 20mm;
+      margin: 2mm;
     }
     
     body {
       font-family: 'Times New Roman', Times, serif;
-      font-size: 12pt;
-      line-height: 1.8;
+      font-size: 10pt;
+      line-height: 1.2;
       margin: 0;
-      padding: 0;
+      padding: 3mm;
       color: black;
     }
     
     .certificate-container {
       width: 100%;
-      max-width: 170mm;
+      max-width: 190mm;
+      max-height: 250mm;
       margin: 0 auto;
-      border: 3px solid black;
-      padding: 15mm;
+      border: none;
+      padding: 5mm;
+      overflow: hidden;
       position: relative;
+    }
+    
+    /* Override all font sizes */
+    * {
+      font-size: 10pt !important;
     }
     
     .header-text {

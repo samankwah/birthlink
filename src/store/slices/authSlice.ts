@@ -92,10 +92,22 @@ export const loginUser = createAsyncThunk(
       // Get user profile from Firestore
       const userDoc = await getDoc(doc(db, 'users', firebaseUser.uid));
       if (!userDoc.exists()) {
-        throw new Error('User profile not found');
+        throw new Error('User profile not found. Please contact support if you believe this is an error.');
       }
       
       const firestoreData = userDoc.data();
+      
+      // Check user status - only allow active users to log in
+      if (firestoreData?.status !== 'active') {
+        const status = firestoreData?.status || 'unknown';
+        if (status === 'pending') {
+          throw new Error('Your account is pending approval. Please contact an administrator.');
+        } else if (status === 'disabled') {
+          throw new Error('Your account has been disabled. Please contact support.');
+        } else {
+          throw new Error(`Account status: ${status}. Please contact support.`);
+        }
+      }
       
       // Convert Firebase Timestamps to serializable format for Redux
       const userData: User = {
@@ -192,7 +204,7 @@ export const registerUser = createAsyncThunk(
           language: 'en',
           notifications: true
         },
-        status: 'pending',
+        status: 'active', // Change to 'pending' if you want admin approval required
         createdAt: createFirebaseTimestamp(),
         lastLogin: createFirebaseTimestamp()
       };
@@ -209,7 +221,7 @@ export const registerUser = createAsyncThunk(
           language: 'en',
           notifications: true
         },
-        status: 'pending',
+        status: 'active', // Change to 'pending' if you want admin approval required
         createdAt: createSerializableTimestamp(),
         lastLogin: createSerializableTimestamp()
       };

@@ -17,8 +17,40 @@ export const useAuth = () => {
     if (isInitialized.current) return;
     isInitialized.current = true;
 
-    // If using mock auth, skip Firebase auth state listener
+    // If using mock auth, skip Firebase auth state listener and set mock user
     if (shouldUseMockAuth()) {
+      console.log('🚧 Using mock authentication');
+      
+      // Create a mock user for development
+      const mockUser: User = {
+        uid: 'dev-user-123',
+        email: 'admin@birthlink.com',
+        role: 'admin',
+        profile: {
+          firstName: 'Admin',
+          lastName: 'User',
+          phoneNumber: '+233243999631',
+          location: {
+            region: 'Eastern',
+            district: 'Fanteakwa'
+          }
+        },
+        preferences: {
+          language: 'en',
+          notifications: true
+        },
+        status: 'active',
+        createdAt: {
+          seconds: Math.floor(Date.now() / 1000),
+          nanoseconds: 0
+        },
+        lastLogin: {
+          seconds: Math.floor(Date.now() / 1000),
+          nanoseconds: 0
+        }
+      };
+      
+      dispatch(setUser(mockUser));
       dispatch(setLoading(false));
       return;
     }

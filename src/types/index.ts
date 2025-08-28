@@ -55,6 +55,7 @@ export interface ChildDetails {
   placeOfBirth: string;
   gender: Gender;
   hospitalOfBirth?: string;
+  registrationDistrict?: string;
 }
 
 export interface ParentDetails {
@@ -64,7 +65,7 @@ export interface ParentDetails {
   dateOfBirth: Date;
   occupation?: string;
   phoneNumber?: string;
-  nationality?: string;
+  nationality: string; // Required for certificate
 }
 
 export interface RegistrarInfo {
@@ -73,6 +74,10 @@ export interface RegistrarInfo {
   location: string;
   region: string;
   district: string;
+  certificateNumber?: string;
+  entryNumber?: string;
+  registrarSignature?: string;
+  registrarStamp?: string;
 }
 
 export interface SyncMetadata {
@@ -102,8 +107,8 @@ export interface BirthRegistration {
 // Form Types
 export interface RegistrationFormData {
   childDetails: Omit<ChildDetails, 'dateOfBirth'> & { dateOfBirth: string };
-  motherDetails: Omit<ParentDetails, 'dateOfBirth'> & { dateOfBirth: string };
-  fatherDetails: Omit<ParentDetails, 'dateOfBirth'> & { dateOfBirth: string };
+  motherDetails: Omit<ParentDetails, 'dateOfBirth' | 'nationality'> & { dateOfBirth: string; nationality: string };
+  fatherDetails: Omit<ParentDetails, 'dateOfBirth' | 'nationality'> & { dateOfBirth: string; nationality: string };
   registrarInfo?: Omit<RegistrarInfo, 'registrarId' | 'registrationDate'>;
 }
 

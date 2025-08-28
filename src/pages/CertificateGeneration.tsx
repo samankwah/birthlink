@@ -84,7 +84,9 @@ export const CertificateGeneration: React.FC = () => {
       return;
     }
 
-    const certificateHTML = certificateRef.current.innerHTML;
+    // Extract only the certificate content, avoiding duplication
+    const certificateElement = certificateRef.current.querySelector('.certificate-border');
+    const certificateHTML = certificateElement ? certificateElement.innerHTML : certificateRef.current.innerHTML;
     
     const printHTML = `
       <!DOCTYPE html>
@@ -94,21 +96,28 @@ export const CertificateGeneration: React.FC = () => {
           <style>
             @page { 
               size: A4; 
-              margin: 0.5cm; 
+              margin: 2mm; 
             }
             body { 
               font-family: 'Times New Roman', Times, serif; 
               margin: 0; 
-              padding: 0; 
+              padding: 3mm; 
               background: white; 
               color: black; 
               line-height: 1.2; 
+              font-size: 10pt;
             }
-            .certificate-container { 
+            .certificate-content { 
               width: 100%; 
-              max-width: none; 
-              padding: 20px; 
+              max-width: 190mm; 
+              max-height: 250mm;
+              padding: 5mm; 
               box-sizing: border-box; 
+              overflow: hidden;
+            }
+            /* Override all font sizes */
+            * {
+              font-size: 10pt !important;
             }
             * { 
               -webkit-print-color-adjust: exact !important; 
@@ -122,7 +131,7 @@ export const CertificateGeneration: React.FC = () => {
           </style>
         </head>
         <body>
-          <div class="certificate-container">${certificateHTML}</div>
+          <div class="certificate-content">${certificateHTML}</div>
         </body>
       </html>
     `;
@@ -154,18 +163,24 @@ export const CertificateGeneration: React.FC = () => {
       tempDiv.style.position = 'absolute';
       tempDiv.style.left = '-9999px';
       tempDiv.style.top = '-9999px';
-      tempDiv.style.width = '794px'; // A4 width in pixels at 96 DPI
-      tempDiv.style.height = '1123px'; // A4 height in pixels at 96 DPI
+      tempDiv.style.width = '210mm'; // A4 width
+      tempDiv.style.height = '297mm'; // A4 height  
       tempDiv.style.backgroundColor = 'white';
-      tempDiv.style.padding = '20px';
+      tempDiv.style.padding = '10mm';
       tempDiv.style.boxSizing = 'border-box';
+      tempDiv.style.overflow = 'hidden';
+      tempDiv.style.fontFamily = 'Times New Roman, Times, serif';
+      tempDiv.style.fontSize = '10pt';
+      tempDiv.style.lineHeight = '1.2';
       
       // Clone the certificate content
       const clonedCertificate = certificateRef.current.cloneNode(true) as HTMLElement;
       clonedCertificate.style.width = '100%';
-      clonedCertificate.style.maxWidth = 'none';
+      clonedCertificate.style.maxWidth = '190mm';
+      clonedCertificate.style.maxHeight = '277mm'; // Fit within A4 minus padding
       clonedCertificate.style.transform = 'scale(1)';
       clonedCertificate.style.transformOrigin = 'top left';
+      clonedCertificate.style.overflow = 'hidden';
       
       tempDiv.appendChild(clonedCertificate);
       document.body.appendChild(tempDiv);
@@ -183,22 +198,31 @@ export const CertificateGeneration: React.FC = () => {
 
       await Promise.all(imagePromises);
 
-      // Generate canvas with high quality
+      // Generate canvas with optimized settings for single page
       const canvas = await html2canvas(tempDiv, {
-        scale: 2, // High quality
+        scale: 1.5, // Balanced quality
         useCORS: true,
         allowTaint: false,
         backgroundColor: '#ffffff',
-        width: 794,
-        height: 1123,
+        width: 794, // A4 width at 96 DPI
+        height: 1123, // A4 height at 96 DPI
         scrollX: 0,
         scrollY: 0,
+        onclone: (clonedDoc) => {
+          // Ensure the cloned document has proper sizing
+          const clonedElement = clonedDoc.querySelector('#birth-certificate');
+          if (clonedElement) {
+            (clonedElement as HTMLElement).style.transform = 'scale(1)';
+            (clonedElement as HTMLElement).style.maxHeight = '277mm';
+            (clonedElement as HTMLElement).style.overflow = 'hidden';
+          }
+        }
       });
 
       // Remove temp div
       document.body.removeChild(tempDiv);
 
-      // Create PDF
+      // Create PDF with single page constraint
       const pdf = new jsPDF({
         orientation: 'portrait',
         unit: 'mm',
@@ -208,22 +232,14 @@ export const CertificateGeneration: React.FC = () => {
 
       const imgWidth = 210; // A4 width in mm
       const pageHeight = 297; // A4 height in mm
-      const imgHeight = (canvas.height * imgWidth) / canvas.width;
-      let heightLeft = imgHeight;
+      
+      // Force fit content to single page
+      const imgHeight = Math.min((canvas.height * imgWidth) / canvas.width, pageHeight);
 
       const imgData = canvas.toDataURL('image/png', 1.0);
+      
+      // Add image to fit exactly on one page
       pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight, '', 'FAST');
-
-      // Add additional pages if content is too tall
-      if (heightLeft > pageHeight) {
-        let position = pageHeight;
-        while (heightLeft > 0) {
-          position = heightLeft - pageHeight;
-          pdf.addPage();
-          pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight, '', 'FAST');
-          heightLeft -= pageHeight;
-        }
-      }
 
       // Save the PDF
       const fileName = `Birth_Certificate_${registration.childDetails.firstName}_${registration.childDetails.lastName}_${serialNumber}.pdf`;

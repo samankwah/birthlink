@@ -386,6 +386,7 @@
     "livePreview": "Certificate updates as you fill the form",
     "enterChildName": "Enter child name to see certificate preview",
     "previewPlaceholder": "Certificate preview will appear here",
+    "previewReady": "Certificate preview is ready",
     "print": "Print Certificate",
     "downloadPDF": "Download PDF",
     "generating": "Generating...",

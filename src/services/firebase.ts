@@ -56,17 +56,17 @@ if (import.meta.env.DEV && import.meta.env.VITE_USE_FIREBASE_EMULATORS === 'true
 
 // Export a flag to check if we should use mock auth
 export const shouldUseMockAuth = () => {
-  // Only use mock auth if explicitly enabled AND Firebase is not properly configured
+  // Use mock auth if explicitly enabled in development
   const mockAuthEnabled = import.meta.env.VITE_USE_MOCK_AUTH === 'true';
-  const firebaseConfigured = firebaseConfig.apiKey && firebaseConfig.projectId;
   
-  // If Firebase is properly configured, never use mock auth
-  if (firebaseConfigured) {
-    return false;
+  // Allow mock auth to override Firebase config in development
+  if (import.meta.env.DEV && mockAuthEnabled) {
+    return true;
   }
   
-  // Only use mock auth if explicitly enabled and Firebase is not configured
-  return mockAuthEnabled;
+  // In production, only use mock auth if Firebase is not configured
+  const firebaseConfigured = firebaseConfig.apiKey && firebaseConfig.projectId;
+  return !firebaseConfigured && mockAuthEnabled;
 };
 
 // Export emulator connection status for debugging
