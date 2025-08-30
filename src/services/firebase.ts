@@ -28,6 +28,8 @@ export const functions = getFunctions(app);
 
 // Initialize Firebase Storage and get a reference to the service
 export const storage = getStorage(app);
+console.log('🔧 Firebase Storage initialized:', storage);
+console.log('🔧 Storage bucket:', storage.app.options.storageBucket);
 
 // Track emulator connection status
 let emulatorsConnected = false;

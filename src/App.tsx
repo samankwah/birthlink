@@ -184,8 +184,12 @@ const AppRouter: React.FC = () => {
             </ProtectedRoute>
           } />
           
-          {/* Redirect root to dashboard */}
-          <Route path="/" element={<Navigate to="/dashboard" replace />} />
+          {/* Redirect root to login if not authenticated, otherwise dashboard */}
+          <Route path="/" element={
+            <ProtectedRoute>
+              <Navigate to="/dashboard" replace />
+            </ProtectedRoute>
+          } />
           
           {/* Catch all route */}
           <Route path="*" element={

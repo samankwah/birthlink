@@ -10,6 +10,7 @@ import {
 import { doc, getDoc, setDoc, updateDoc, Timestamp } from 'firebase/firestore';
 import { auth, db, shouldUseMockAuth } from '../../services/firebase';
 import type { User, UserRole, SerializableTimestamp } from '../../types';
+import { getFormattedErrorMessage } from '../../utils/authErrorMessages';
 
 // Helper functions for timestamp handling
 const createFirebaseTimestamp = () => Timestamp.now();
@@ -22,6 +23,7 @@ const createSerializableTimestamp = (): SerializableTimestamp => ({
 
 interface AuthState {
   user: User | null;
+  firebaseUser: FirebaseUser | null;
   isAuthenticated: boolean;
   isLoading: boolean;
   error: string | null;
@@ -29,6 +31,7 @@ interface AuthState {
 
 const initialState: AuthState = {
   user: null,
+  firebaseUser: null,
   isAuthenticated: false,
   isLoading: false,
   error: null
@@ -289,11 +292,13 @@ export const updateUserProfile = createAsyncThunk(
     }
     
     const userRef = doc(db, 'users', state.auth.user.uid);
+    const updatedProfile = { ...state.auth.user.profile, ...updates };
     await updateDoc(userRef, {
-      profile: { ...state.auth.user.profile, ...updates },
+      profile: updatedProfile,
       updatedAt: createFirebaseTimestamp()
     });
     
+    // Return the partial updates - reducer will handle merging
     return updates;
   }
 );
@@ -330,6 +335,7 @@ const authSlice = createSlice({
   initialState,
   reducers: {
     setFirebaseUser: (state, action: PayloadAction<FirebaseUser | null>) => {
+      state.firebaseUser = action.payload;
       state.isAuthenticated = !!action.payload;
       if (!action.payload) {
         state.user = null;
@@ -361,7 +367,7 @@ const authSlice = createSlice({
       })
       .addCase(loginUser.rejected, (state, action) => {
         state.isLoading = false;
-        state.error = action.error.message || 'Login failed';
+        state.error = getFormattedErrorMessage(action.error);
         state.isAuthenticated = false;
       })
       // Register
@@ -377,7 +383,7 @@ const authSlice = createSlice({
       })
       .addCase(registerUser.rejected, (state, action) => {
         state.isLoading = false;
-        state.error = action.error.message || 'Registration failed';
+        state.error = getFormattedErrorMessage(action.error);
       })
       // Logout
       .addCase(logoutUser.fulfilled, (state) => {
@@ -401,6 +407,7 @@ const authSlice = createSlice({
       // Update Profile
       .addCase(updateUserProfile.fulfilled, (state, action) => {
         if (state.user) {
+          // Merge the updated profile data with the existing profile
           state.user.profile = { ...state.user.profile, ...action.payload };
         }
       })

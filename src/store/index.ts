@@ -5,18 +5,20 @@ import authSlice from './slices/authSlice';
 import registrationSlice from './slices/registrationSlice';
 import uiSlice from './slices/uiSlice';
 import settingsSlice from './slices/settingsSlice';
+import syncSlice from './slices/syncSlice';
 
 const persistConfig = {
   key: 'birthlink-root',
   storage,
-  whitelist: ['auth', 'registrations', 'ui', 'settings']
+  whitelist: ['auth', 'registrations', 'ui', 'settings', 'sync']
 };
 
 const rootReducer = combineReducers({
   auth: authSlice,
   registrations: registrationSlice,
   ui: uiSlice,
-  settings: settingsSlice
+  settings: settingsSlice,
+  sync: syncSlice
 });
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);

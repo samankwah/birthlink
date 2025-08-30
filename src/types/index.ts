@@ -1,9 +1,9 @@
-import { Timestamp } from 'firebase/firestore';
 
 // Timestamp Types
 export interface SerializableTimestamp {
   seconds: number;
   nanoseconds: number;
+  toDate?: () => Date;
 }
 
 // User Types

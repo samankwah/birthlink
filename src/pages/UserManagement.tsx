@@ -343,7 +343,7 @@ export const UserManagement: React.FC = () => {
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {userData.lastLogin ? new Date(userData.lastLogin.toDate()).toLocaleDateString() : t('common.never')}
+                      {userData.lastLogin ? new Date(userData.lastLogin.toDate?.() || new Date(userData.lastLogin.seconds * 1000)).toLocaleDateString() : t('common.never')}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                       <div className="flex space-x-2">

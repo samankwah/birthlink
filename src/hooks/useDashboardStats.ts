@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
-import { collection, query, where, getDocs, orderBy, limit } from 'firebase/firestore';
+import { collection, query, where, getDocs } from 'firebase/firestore';
 import { db, shouldUseMockAuth } from '../services/firebase';
 import type { RootState } from '../store';
 
@@ -34,7 +34,7 @@ export const useDashboardStats = (): DashboardStats => {
       const registrationsRef = collection(db, 'registrations');
       
       // Always filter by current user - show only their registrations
-      let baseQuery = query(registrationsRef, where('registrarInfo.registrarId', '==', user?.uid || 'unknown'));
+      const baseQuery = query(registrationsRef, where('registrarInfo.registrarId', '==', user?.uid || 'unknown'));
       
       // If admin wants to see all data, they can use a different view
       // For now, dashboard shows personal data only
@@ -131,8 +131,8 @@ export const useDashboardStats = (): DashboardStats => {
       const processingRate = statsData.total > 0 ? 
         Math.round((statsData.approved / statsData.total) * 100) : 0;
         
-      const rejectionRate = statsData.total > 0 ? 
-        Math.round((statsData.rejected / statsData.total) * 100) : 0;
+      // const rejectionRate = statsData.total > 0 ? 
+      //   Math.round((statsData.rejected / statsData.total) * 100) : 0;
 
       const dashboardStats: DashboardStat[] = [
         {

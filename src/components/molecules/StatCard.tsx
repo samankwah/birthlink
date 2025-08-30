@@ -23,7 +23,7 @@ export const StatCard: React.FC<StatCardProps> = ({
   isLoading = false,
   className = "",
   // trend, // Currently unused, removing to fix lint error
-  status = 'good',
+  // status = 'good', // Currently unused, removing to fix lint error
   percentage,
   subtitle,
   animationDelay = 0

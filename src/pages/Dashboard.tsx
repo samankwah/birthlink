@@ -1,23 +1,23 @@
 import React, { useState, useMemo, useEffect } from "react";
-import { useTranslation } from "react-i18next";
-import { useSelector } from "react-redux";
+// import { useTranslation } from "react-i18next"; // Currently unused
+// import { useSelector } from "react-redux"; // Currently unused
 import { useNavigate } from "react-router-dom";
-import type { RootState } from "../store";
+// import type { RootState } from "../store"; // Currently unused
 import {
   StatCard,
-  QuickActionCard,
-  DashboardSection,
+  // QuickActionCard, // Currently unused
+  // DashboardSection, // Currently unused
 } from "../components/molecules";
 import {
   useDashboardStats,
   useRecentRegistrations,
-  useQuickActions,
+  // useQuickActions, // Currently unused
 } from "../hooks";
 
 export const Dashboard: React.FC = () => {
-  const { t } = useTranslation();
+  // const { t } = useTranslation(); // Currently unused
   const navigate = useNavigate();
-  const { user } = useSelector((state: RootState) => state.auth);
+  // const { user } = useSelector((state: RootState) => state.auth); // Currently unused
   const {
     stats,
     isLoading: statsLoading,
@@ -29,7 +29,7 @@ export const Dashboard: React.FC = () => {
     isLoading: recentLoading,
     error: recentError,
   } = useRecentRegistrations(50); // Fetch more data for pagination
-  const quickActions = useQuickActions();
+  // const quickActions = useQuickActions(); // Currently unused
 
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
@@ -63,7 +63,7 @@ export const Dashboard: React.FC = () => {
 
   // Action handlers
   const handleView = (registrationId: string) => {
-    navigate(`/certificate/generate`);
+    navigate(`/certificate/generate?id=${registrationId}`);
   };
 
   const handleEdit = (registrationId: string) => {

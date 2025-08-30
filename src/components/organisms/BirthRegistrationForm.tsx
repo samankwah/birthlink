@@ -15,7 +15,6 @@ import {
   generateCertificateNumber, 
   generateEntryNumber, 
   validateChildAge, 
-  formatParentNationality,
   generateRegistrationNumber
 } from '../../utils/certificateNumber';
 
@@ -112,28 +111,28 @@ const REGIONS_DISTRICTS = {
   ]
 };
 
-// Common nationalities for Ghana Birth Certificate
-const NATIONALITIES = [
-  'Ghana',
-  'Nigeria', 
-  'Burkina Faso',
-  'Ivory Coast',
-  'Togo',
-  'Mali',
-  'Niger',
-  'Liberia',
-  'Sierra Leone',
-  'Guinea',
-  'Senegal',
-  'Benin',
-  'United Kingdom',
-  'United States',
-  'Germany',
-  'France',
-  'Canada',
-  'Australia',
-  'Other'
-];
+// Common nationalities for Ghana Birth Certificate - currently unused
+// const NATIONALITIES = [
+//   'Ghana',
+//   'Nigeria', 
+//   'Burkina Faso',
+//   'Ivory Coast',
+//   'Togo',
+//   'Mali',
+//   'Niger',
+//   'Liberia',
+//   'Sierra Leone',
+//   'Guinea',
+//   'Senegal',
+//   'Benin',
+//   'United Kingdom',
+//   'United States',
+//   'Germany',
+//   'France',
+//   'Canada',
+//   'Australia',
+//   'Other'
+// ];
 
 interface BirthRegistrationFormProps {
   initialData?: Partial<RegistrationFormData>;
@@ -239,7 +238,7 @@ export const BirthRegistrationForm: React.FC<BirthRegistrationFormProps> = ({
       setShowPreview(false);
       setPreviewRegistration(null);
     }
-  }, [formData]);
+  }, [formData, isFormComplete]);
 
   const handleInputChange = (section: keyof RegistrationFormData, field: string, value: string) => {
     setFormData(prev => ({
@@ -264,7 +263,7 @@ export const BirthRegistrationForm: React.FC<BirthRegistrationFormProps> = ({
       if (!ageValidation.isValid && ageValidation.message) {
         setValidationErrors(prev => [
           ...prev.filter(e => e.field !== fieldPath),
-          { field: fieldPath, message: ageValidation.message }
+          { field: fieldPath, message: ageValidation.message || 'Validation error' }
         ]);
       }
     }

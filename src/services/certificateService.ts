@@ -234,7 +234,7 @@ export class CertificateService {
     }
   }
 
-  // @ts-ignore
+  // @ts-expect-error - PDF generation requires DOM manipulation
   private async _createCertificateElement(
     registration: BirthRegistration,
     certificateData: any
@@ -298,7 +298,7 @@ export class CertificateService {
     }
   }
 
-  // @ts-ignore
+  // @ts-expect-error - Browser print API types not fully available
   private async _convertElementToPDF(element: HTMLElement): Promise<ArrayBuffer> {
     // Use the browser's print functionality for high-quality PDF generation
     return new Promise((resolve) => {
@@ -314,7 +314,7 @@ export class CertificateService {
             return Array.from(sheet.cssRules)
               .map(rule => rule.cssText)
               .join('\n');
-          } catch (e) {
+          } catch {
             // Cross-origin stylesheets might not be accessible
             return '';
           }

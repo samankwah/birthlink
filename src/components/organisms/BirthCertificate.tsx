@@ -294,7 +294,7 @@ export const BirthCertificate = forwardRef<
                 style={{
                   minHeight: "22px",
                   paddingBottom: "3px",
-                  width: "90px",
+                  width: "60px",
                   display: "inline-block",
                   fontSize: "12pt",
                 }}
@@ -320,7 +320,7 @@ export const BirthCertificate = forwardRef<
                 style={{
                   minHeight: "22px",
                   paddingBottom: "3px",
-                  width: "140px",
+                  width: "200px",
                   display: "inline-block",
                   fontSize: "12pt",
                 }}
@@ -512,7 +512,7 @@ export const BirthCertificate = forwardRef<
                 style={{
                   minHeight: "22px",
                   paddingBottom: "3px",
-                  width: "90px",
+                  width: "60px",
                   display: "inline-block",
                   fontSize: "12pt",
                 }}
@@ -527,7 +527,7 @@ export const BirthCertificate = forwardRef<
                 style={{
                   minHeight: "22px",
                   paddingBottom: "3px",
-                  width: "140px",
+                  width: "200px",
                   display: "inline-block",
                   fontSize: "12pt",
                 }}
@@ -542,7 +542,7 @@ export const BirthCertificate = forwardRef<
                 style={{
                   minHeight: "22px",
                   paddingBottom: "3px",
-                  width: "10let 0px",
+                  width: "200px",
                   display: "inline-block",
                   fontSize: "12pt",
                 }}
@@ -592,7 +592,7 @@ export const BirthCertificate = forwardRef<
           className="certificate-footer"
           style={{
             fontSize: "9pt",
-            marginTop: "5mm",
+            marginTop: "3mm",
             display: "flex",
             justifyContent: "space-between",
           }}

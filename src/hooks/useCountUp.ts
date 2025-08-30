@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 
 interface UseCountUpOptions {
   duration?: number;
@@ -18,8 +18,8 @@ export const useCountUp = (
 
   const [displayValue, setDisplayValue] = useState<string | number>(0);
   const [isAnimating, setIsAnimating] = useState(false);
-  const animationFrameRef = useRef<number>();
-  const startTimeRef = useRef<number>();
+  const animationFrameRef = useRef<number>(0);
+  const startTimeRef = useRef<number>(0);
 
   // Convert target value to number for calculation
   const getNumericValue = (value: string | number): number => {
@@ -62,7 +62,7 @@ export const useCountUp = (
     }
   };
 
-  const startAnimation = () => {
+  const startAnimation = useCallback(() => {
     if (getNumericValue(targetValue) === 0) {
       setDisplayValue(targetValue);
       return;
@@ -70,7 +70,7 @@ export const useCountUp = (
 
     setIsAnimating(true);
     setDisplayValue(0);
-    startTimeRef.current = undefined;
+    startTimeRef.current = 0;
 
     const delayedStart = () => {
       animationFrameRef.current = requestAnimationFrame(animate);
@@ -81,7 +81,7 @@ export const useCountUp = (
     } else {
       delayedStart();
     }
-  };
+  }, [targetValue, delay, animate]);
 
   useEffect(() => {
     if (targetValue !== undefined && targetValue !== null) {
@@ -93,7 +93,7 @@ export const useCountUp = (
         cancelAnimationFrame(animationFrameRef.current);
       }
     };
-  }, [targetValue]);
+  }, [targetValue, startAnimation]);
 
   useEffect(() => {
     return () => {

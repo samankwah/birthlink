@@ -356,13 +356,13 @@ export const UserProfile: React.FC = () => {
                 <div>
                   <span className="font-medium text-gray-600">{t('userProfile.memberSince')}:</span>
                   <span className="ml-2">
-                    {new Date(user.createdAt.toDate()).toLocaleDateString()}
+                    {new Date(user.createdAt.toDate?.() || new Date(user.createdAt.seconds * 1000)).toLocaleDateString()}
                   </span>
                 </div>
                 <div>
                   <span className="font-medium text-gray-600">{t('userProfile.lastLogin')}:</span>
                   <span className="ml-2">
-                    {user.lastLogin ? new Date(user.lastLogin.toDate()).toLocaleDateString() : t('common.never')}
+                    {user.lastLogin ? new Date(user.lastLogin.toDate?.() || new Date(user.lastLogin.seconds * 1000)).toLocaleDateString() : t('common.never')}
                   </span>
                 </div>
                 <div>

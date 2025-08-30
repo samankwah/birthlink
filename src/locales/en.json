@@ -80,7 +80,9 @@
     "checkSpamFolder": "Check your spam/junk folder",
     "waitFewMinutes": "Wait a few minutes and try again",
     "resendEmail": "Try Again",
-    "rememberPassword": "Remember your password?"
+    "rememberPassword": "Remember your password?",
+    "loginFailed": "Sign In Failed",
+    "loginError": "Login failed. Please check your credentials and try again."
   },
   "register": {
     "steps": {
@@ -338,6 +340,17 @@
     "photoHint": "JPG, PNG or GIF. Maximum file size 5MB.",
     "uploading": "Uploading...",
     "uploadError": "Failed to upload image",
+    "storageError": "Storage service unavailable. Please try again later.",
+    "networkError": "Network error. Please check your connection and try again.",
+    "permissionError": "Permission denied. Please ensure you are logged in and try again.",
+    "canceledError": "Upload was canceled. Please try again.",
+    "invalidFormatError": "Invalid file format. Please select a valid image file.",
+    "notFoundError": "File not found. Please try uploading again.",
+    "quotaError": "Storage quota exceeded. Please contact support.",
+    "configError": "Storage service is not configured. Please contact support.",
+    "bucketError": "Firebase Storage is not properly set up. Please check the setup guide.",
+    "referenceError": "Storage reference error. Please contact support.",
+    "updateError": "Failed to update profile. Please try again.",
     "firstName": "First Name",
     "lastName": "Last Name",
     "email": "Email Address",

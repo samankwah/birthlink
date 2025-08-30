@@ -110,6 +110,36 @@ The application comes pre-configured with demo Firebase credentials for developm
    # ... etc
    ```
 
+**Firebase Storage Setup (Required for Profile Pictures):**
+To enable profile picture uploads:
+
+1. **Enable Storage in Firebase Console**:
+   - Go to Firebase Console > Storage
+   - Click "Get Started" if not already enabled
+   - Choose your storage location (preferably close to Ghana)
+
+2. **Deploy Storage Rules**:
+   ```bash
+   # Run the automated setup script
+   ./setup-firebase-storage.sh   # macOS/Linux
+   # OR
+   setup-firebase-storage.bat    # Windows
+   
+   # Manual deployment
+   firebase login
+   firebase use your-project-id
+   firebase deploy --only storage
+   ```
+
+3. **CORS Configuration (if needed)**:
+   ```bash
+   # Install Google Cloud SDK first
+   gcloud auth login
+   gsutil cors set cors.json gs://your-storage-bucket
+   ```
+
+> **Note**: If profile uploads fail with "Storage service unavailable", see [FIREBASE_STORAGE_SETUP.md](./FIREBASE_STORAGE_SETUP.md) for detailed troubleshooting.
+
 **Using Firebase Emulators (Optional):**
 For local development with Firebase emulators:
 ```bash

@@ -36,7 +36,7 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
 
   // Only redirect if we're sure the user is not authenticated AND not loading
   if (!isAuthenticated && !isLoading) {
-    console.log('Redirecting to login - not authenticated');
+    console.log('Redirecting to login - user must register or login to access the system');
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 

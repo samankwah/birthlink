@@ -17,40 +17,11 @@ export const useAuth = () => {
     if (isInitialized.current) return;
     isInitialized.current = true;
 
-    // If using mock auth, skip Firebase auth state listener and set mock user
+    // Mock authentication is now disabled to enforce proper registration/login flow
     if (shouldUseMockAuth()) {
-      console.log('🚧 Using mock authentication');
-      
-      // Create a mock user for development
-      const mockUser: User = {
-        uid: 'dev-user-123',
-        email: 'admin@birthlink.com',
-        role: 'admin',
-        profile: {
-          firstName: 'Admin',
-          lastName: 'User',
-          phoneNumber: '+233243999631',
-          location: {
-            region: 'Eastern',
-            district: 'Fanteakwa'
-          }
-        },
-        preferences: {
-          language: 'en',
-          notifications: true
-        },
-        status: 'active',
-        createdAt: {
-          seconds: Math.floor(Date.now() / 1000),
-          nanoseconds: 0
-        },
-        lastLogin: {
-          seconds: Math.floor(Date.now() / 1000),
-          nanoseconds: 0
-        }
-      };
-      
-      dispatch(setUser(mockUser));
+      console.log('🚧 Mock authentication disabled - users must register/login properly');
+      dispatch(setUser(null));
+      dispatch(setFirebaseUser(null));
       dispatch(setLoading(false));
       return;
     }

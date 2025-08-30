@@ -8,7 +8,7 @@ import { logoutUser } from '../../store/slices/authSlice';
 export const ProfileDropdown: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
-  const { t, i18n } = useTranslation();
+  const { i18n } = useTranslation();
   const { user } = useSelector((state: RootState) => state.auth);
   const [isOpen, setIsOpen] = useState(false);
   const [languageMenuOpen, setLanguageMenuOpen] = useState(false);
@@ -77,8 +77,18 @@ export const ProfileDropdown: React.FC = () => {
         className="flex items-center space-x-3 p-2 rounded-full hover:bg-gray-100 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500"
         aria-label="Account menu"
       >
-        <div className={`w-8 h-8 rounded-full ${getRoleColor(user.role)} flex items-center justify-center text-white text-sm font-medium`}>
-          {getInitials(user.profile?.firstName, user.profile?.lastName)}
+        <div className="w-8 h-8 rounded-full overflow-hidden">
+          {user.profile?.profilePicture ? (
+            <img 
+              src={user.profile.profilePicture} 
+              alt="Profile"
+              className="w-full h-full object-cover"
+            />
+          ) : (
+            <div className={`w-full h-full ${getRoleColor(user.role)} flex items-center justify-center text-white text-sm font-medium`}>
+              {getInitials(user.profile?.firstName, user.profile?.lastName)}
+            </div>
+          )}
         </div>
         <svg 
           className={`w-4 h-4 text-gray-400 transition-transform ${isOpen ? 'rotate-180' : ''}`}
@@ -96,8 +106,18 @@ export const ProfileDropdown: React.FC = () => {
           {/* Header */}
           <div className="p-4 border-b border-gray-200">
             <div className="flex items-center space-x-3 mb-3">
-              <div className={`w-12 h-12 rounded-full ${getRoleColor(user.role)} flex items-center justify-center text-white text-lg font-medium`}>
-                {getInitials(user.profile?.firstName, user.profile?.lastName)}
+              <div className="w-12 h-12 rounded-full overflow-hidden">
+                {user.profile?.profilePicture ? (
+                  <img 
+                    src={user.profile.profilePicture} 
+                    alt="Profile"
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <div className={`w-full h-full ${getRoleColor(user.role)} flex items-center justify-center text-white text-lg font-medium`}>
+                    {getInitials(user.profile?.firstName, user.profile?.lastName)}
+                  </div>
+                )}
               </div>
               <div className="flex-1 min-w-0">
                 <h3 className="text-base font-medium text-gray-900 truncate">
