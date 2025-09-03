@@ -343,7 +343,7 @@ export const UserManagement: React.FC = () => {
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {userData.lastLogin ? new Date(userData.lastLogin.toDate()).toLocaleDateString() : t('common.never')}
+                      {userData.lastLogin ? new Date(userData.lastLogin.toDate?.() || new Date(userData.lastLogin.seconds * 1000)).toLocaleDateString() : t('common.never')}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                       <div className="flex space-x-2">
@@ -379,8 +379,8 @@ export const UserManagement: React.FC = () => {
 
         {/* User Details Modal - Would be implemented as a separate component */}
         {selectedUser && (
-          <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center">
-            <div className="bg-white rounded-lg p-6 w-full max-w-md">
+          <div className="fixed inset-0 bg-white/20 backdrop-blur-sm flex items-center justify-center z-50">
+            <div className="bg-white/95 backdrop-blur rounded-lg p-6 w-full max-w-md shadow-2xl border border-white/30">
               <h3 className="text-lg font-medium mb-4">
                 {t('userManagement.userDetails')}
               </h3>

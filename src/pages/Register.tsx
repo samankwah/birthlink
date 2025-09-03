@@ -6,6 +6,7 @@ import type { RootState, AppDispatch } from '../store';
 import { registerUser } from '../store/slices/authSlice';
 import type { UserRole } from '../types';
 import { GHANA_REGIONS } from '../types';
+import { validateGhanaPhoneNumber, formatGhanaPhoneNumber, normalizeGhanaPhoneNumber } from '../utils/validation';
 
 interface RegisterFormData {
   firstName: string;
@@ -78,12 +79,11 @@ export const Register: React.FC = () => {
       errors.confirmPassword = t('validation.passwordMismatch', 'Passwords do not match');
     }
     
-    // Contact Information
-    if (formData.phoneNumber) {
-      const cleanPhone = formData.phoneNumber.replace(/\s+/g, '');
-      if (!cleanPhone.match(/^(\+233|0)[2-5|7-9]\d{8}$/)) {
-        errors.phoneNumber = t('validation.invalidPhone', 'Please enter a valid Ghana phone number (e.g., 0243999631 or +233243999631)');
-      }
+    // Contact Information - Phone Number is now required
+    if (!formData.phoneNumber.trim()) {
+      errors.phoneNumber = t('validation.required', 'This field is required');
+    } else if (!validateGhanaPhoneNumber(formData.phoneNumber)) {
+      errors.phoneNumber = t('validation.invalidPhone', 'Please enter a valid Ghana phone number (e.g., 024 123 4567 or +233 24 123 4567)');
     }
     
     if (!formData.region) {
@@ -100,7 +100,14 @@ export const Register: React.FC = () => {
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    
+    // Special handling for phone number formatting
+    if (name === 'phoneNumber') {
+      const formattedPhone = formatGhanaPhoneNumber(value);
+      setFormData(prev => ({ ...prev, [name]: formattedPhone }));
+    } else {
+      setFormData(prev => ({ ...prev, [name]: value }));
+    }
     
     // Clear error when user starts typing
     if (formErrors[name]) {
@@ -125,7 +132,7 @@ export const Register: React.FC = () => {
         profile: {
           firstName: registrationData.firstName.trim(),
           lastName: registrationData.lastName.trim(),
-          phoneNumber: registrationData.phoneNumber.trim(),
+          phoneNumber: normalizeGhanaPhoneNumber(registrationData.phoneNumber.trim()),
           region: registrationData.region,
           district: registrationData.district.trim()
         },
@@ -373,6 +380,7 @@ export const Register: React.FC = () => {
                 <input
                   name="phoneNumber"
                   type="tel"
+                  required
                   value={formData.phoneNumber}
                   onChange={handleInputChange}
                   className={`block w-full px-4 py-4 border-0 border-b-2 bg-transparent placeholder-gray-500 focus:outline-none focus:border-blue-600 transition-colors text-base ${
@@ -380,11 +388,14 @@ export const Register: React.FC = () => {
                       ? 'border-red-500 text-red-900' 
                       : 'border-gray-300 text-gray-900 hover:border-gray-400'
                   }`}
-                  placeholder="Phone number (optional)"
+                  placeholder="Phone number (e.g., 024 123 4567)"
                 />
                 {formErrors.phoneNumber && (
                   <p className="mt-2 text-sm text-red-600">{formErrors.phoneNumber}</p>
                 )}
+                <div className="text-xs text-gray-500 mt-1">
+                  Enter Ghana phone number with or without country code
+                </div>
               </div>
 
               {/* Region and District */}

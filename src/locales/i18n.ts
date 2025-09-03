@@ -4,6 +4,8 @@ import LanguageDetector from 'i18next-browser-languagedetector';
 
 import enTranslations from './en.json';
 import twTranslations from './tw.json';
+import gaTranslations from './ga.json';
+import eeTranslations from './ee.json';
 
 const resources = {
   en: {
@@ -12,12 +14,12 @@ const resources = {
   tw: {
     translation: twTranslations
   },
-  // Placeholder for other languages
+  // Other supported languages
   ga: {
-    translation: enTranslations // Will be replaced with Ga translations
+    translation: gaTranslations
   },
   ee: {
-    translation: enTranslations // Will be replaced with Ewe translations
+    translation: eeTranslations
   }
 };
 

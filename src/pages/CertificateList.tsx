@@ -10,28 +10,32 @@ import {
 import { addNotification } from "../store/slices/uiSlice";
 import type { RootState, AppDispatch } from "../store";
 import type { BirthRegistration } from "../types";
+import { useDocumentTitle } from "../hooks";
 import {
-  Edit3,
-  Trash2,
-  FileText,
-  Eye,
-  Grid3X3,
-  List,
-  Printer,
-  Search,
-  Filter,
-  BarChart3,
-  Users,
-  Calendar,
-  CheckCircle,
-  ChevronLeft,
-  ChevronRight,
-} from "lucide-react";
+  FaEdit as Edit3,
+  FaTrash as Trash2,
+  FaFileAlt as FileText,
+  FaEye as Eye,
+  FaTh as Grid3X3,
+  FaList as List,
+  FaPrint as Printer,
+  FaSearch as Search,
+  FaFilter as Filter,
+  FaChartBar as BarChart3,
+  FaUsers as Users,
+  FaCalendar as Calendar,
+  FaCheckCircle as CheckCircle,
+  FaChevronLeft as ChevronLeft,
+  FaChevronRight as ChevronRight,
+} from "react-icons/fa";
 
 export const CertificateList: React.FC = () => {
   const { t } = useTranslation();
   const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
+  
+  // Set page title
+  useDocumentTitle("Certificates");
 
   const { registrations, isLoading } = useSelector(
     (state: RootState) => state.registrations
@@ -46,6 +50,7 @@ export const CertificateList: React.FC = () => {
   const [currentPage, setCurrentPage] = useState(1);
   // Removed unused setter
   const [itemsPerPage] = useState(10);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   useEffect(() => {
     // Fetch registrations for the current user
@@ -99,46 +104,68 @@ export const CertificateList: React.FC = () => {
   };
 
   const handleEditRegistration = (registration: BirthRegistration) => {
-    // Navigate to edit form with registration data
-    navigate("/registrations/new", {
-      state: {
-        mode: "edit",
-        registrationData: registration,
-      },
-    });
+    // Navigate to edit form with registration ID
+    navigate(`/registrations/edit/${registration.id}`);
   };
 
   const handleDeleteRegistration = async (registrationId: string) => {
-    if (
-      window.confirm(
-        t(
-          "certificate.confirmDelete",
-          "Are you sure you want to delete this registration?"
-        )
+    const confirmed = window.confirm(
+      t(
+        "certificate.confirmDelete",
+        "Are you sure you want to delete this registration? This action cannot be undone."
       )
-    ) {
-      try {
-        await dispatch(deleteRegistration(registrationId)).unwrap();
-        dispatch(
-          addNotification({
-            type: "success",
-            message: t(
-              "certificate.deleteSuccess",
-              "Registration deleted successfully"
-            ),
-          })
-        );
-      } catch (error) {
-        dispatch(
-          addNotification({
-            type: "error",
-            message: t(
-              "certificate.deleteError",
-              "Failed to delete registration"
-            ),
-          })
-        );
+    );
+
+    if (!confirmed) return;
+
+    setDeletingId(registrationId);
+
+    try {
+      await dispatch(deleteRegistration(registrationId)).unwrap();
+      dispatch(
+        addNotification({
+          type: "success",
+          message: t(
+            "certificate.deleteSuccess",
+            "Registration deleted successfully"
+          ),
+        })
+      );
+    } catch (error: any) {
+      console.error("Delete registration error:", error);
+
+      let errorMessage = t(
+        "certificate.deleteError",
+        "Failed to delete registration"
+      );
+
+      // Handle specific error types
+      if (error?.message) {
+        if (
+          error.message.includes("permission-denied") ||
+          error.message.includes("insufficient permissions")
+        ) {
+          errorMessage =
+            "You don't have permission to delete this registration. Contact your administrator.";
+        } else if (error.message.includes("not-found")) {
+          errorMessage =
+            "Registration not found. It may have already been deleted.";
+        } else if (error.message.includes("network")) {
+          errorMessage =
+            "Network error. Please check your connection and try again.";
+        } else {
+          errorMessage = `Delete failed: ${error.message}`;
+        }
       }
+
+      dispatch(
+        addNotification({
+          type: "error",
+          message: errorMessage,
+        })
+      );
+    } finally {
+      setDeletingId(null);
     }
   };
 
@@ -174,7 +201,7 @@ export const CertificateList: React.FC = () => {
           <style>
             @page {
               size: A4;
-              margin: 15mm;
+              margin: 2mm;
               -webkit-print-color-adjust: exact;
               color-adjust: exact;
               print-color-adjust: exact;
@@ -182,10 +209,10 @@ export const CertificateList: React.FC = () => {
             
             body {
               font-family: 'Times New Roman', Times, serif;
-              font-size: 11pt;
-              line-height: 1.4;
+              font-size: 10pt;
+              line-height: 1.2;
               margin: 0;
-              padding: 0;
+              padding: 3mm;
               color: black;
               -webkit-print-color-adjust: exact;
               color-adjust: exact;
@@ -194,13 +221,20 @@ export const CertificateList: React.FC = () => {
             
             .certificate-container {
               width: 100%;
-              border: 3px solid black;
-              padding: 15mm;
+              max-width: 400mm;
+              max-height: 250mm;
+              border: none;
+              padding: 5mm;
               position: relative;
-              height: 267mm;
               box-sizing: border-box;
               display: flex;
               flex-direction: column;
+              overflow: hidden;
+            }
+            
+            /* Override all font sizes */
+            * {
+              font-size: 10pt !important;
             }
             
             .header-text {
@@ -373,7 +407,7 @@ export const CertificateList: React.FC = () => {
                 registration.childDetails.dateOfBirth
               )}</span>
               <span>day of</span>
-              <span class="dotted-line medium-line">${getMonthName(
+              <span class="dotted-line short-line">${getMonthName(
                 registration.childDetails.dateOfBirth
               )}</span>
               <span>20</span>
@@ -440,15 +474,15 @@ export const CertificateList: React.FC = () => {
             
             <div class="form-line">
               <span>witness my hand this</span>
-              <span class="dotted-line short-line">${getDayOfYear(
+              <span class="dotted-line">${getDayOfYear(
                 registration.registrarInfo?.registrationDate || new Date()
               )}</span>
               <span>day of</span>
-              <span class="dotted-line medium-line">${getMonthName(
+              <span class="dotted-line">${getMonthName(
                 registration.registrarInfo?.registrationDate || new Date()
               )}</span>
               <span>20</span>
-              <span class="dotted-line short-line">${getYear(
+              <span class="dotted-line">${getYear(
                 registration.registrarInfo?.registrationDate || new Date()
               )
                 .toString()
@@ -469,12 +503,13 @@ export const CertificateList: React.FC = () => {
               </div>
             </div>
             
+           
+          </div>
+        </body> 
             <div class="footer-info">
               <div>BHP Counterfeit</div>
               <div>Birth Certificate Form R</div>
             </div>
-          </div>
-        </body>
       </html>
     `;
 
@@ -774,8 +809,13 @@ export const CertificateList: React.FC = () => {
                             }
                             className="p-2 text-red-600 hover:text-red-700"
                             title="Delete Registration"
+                            disabled={deletingId === registration.id}
                           >
-                            <Trash2 className="w-4 h-4" />
+                            {deletingId === registration.id ? (
+                              <div className="animate-spin rounded-full h-4 w-4 border-2 border-red-600 border-t-transparent" />
+                            ) : (
+                              <Trash2 className="w-4 h-4" />
+                            )}
                           </Button>
                         </div>
                       </td>
@@ -881,13 +921,13 @@ export const CertificateList: React.FC = () => {
           </div>
         )}
 
-        {/* Pagination Controls */}
+        {/* Pagination Controls - Arrow Only */}
         {totalPages > 1 && (
           <div className="mt-8">
             {/* Mobile Pagination */}
             <div className="flex items-center justify-between md:hidden">
               <Button
-                variant="secondary" // changed from outline
+                variant="secondary"
                 size="sm"
                 onClick={() => setCurrentPage(currentPage - 1)}
                 disabled={currentPage === 1}
@@ -904,7 +944,7 @@ export const CertificateList: React.FC = () => {
               </div>
 
               <Button
-                variant="secondary" // changed from outline
+                variant="secondary"
                 size="sm"
                 onClick={() => setCurrentPage(currentPage + 1)}
                 disabled={currentPage === totalPages}
@@ -928,94 +968,38 @@ export const CertificateList: React.FC = () => {
                 </p>
               </div>
 
-              <nav className="flex items-center gap-1" aria-label="Pagination">
-                <Button
-                  variant="secondary" // changed from outline
-                  size="sm"
-                  onClick={() => setCurrentPage(currentPage - 1)}
-                  disabled={currentPage === 1}
-                  className="flex items-center gap-1 px-3 py-2"
+              <div className="flex items-center gap-4">
+                <span className="text-sm font-medium text-gray-700">
+                  Page {currentPage} of {totalPages}
+                </span>
+
+                <nav
+                  className="flex items-center gap-2"
+                  aria-label="Pagination"
                 >
-                  <ChevronLeft className="w-4 h-4" />
-                  Previous
-                </Button>
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    onClick={() => setCurrentPage(currentPage - 1)}
+                    disabled={currentPage === 1}
+                    className="flex items-center gap-1 px-3 py-2"
+                  >
+                    <ChevronLeft className="w-4 h-4" />
+                    Previous
+                  </Button>
 
-                <div className="flex items-center">
-                  {(() => {
-                    const pages: (number | string)[] = [];
-
-                    if (totalPages <= 7) {
-                      for (let i = 1; i <= totalPages; i++) {
-                        pages.push(i);
-                      }
-                    } else {
-                      pages.push(1);
-
-                      if (currentPage > 4) {
-                        pages.push("...");
-                      }
-
-                      const start = Math.max(2, currentPage - 1);
-                      const end = Math.min(totalPages - 1, currentPage + 1);
-
-                      for (let i = start; i <= end; i++) {
-                        pages.push(i);
-                      }
-
-                      if (currentPage < totalPages - 3) {
-                        pages.push("...");
-                      }
-
-                      if (totalPages > 1) {
-                        pages.push(totalPages);
-                      }
-                    }
-
-                    return pages.map((page, index) => {
-                      if (page === "...") {
-                        return (
-                          <span
-                            key={`ellipsis-${index}`}
-                            className="px-3 py-2 text-gray-500 text-sm"
-                          >
-                            ...
-                          </span>
-                        );
-                      }
-
-                      const pageNum = page as number;
-                      const isCurrent = pageNum === currentPage;
-
-                      return (
-                        <Button
-                          key={pageNum}
-                          variant={isCurrent ? "primary" : "ghost"} // changed from default to primary
-                          size="sm"
-                          onClick={() => setCurrentPage(pageNum)}
-                          className={`min-w-[40px] h-10 ${
-                            isCurrent
-                              ? "bg-blue-600 text-white hover:bg-blue-700 font-semibold"
-                              : "text-gray-700 hover:bg-gray-100"
-                          }`}
-                        >
-                          {pageNum}
-                        </Button>
-                      );
-                    });
-                  })()}
-                </div>
-
-                <Button
-                  variant="secondary" // changed from outline
-                  size="sm"
-                  onClick={() => setCurrentPage(currentPage + 1)}
-                  disabled={currentPage === totalPages}
-                  className="flex items-center gap-1 px-3 py-2"
-                >
-                  Next
-                  <ChevronRight className="w-4 h-4" />
-                </Button>
-              </nav>
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    onClick={() => setCurrentPage(currentPage + 1)}
+                    disabled={currentPage === totalPages}
+                    className="flex items-center gap-1 px-3 py-2"
+                  >
+                    Next
+                    <ChevronRight className="w-4 h-4" />
+                  </Button>
+                </nav>
+              </div>
             </div>
           </div>
         )}

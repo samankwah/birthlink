@@ -9,7 +9,17 @@ import {
 } from 'firebase/auth';
 import { doc, getDoc, setDoc, updateDoc, Timestamp } from 'firebase/firestore';
 import { auth, db, shouldUseMockAuth } from '../../services/firebase';
-import type { User, UserRole } from '../../types';
+import type { User, UserRole, SerializableTimestamp } from '../../types';
+import { getFormattedErrorMessage } from '../../utils/authErrorMessages';
+
+// Helper functions for timestamp handling
+const createFirebaseTimestamp = () => Timestamp.now();
+
+const createSerializableTimestamp = (): SerializableTimestamp => ({
+  seconds: Math.floor(Date.now() / 1000),
+  nanoseconds: 0
+});
+
 
 interface AuthState {
   user: User | null;
@@ -31,15 +41,24 @@ const initialState: AuthState = {
 export const loginUser = createAsyncThunk(
   'auth/login',
   async ({ email, password }: { email: string; password: string }) => {
-    // Development bypass when using mock authentication OR when Firebase fails
+    // Development bypass when using mock authentication (only if Firebase not configured)
     if (shouldUseMockAuth()) {
-      console.warn('🚧 Development mode: Using mock authentication');
+      console.warn('🚧 Development mode: Using mock authentication - Firebase not configured');
       
       // Simulate network delay
       await new Promise(resolve => setTimeout(resolve, 1000));
       
+      // For mock auth, we still validate that the email looks reasonable
+      if (!email || !email.includes('@')) {
+        throw new Error('Please enter a valid email address');
+      }
+      
+      if (!password || password.length < 6) {
+        throw new Error('Please enter a password (minimum 6 characters)');
+      }
+      
       // Mock user data for development
-      const mockUser: User & { firebaseUser: any } = {
+      const mockUser: User = {
         uid: 'dev-user-123',
         email: email,
         role: 'registrar',
@@ -57,13 +76,8 @@ export const loginUser = createAsyncThunk(
           notifications: true
         },
         status: 'active',
-        createdAt: new Date() as unknown as Timestamp,
-        lastLogin: new Date() as unknown as Timestamp,
-        firebaseUser: {
-          uid: 'dev-user-123',
-          email: email,
-          displayName: 'Test Registrar'
-        }
+        createdAt: createSerializableTimestamp(),
+        lastLogin: createSerializableTimestamp()
       };
       
       return mockUser;
@@ -81,48 +95,40 @@ export const loginUser = createAsyncThunk(
       // Get user profile from Firestore
       const userDoc = await getDoc(doc(db, 'users', firebaseUser.uid));
       if (!userDoc.exists()) {
-        throw new Error('User profile not found');
+        throw new Error('User profile not found. Please contact support if you believe this is an error.');
       }
       
-      const userData = userDoc.data() as Omit<User, 'uid'>;
-      return {
-        uid: firebaseUser.uid,
-        ...userData,
-        firebaseUser
-      };
-    } catch (firebaseError) {
-      // If Firebase fails, fall back to mock auth
-      console.warn('🔄 Firebase auth failed, using mock authentication:', (firebaseError as Error).message);
+      const firestoreData = userDoc.data();
       
-      // Mock user data for development
-      const mockUser: User & { firebaseUser: any } = {
-        uid: 'dev-user-123',
-        email: email,
-        role: 'registrar',
-        profile: {
-          firstName: 'Test',
-          lastName: 'Registrar',
-          phoneNumber: '+233243999631',
-          location: {
-            region: 'Eastern',
-            district: 'Fanteakwa'
-          }
-        },
-        preferences: {
-          language: 'en',
-          notifications: true
-        },
-        status: 'active',
-        createdAt: new Date() as unknown as Timestamp,
-        lastLogin: new Date() as unknown as Timestamp,
-        firebaseUser: {
-          uid: 'dev-user-123',
-          email: email,
-          displayName: 'Test Registrar'
+      // Check user status - only allow active users to log in
+      if (firestoreData?.status !== 'active') {
+        const status = firestoreData?.status || 'unknown';
+        if (status === 'pending') {
+          throw new Error('Your account is pending approval. Please contact an administrator.');
+        } else if (status === 'disabled') {
+          throw new Error('Your account has been disabled. Please contact support.');
+        } else {
+          throw new Error(`Account status: ${status}. Please contact support.`);
         }
+      }
+      
+      // Convert Firebase Timestamps to serializable format for Redux
+      const userData: User = {
+        uid: firebaseUser.uid,
+        email: firestoreData?.email || '',
+        role: firestoreData?.role || 'viewer',
+        profile: firestoreData?.profile || {},
+        preferences: firestoreData?.preferences || { language: 'en', notifications: true },
+        status: firestoreData?.status || 'active',
+        createdAt: createSerializableTimestamp(),
+        lastLogin: createSerializableTimestamp()
       };
       
-      return mockUser;
+      return userData;
+    } catch (firebaseError) {
+      // Re-throw Firebase errors instead of falling back to mock auth
+      console.error('❌ Firebase authentication failed:', (firebaseError as Error).message);
+      throw firebaseError;
     }
   }
 );
@@ -140,15 +146,28 @@ export const registerUser = createAsyncThunk(
     profile: User['profile'];
     role?: UserRole;
   }) => {
-    // Development bypass when using mock authentication OR when Firebase fails
+    // Development bypass when using mock authentication (only if Firebase not configured)
     if (shouldUseMockAuth()) {
-      console.warn('🚧 Development mode: Using mock registration');
+      console.warn('🚧 Development mode: Using mock registration - Firebase not configured');
       
       // Simulate network delay
       await new Promise(resolve => setTimeout(resolve, 1500));
       
+      // For mock auth, still validate registration fields
+      if (!email || !email.includes('@')) {
+        throw new Error('Please enter a valid email address');
+      }
+      
+      if (!password || password.length < 8) {
+        throw new Error('Password must be at least 8 characters long');
+      }
+      
+      if (!profile.firstName || !profile.lastName) {
+        throw new Error('First name and last name are required');
+      }
+      
       // Mock user data for development
-      const mockUser: User & { firebaseUser: any } = {
+      const mockUser: User = {
         uid: `dev-user-${Date.now()}`,
         email,
         role,
@@ -158,13 +177,8 @@ export const registerUser = createAsyncThunk(
           notifications: true
         },
         status: 'active',
-        createdAt: new Date() as unknown as Timestamp,
-        lastLogin: new Date() as unknown as Timestamp,
-        firebaseUser: {
-          uid: `dev-user-${Date.now()}`,
-          email,
-          displayName: `${profile.firstName} ${profile.lastName}`
-        }
+        createdAt: createSerializableTimestamp(),
+        lastLogin: createSerializableTimestamp()
       };
       
       return mockUser;
@@ -184,8 +198,8 @@ export const registerUser = createAsyncThunk(
         displayName: `${profile.firstName} ${profile.lastName}`
       });
       
-      // Create user document in Firestore
-      const userData: Omit<User, 'uid'> = {
+      // Create user document in Firestore with proper Firebase Timestamps
+      const firestoreData = {
         email,
         role,
         profile,
@@ -193,25 +207,16 @@ export const registerUser = createAsyncThunk(
           language: 'en',
           notifications: true
         },
-        status: 'pending',
-        createdAt: new Date() as unknown as Timestamp,
-        lastLogin: new Date() as unknown as Timestamp
+        status: 'active', // Change to 'pending' if you want admin approval required
+        createdAt: createFirebaseTimestamp(),
+        lastLogin: createFirebaseTimestamp()
       };
       
-      await setDoc(doc(db, 'users', firebaseUser.uid), userData);
+      await setDoc(doc(db, 'users', firebaseUser.uid), firestoreData);
       
-      return {
+      // Return user data for Redux with serializable timestamps
+      const userData: User = {
         uid: firebaseUser.uid,
-        ...userData,
-        firebaseUser
-      };
-    } catch (firebaseError) {
-      // If Firebase fails, fall back to mock registration
-      console.warn('🔄 Firebase registration failed, using mock registration:', (firebaseError as Error).message);
-      
-      // Mock user data for development
-      const mockUser: User & { firebaseUser: any } = {
-        uid: `dev-user-${Date.now()}`,
         email,
         role,
         profile,
@@ -219,17 +224,16 @@ export const registerUser = createAsyncThunk(
           language: 'en',
           notifications: true
         },
-        status: 'active',
-        createdAt: new Date() as unknown as Timestamp,
-        lastLogin: new Date() as unknown as Timestamp,
-        firebaseUser: {
-          uid: `dev-user-${Date.now()}`,
-          email,
-          displayName: `${profile.firstName} ${profile.lastName}`
-        }
+        status: 'active', // Change to 'pending' if you want admin approval required
+        createdAt: createSerializableTimestamp(),
+        lastLogin: createSerializableTimestamp()
       };
       
-      return mockUser;
+      return userData;
+    } catch (firebaseError) {
+      // Re-throw Firebase errors instead of falling back to mock auth
+      console.error('❌ Firebase registration failed:', (firebaseError as Error).message);
+      throw firebaseError;
     }
   }
 );
@@ -237,7 +241,7 @@ export const registerUser = createAsyncThunk(
 export const logoutUser = createAsyncThunk(
   'auth/logout',
   async () => {
-    if (import.meta.env.VITE_USE_MOCK_AUTH === 'true') {
+    if (shouldUseMockAuth()) {
       // Mock logout - just resolve
       console.warn('🚧 Development mode: Mock logout');
       return;
@@ -288,11 +292,13 @@ export const updateUserProfile = createAsyncThunk(
     }
     
     const userRef = doc(db, 'users', state.auth.user.uid);
+    const updatedProfile = { ...state.auth.user.profile, ...updates };
     await updateDoc(userRef, {
-      profile: { ...state.auth.user.profile, ...updates },
-      updatedAt: new Date()
+      profile: updatedProfile,
+      updatedAt: createFirebaseTimestamp()
     });
     
+    // Return the partial updates - reducer will handle merging
     return updates;
   }
 );
@@ -317,7 +323,7 @@ export const updateUserPreferences = createAsyncThunk(
     const userRef = doc(db, 'users', state.auth.user.uid);
     await updateDoc(userRef, {
       preferences: { ...state.auth.user.preferences, ...preferences },
-      updatedAt: new Date()
+      updatedAt: createFirebaseTimestamp()
     });
     
     return preferences;
@@ -334,6 +340,10 @@ const authSlice = createSlice({
       if (!action.payload) {
         state.user = null;
       }
+    },
+    setUser: (state, action: PayloadAction<User | null>) => {
+      state.user = action.payload;
+      state.isAuthenticated = !!action.payload;
     },
     clearError: (state) => {
       state.error = null;
@@ -352,13 +362,12 @@ const authSlice = createSlice({
       .addCase(loginUser.fulfilled, (state, action) => {
         state.isLoading = false;
         state.user = action.payload;
-        state.firebaseUser = action.payload.firebaseUser;
         state.isAuthenticated = true;
         state.error = null;
       })
       .addCase(loginUser.rejected, (state, action) => {
         state.isLoading = false;
-        state.error = action.error.message || 'Login failed';
+        state.error = getFormattedErrorMessage(action.error);
         state.isAuthenticated = false;
       })
       // Register
@@ -369,18 +378,16 @@ const authSlice = createSlice({
       .addCase(registerUser.fulfilled, (state, action) => {
         state.isLoading = false;
         state.user = action.payload;
-        state.firebaseUser = action.payload.firebaseUser;
         state.isAuthenticated = true;
         state.error = null;
       })
       .addCase(registerUser.rejected, (state, action) => {
         state.isLoading = false;
-        state.error = action.error.message || 'Registration failed';
+        state.error = getFormattedErrorMessage(action.error);
       })
       // Logout
       .addCase(logoutUser.fulfilled, (state) => {
         state.user = null;
-        state.firebaseUser = null;
         state.isAuthenticated = false;
         state.error = null;
       })
@@ -400,6 +407,7 @@ const authSlice = createSlice({
       // Update Profile
       .addCase(updateUserProfile.fulfilled, (state, action) => {
         if (state.user) {
+          // Merge the updated profile data with the existing profile
           state.user.profile = { ...state.user.profile, ...action.payload };
         }
       })
@@ -412,5 +420,5 @@ const authSlice = createSlice({
   }
 });
 
-export const { setFirebaseUser, clearError, setLoading } = authSlice.actions;
+export const { setFirebaseUser, setUser, clearError, setLoading } = authSlice.actions;
 export default authSlice.reducer;

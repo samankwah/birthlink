@@ -30,7 +30,97 @@
     "notProvided": "Not provided",
     "enabled": "Enabled",
     "disabled": "Disabled",
-    "selectRegion": "Select Region"
+    "selectRegion": "Select Region",
+    "minutes": "minutes",
+    "seconds": "seconds",
+    "hours": "hours",
+    "days": "days",
+    "weeks": "weeks",
+    "months": "months",
+    "years": "years"
+  },
+  "help": {
+    "title": "Help & Support",
+    "subtitle": "Find answers to common questions, contact support, and access user guides",
+    "faq": {
+      "title": "Frequently Asked Questions",
+      "questions": {
+        "newBirth": "How do I register a new birth?",
+        "documents": "What documents are required for birth registration?",
+        "certificate": "How can I generate a birth certificate?",
+        "edit": "Can I edit a registration after it's been submitted?",
+        "password": "How do I change my password?",
+        "forgotPassword": "What should I do if I forget my password?",
+        "language": "How do I change the system language?",
+        "roles": "What are the different user roles in the system?"
+      },
+      "answers": {
+        "newBirth": "To register a new birth, navigate to the 'New Registration' page from the main menu. Fill in all required information including child details, parent information, and birth location. Make sure you have all necessary documents ready.",
+        "documents": "You typically need the hospital birth certificate, parents' identification documents, marriage certificate (if applicable), and any other supporting documents as required by your region's regulations.",
+        "certificate": "Go to the 'Certificates' section and select 'Generate Certificate'. Choose the registration record and select the certificate type. The system will generate a PDF certificate that you can download and print.",
+        "edit": "Yes, if you have registrar privileges, you can edit registrations by going to the 'Registrations' page and clicking the edit button next to the record you want to modify.",
+        "password": "Go to your Profile settings and look for the 'Change Password' section. You'll need to enter your current password and then your new password twice for confirmation.",
+        "forgotPassword": "On the login page, click 'Forgot Password?' and enter your email address. You'll receive instructions to reset your password via email.",
+        "language": "Click on your profile dropdown in the top right corner and select your preferred language from the language menu. The system supports English, Twi, Ga, and Ewe.",
+        "roles": "There are three main roles: Viewer (can view registrations and generate certificates), Registrar (can create and edit registrations), and Admin (full system access including user management and settings)."
+      }
+    },
+    "contact": {
+      "title": "Contact Support",
+      "technical": "Technical Support",
+      "registration": "Registration Assistance",
+      "admin": "System Administration",
+      "emergency": "Emergency Support",
+      "emergencyDesc": "For urgent technical issues affecting critical operations, please contact our emergency support line:",
+      "hours": "Monday - Friday, 8:00 AM - 5:00 PM GMT",
+      "adminHours": "Monday - Friday, 9:00 AM - 4:00 PM GMT",
+      "available247": "24/7"
+    },
+    "guides": {
+      "title": "User Guides & Tutorials",
+      "gettingStarted": "Getting Started Guide",
+      "gettingStartedDesc": "Learn the basics of using the BirthLink system",
+      "registrationManual": "Birth Registration Manual",
+      "registrationManualDesc": "Step-by-step instructions for registering births",
+      "certificateGuide": "Certificate Generation Guide",
+      "certificateGuideDesc": "How to generate and print birth certificates",
+      "userManagement": "User Management Manual",
+      "userManagementDesc": "Admin guide for managing users and permissions",
+      "systemSettings": "System Settings Guide",
+      "systemSettingsDesc": "Configuration and customization options",
+      "troubleshooting": "Troubleshooting Guide",
+      "troubleshootingDesc": "Common issues and their solutions",
+      "downloadPdf": "Download PDF"
+    },
+    "status": {
+      "title": "System Status",
+      "allOperational": "All systems operational",
+      "lastUpdated": "Last updated:",
+      "uptime": "Uptime:",
+      "services": {
+        "auth": "User Authentication",
+        "registration": "Birth Registration",
+        "certificates": "Certificate Generation",
+        "database": "Database Services",
+        "storage": "File Storage",
+        "email": "Email Notifications"
+      },
+      "maintenance": {
+        "title": "Scheduled Maintenance",
+        "noMaintenance": "No scheduled maintenance at this time. We'll notify users in advance of any planned downtime."
+      },
+      "statusTypes": {
+        "operational": "Operational",
+        "degraded": "Degraded",
+        "down": "Down"
+      }
+    },
+    "navigation": {
+      "faq": "FAQ",
+      "contact": "Contact Support",
+      "guides": "User Guides",
+      "status": "System Status"
+    }
   },
   "auth": {
     "login": "Login",
@@ -73,7 +163,9 @@
     "checkSpamFolder": "Check your spam/junk folder",
     "waitFewMinutes": "Wait a few minutes and try again",
     "resendEmail": "Try Again",
-    "rememberPassword": "Remember your password?"
+    "rememberPassword": "Remember your password?",
+    "loginFailed": "Sign In Failed",
+    "loginError": "Login failed. Please check your credentials and try again."
   },
   "register": {
     "steps": {
@@ -199,7 +291,18 @@
     "registrarInfo": "Registration Information",
     "registrationLocation": "Registration Location",
     "childName": "Child Name",
-    "nationality": "Nationality"
+    "nationality": "Nationality",
+    "childInformation": "Child Information",
+    "motherInformation": "Mother Information",
+    "fatherInformation": "Father Information",
+    "region": "Region",
+    "district": "District",
+    "male": "Male",
+    "female": "Female",
+    "placeOfBirth": "Place of Birth",
+    "hospitalOfBirth": "Hospital of Birth",
+    "occupation": "Occupation",
+    "nationalId": "National ID"
   },
   "validation": {
     "required": "This field is required",
@@ -221,6 +324,9 @@
     "lastSync": "Last sync: {{time}}"
   },
   "dashboard": {
+    "title": "Dashboard Overview",
+    "subtitle": "Birth registration system overview and key metrics",
+    "personalizedSubtitle": "Your birth registration overview and key metrics",
     "welcome": "Welcome, {{name}}!",
     "recentRegistrations": "Recent Registrations",
     "totalRegistrations": "Total Registrations",
@@ -331,6 +437,17 @@
     "photoHint": "JPG, PNG or GIF. Maximum file size 5MB.",
     "uploading": "Uploading...",
     "uploadError": "Failed to upload image",
+    "storageError": "Storage service unavailable. Please try again later.",
+    "networkError": "Network error. Please check your connection and try again.",
+    "permissionError": "Permission denied. Please ensure you are logged in and try again.",
+    "canceledError": "Upload was canceled. Please try again.",
+    "invalidFormatError": "Invalid file format. Please select a valid image file.",
+    "notFoundError": "File not found. Please try uploading again.",
+    "quotaError": "Storage quota exceeded. Please contact support.",
+    "configError": "Storage service is not configured. Please contact support.",
+    "bucketError": "Firebase Storage is not properly set up. Please check the setup guide.",
+    "referenceError": "Storage reference error. Please contact support.",
+    "updateError": "Failed to update profile. Please try again.",
     "firstName": "First Name",
     "lastName": "Last Name",
     "email": "Email Address",
@@ -379,6 +496,7 @@
     "livePreview": "Certificate updates as you fill the form",
     "enterChildName": "Enter child name to see certificate preview",
     "previewPlaceholder": "Certificate preview will appear here",
+    "previewReady": "Certificate preview is ready",
     "print": "Print Certificate",
     "downloadPDF": "Download PDF",
     "generating": "Generating...",
@@ -401,55 +519,182 @@
     "shareText": "Birth Certificate for Registration Number:",
     "linkCopied": "Certificate link copied to clipboard",
     "regenerated": "New certificate serial number generated",
-    "noRegistrationData": "No registration data available for certificate generation"
+    "noRegistrationData": "No registration data available for certificate generation",
+    "preview": "Certificate Preview",
+    "previewReady": "Certificate preview is ready",
+    "completeForm": "Complete all required fields to preview certificate",
+    "completeAllFields": "Complete all required fields to preview certificate",
+    "requiredSteps": "Fill all 4 steps: Child Details, Mother Details, Father Details, and Registration Info"
   },
   "settings": {
-    "title": "System Settings",
-    "subtitle": "Configure application settings and preferences",
-    "accessDenied": "Access Denied",
-    "adminRequired": "Administrator access required",
-    "loadError": "Failed to load settings",
-    "saveSuccess": "Settings saved successfully",
-    "saveError": "Failed to save settings",
-    "resetConfirmation": "Are you sure you want to reset all settings to defaults?",
-    "resetSuccess": "Settings reset to defaults",
-    "saveSettings": "Save Settings",
-    "tabs": {
-      "general": "General",
-      "sync": "Synchronization",
-      "security": "Security",
-      "advanced": "Advanced"
+    "user": {
+      "title": "Settings",
+      "subtitle": "Customize your preferences and account settings",
+      "searchPlaceholder": "Search settings...",
+      "saveSuccess": "Your settings have been saved successfully",
+      "saveError": "Failed to save settings. Please try again.",
+      "resetConfirmation": "Are you sure you want to reset all settings to defaults? This cannot be undone.",
+      "resetSuccess": "Settings have been reset to defaults",
+      "resetError": "Failed to reset settings. Please try again.",
+      "resetToDefaults": "Reset to Defaults",
+      "saveSettings": "Save Changes",
+      "unsavedChanges": "You have unsaved changes",
+      "lastSaved": "Last saved",
+      "settingSaved": "Setting saved",
+      "settingError": "Failed to save setting",
+      "appearance": {
+        "title": "Appearance & Language",
+        "description": "Customize how the app looks and behaves",
+        "theme": "Theme",
+        "themeDescription": "Choose your preferred color scheme",
+        "language": "Language",
+        "languageDescription": "Select your preferred language",
+        "dateFormat": "Date Format",
+        "timeFormat": "Time Format"
+      },
+      "theme": {
+        "light": "Light",
+        "system": "System Default"
+      },
+      "notifications": {
+        "title": "Notifications",
+        "description": "Control how and when you receive notifications",
+        "email": "Email Notifications",
+        "emailDescription": "Receive updates via email",
+        "sms": "SMS Notifications",
+        "smsDescription": "Receive important alerts via SMS",
+        "inApp": "In-App Notifications",
+        "inAppDescription": "Show notifications within the application",
+        "registrationUpdates": "Registration Updates",
+        "registrationUpdatesDescription": "Notify when registration status changes",
+        "systemAlerts": "System Alerts",
+        "systemAlertsDescription": "Important system messages and maintenance notices",
+        "weeklyReports": "Weekly Reports",
+        "weeklyReportsDescription": "Receive weekly activity summaries"
+      },
+      "dashboard": {
+        "title": "Dashboard Preferences",
+        "description": "Customize your dashboard view and behavior",
+        "defaultView": "Default View",
+        "defaultViewDescription": "How data is displayed by default",
+        "cardsView": "Cards View",
+        "tableView": "Table View",
+        "itemsPerPage": "Items per Page",
+        "autoRefresh": "Auto Refresh",
+        "autoRefreshDescription": "Automatically refresh data in the background",
+        "refreshInterval": "Refresh Interval",
+        "refreshIntervalDescription": "How often to refresh data automatically"
+      },
+      "privacy": {
+        "title": "Privacy & Data",
+        "description": "Control your data privacy and sharing preferences",
+        "shareAnalytics": "Share Analytics",
+        "shareAnalyticsDescription": "Help improve the app by sharing anonymous usage data",
+        "activityVisible": "Activity Visibility",
+        "activityVisibleDescription": "Allow others to see when you're active",
+        "allowDataExport": "Allow Data Export",
+        "allowDataExportDescription": "Enable downloading your data for backup or transfer"
+      }
     },
-    "maintenanceMode": "System Maintenance Mode",
-    "maintenanceModeDescription": "Put the system in maintenance mode",
-    "maintenanceWarning": "System is now in maintenance mode",
-    "registrationsPerDay": "Registrations Per Day Limit",
-    "supportedLanguages": "Supported Languages",
-    "syncBatchSize": "Sync Batch Size",
-    "maxOfflineRegistrations": "Max Offline Registrations",
-    "syncRetryAttempts": "Sync Retry Attempts",
-    "sessionTimeout": "Session Timeout (minutes)",
-    "enableAnalytics": "Enable Analytics",
-    "analyticsDescription": "Collect anonymous usage statistics",
-    "enableSMS": "Enable SMS Notifications",
-    "smsDescription": "Send SMS notifications for important events",
-    "syncInformation": "Sync Configuration",
-    "syncInfo1": "Batch size determines how many records sync at once",
-    "syncInfo2": "Higher batch sizes may fail on slow connections",
-    "syncInfo3": "Retry attempts prevent data loss on network issues",
-    "securityNotice": "Security Configuration",
-    "securityDescription": "These settings affect system security and access control",
-    "systemInfo": "System Information",
-    "appVersion": "App Version",
-    "buildDate": "Build Date",
-    "environment": "Environment",
-    "lastBackup": "Last Backup",
-    "dangerZone": "Danger Zone",
-    "resetToDefaults": "Reset to Defaults",
+    "admin": {
+      "title": "System Administration",
+      "subtitle": "Manage system-wide settings and configuration",
+      "accessDenied": "Access Denied",
+      "adminRequired": "Administrator access required to view system settings",
+      "searchPlaceholder": "Search system settings...",
+      "warning": "Changes to these settings will affect all users and system functionality. Proceed with caution.",
+      "saveSuccess": "System settings have been saved successfully",
+      "saveError": "Failed to save system settings. Please try again.",
+      "resetConfirmation": "Are you sure you want to reset all system settings to defaults? This will affect all users and cannot be undone.",
+      "resetSuccess": "System settings have been reset to defaults",
+      "resetError": "Failed to reset system settings. Please try again.",
+      "resetToDefaults": "Reset All to Defaults",
+      "saveSettings": "Save System Settings",
+      "unsavedChanges": "You have unsaved system changes",
+      "lastSaved": "System last updated",
+      "maintenanceWarning": "The system is now in maintenance mode. Users will not be able to access the application.",
+      "system": {
+        "title": "System Configuration",
+        "description": "Core system settings and operational parameters",
+        "maintenanceMode": "Maintenance Mode",
+        "maintenanceModeDescription": "Temporarily disable user access for system maintenance",
+        "registrationsPerDay": "Daily Registration Limit",
+        "registrationsPerDayDescription": "Maximum number of registrations allowed per day",
+        "syncBatchSize": "Sync Batch Size",
+        "syncBatchSizeDescription": "Number of records to process in each sync operation",
+        "supportedLanguages": "Supported Languages",
+        "supportedLanguagesDescription": "Languages available to users"
+      },
+      "security": {
+        "title": "Security & Access",
+        "description": "Authentication, authorization, and security policies",
+        "sessionTimeout": "Session Timeout",
+        "sessionTimeoutDescription": "Automatically log out inactive users",
+        "maxLoginAttempts": "Max Login Attempts",
+        "maxLoginAttemptsDescription": "Lock account after this many failed login attempts",
+        "passwordMinLength": "Minimum Password Length",
+        "passwordMinLengthDescription": "Required minimum characters for user passwords",
+        "requireTwoFactor": "Require Two-Factor Authentication",
+        "requireTwoFactorDescription": "Force all users to enable 2FA for enhanced security",
+        "auditLogLevel": "Audit Log Level",
+        "auditLogLevelDescription": "Detail level for security and activity logging",
+        "auditLevels": {
+          "minimal": "Minimal - Essential events only",
+          "standard": "Standard - Important activities",
+          "detailed": "Detailed - All user activities"
+        }
+      },
+      "backup": {
+        "title": "Backup & Recovery",
+        "description": "Data protection and disaster recovery settings",
+        "enabled": "Automatic Backups",
+        "enabledDescription": "Automatically backup system data on a schedule",
+        "frequency": "Backup Frequency",
+        "frequencyDescription": "How often to create automatic backups",
+        "retentionDays": "Backup Retention",
+        "retentionDaysDescription": "How long to keep backup files before deletion",
+        "lastBackup": "Last successful backup",
+        "frequencies": {
+          "daily": "Daily - Every 24 hours",
+          "weekly": "Weekly - Every 7 days",
+          "monthly": "Monthly - Every 30 days"
+        }
+      },
+      "integration": {
+        "title": "Third-Party Integration",
+        "description": "External service providers and API configurations",
+        "smsProvider": "SMS Provider",
+        "smsProviderDescription": "Service for sending SMS notifications",
+        "emailProvider": "Email Provider",
+        "emailProviderDescription": "Service for sending email notifications",
+        "analyticsEnabled": "System Analytics",
+        "analyticsEnabledDescription": "Collect system performance and usage metrics",
+        "providers": {
+          "none": "Disabled"
+        }
+      },
+      "dataRetention": {
+        "title": "Data Retention Policies",
+        "description": "How long different types of data are kept in the system",
+        "registrations": "Birth Registrations",
+        "registrationsDescription": "How long to keep registration records",
+        "auditLogs": "Audit Logs",
+        "auditLogsDescription": "How long to keep security and activity logs",
+        "userActivity": "User Activity Data",
+        "userActivityDescription": "How long to keep user session and activity data"
+      }
+    },
     "validation": {
       "minRegistrationsError": "Minimum 100 registrations per day required",
       "syncBatchSizeError": "Sync batch size must be between 10 and 200",
       "languagesRequiredError": "At least one language must be enabled"
     }
+  },
+  "feedback": {
+    "urgency_medium": "Medium - Impacts work",
+    "urgency_high": "High - Prevents work"
+  },
+  "pilot": {
+    "badge": "Pilot Phase 3"
   }
 }

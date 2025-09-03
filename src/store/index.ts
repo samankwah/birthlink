@@ -3,21 +3,22 @@ import { persistStore, persistReducer } from 'redux-persist';
 import storage from 'redux-persist/lib/storage';
 import authSlice from './slices/authSlice';
 import registrationSlice from './slices/registrationSlice';
-import syncSlice from './slices/syncSlice';
 import uiSlice from './slices/uiSlice';
-import { offlineMiddleware, persistenceMiddleware, initializeNetworkListener } from './middleware/offlineMiddleware';
+import settingsSlice from './slices/settingsSlice';
+import syncSlice from './slices/syncSlice';
 
 const persistConfig = {
   key: 'birthlink-root',
   storage,
-  whitelist: ['auth', 'registrations', 'ui', 'sync'] // Persist sync state for offline queue
+  whitelist: ['auth', 'registrations', 'ui', 'settings', 'sync']
 };
 
 const rootReducer = combineReducers({
   auth: authSlice,
   registrations: registrationSlice,
-  sync: syncSlice,
-  ui: uiSlice
+  ui: uiSlice,
+  settings: settingsSlice,
+  sync: syncSlice
 });
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);
@@ -30,18 +31,22 @@ export const store = configureStore({
         ignoredActions: [
           'persist/PERSIST', 
           'persist/REHYDRATE',
-          'sync/processSyncQueue/pending',
-          'sync/processSyncQueue/fulfilled'
+          'auth/setFirebaseUser',
+          'auth/login/fulfilled',
+          'auth/register/fulfilled',
+          'ui/addNotification'
         ],
-        ignoredPaths: ['sync.queue', 'registrations.lastDoc']
+        ignoredActionsPaths: ['payload.firebaseUser', 'meta.arg', 'payload.timestamp'],
+        ignoredPaths: [
+          'auth.firebaseUser',
+          'registrations.lastDoc',
+          'ui.notifications'
+        ]
       }
-    }).concat(offlineMiddleware, persistenceMiddleware)
+    })
 });
 
 export const persistor = persistStore(store);
-
-// Initialize network status listener
-initializeNetworkListener(store.dispatch);
 
 export type RootState = ReturnType<typeof store.getState>;
 export type AppDispatch = typeof store.dispatch;

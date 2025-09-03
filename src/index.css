@@ -1,6 +1,24 @@
 @import "tailwindcss";
 
 @layer base {
+  :root {
+    /* Light theme variables */
+    --bg-primary: #ffffff;
+    --bg-secondary: #f9fafb;
+    --bg-tertiary: #f3f4f6;
+    --text-primary: #111827;
+    --text-secondary: #6b7280;
+    --text-muted: #9ca3af;
+    --border-primary: #e5e7eb;
+    --border-secondary: #d1d5db;
+    --accent-primary: #2563eb;
+    --accent-hover: #1d4ed8;
+    --success: #10b981;
+    --warning: #f59e0b;
+    --error: #ef4444;
+  }
+
+
   html {
     font-family: 'Inter', system-ui, sans-serif;
   }
@@ -10,7 +28,9 @@
     min-height: 100vh;
     background-color: #f9fafb;
     color: #111827;
+    transition: background-color 0.3s ease, color 0.3s ease;
   }
+
 }
 
 @layer components {

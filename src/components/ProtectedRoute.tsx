@@ -16,21 +16,43 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   const location = useLocation();
   const { isAuthenticated, user, isLoading } = useSelector((state: RootState) => state.auth);
 
-  // Show loading while checking authentication
+  // Debug logging in development
+  if (import.meta.env.DEV) {
+    console.log('ProtectedRoute Debug:', { isAuthenticated, user: !!user, isLoading, requiredRole });
+  }
+
+  // Always show loading while authentication state is being determined
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Checking authentication...</p>
+        </div>
       </div>
     );
   }
 
-  // Redirect to login if not authenticated
-  if (!isAuthenticated || !user) {
+
+  // Only redirect if we're sure the user is not authenticated AND not loading
+  if (!isAuthenticated && !isLoading) {
+    console.log('Redirecting to login - user must register or login to access the system');
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
-  // Check role-based access
+  // If still loading or not authenticated, show loading
+  if (!user) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading user data...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Check role-based access only when we have a confirmed user
   if (requiredRole && user.role !== requiredRole && user.role !== 'admin') {
     return (
       <div className="min-h-screen flex items-center justify-center">

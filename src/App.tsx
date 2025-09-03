@@ -4,10 +4,12 @@ import { Provider } from 'react-redux';
 import { PersistGate } from 'redux-persist/integration/react';
 import { useTranslation } from 'react-i18next';
 import { store, persistor } from './store';
+import { ThemeProvider } from './contexts';
 import { useAuth } from './hooks/useAuth';
+import { indexedDBService } from './services/indexedDB';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { Layout } from './components/templates/Layout';
-import { NotificationSystem } from './components/organisms';
+import { NotificationSystem, DebugPanel } from './components/organisms';
 import { 
   Dashboard, 
   Login, 
@@ -18,18 +20,54 @@ import {
   Monitoring,
   UserManagement,
   Profile,
-  Settings,
+  UserSettings,
+  AdminSettings,
   CertificateGeneration,
-  CertificateList 
+  CertificateList,
+  HelpSupport
 } from './pages';
 import './locales/i18n';
 
-// Loading component for PersistGate
+// Loading component for PersistGate and IndexedDB
 const Loading: React.FC = () => (
   <div className="min-h-screen flex items-center justify-center">
-    <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
+    <div className="text-center">
+      <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600 mx-auto mb-4"></div>
+      <p className="text-gray-600">Initializing application...</p>
+    </div>
   </div>
 );
+
+// IndexedDB Initializer Component
+const IndexedDBProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const [isReady, setIsReady] = React.useState(false);
+  const [error, setError] = React.useState<string | null>(null);
+
+  React.useEffect(() => {
+    const initDB = async () => {
+      try {
+        await indexedDBService.init();
+        setIsReady(true);
+      } catch (err) {
+        console.error('Failed to initialize IndexedDB:', err);
+        setError(err instanceof Error ? err.message : 'Failed to initialize offline storage');
+        setIsReady(true); // Continue anyway, offline features won't work
+      }
+    };
+
+    initDB();
+  }, []);
+
+  if (!isReady) {
+    return <Loading />;
+  }
+
+  if (error) {
+    console.warn('IndexedDB initialization failed, continuing without offline features:', error);
+  }
+
+  return <>{children}</>;
+};
 
 // Auth Wrapper Component
 const AuthWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -74,6 +112,14 @@ const AppRouter: React.FC = () => {
           } />
           
           <Route path="/registrations/new" element={
+            <ProtectedRoute requiredRole="registrar">
+              <Layout>
+                <NewRegistration />
+              </Layout>
+            </ProtectedRoute>
+          } />
+          
+          <Route path="/registrations/edit/:id" element={
             <ProtectedRoute requiredRole="registrar">
               <Layout>
                 <NewRegistration />
@@ -126,17 +172,42 @@ const AppRouter: React.FC = () => {
             </ProtectedRoute>
           } />
           
-          {/* Settings Route */}
-          <Route path="/settings" element={
-            <ProtectedRoute requiredRole="admin">
+          {/* Help & Support Route */}
+          <Route path="/help" element={
+            <ProtectedRoute>
               <Layout>
-                <Settings />
+                <HelpSupport />
               </Layout>
             </ProtectedRoute>
           } />
           
-          {/* Redirect root to dashboard */}
-          <Route path="/" element={<Navigate to="/dashboard" replace />} />
+          {/* User Settings Route */}
+          <Route path="/settings" element={
+            <ProtectedRoute>
+              <UserSettings />
+            </ProtectedRoute>
+          } />
+          
+          {/* Admin Settings Route */}
+          <Route path="/admin/settings" element={
+            <ProtectedRoute requiredRole="admin">
+              <AdminSettings />
+            </ProtectedRoute>
+          } />
+          
+          {/* Legacy Settings Route - redirect to admin settings */}
+          <Route path="/system/settings" element={
+            <ProtectedRoute requiredRole="admin">
+              <AdminSettings />
+            </ProtectedRoute>
+          } />
+          
+          {/* Redirect root to login if not authenticated, otherwise dashboard */}
+          <Route path="/" element={
+            <ProtectedRoute>
+              <Navigate to="/dashboard" replace />
+            </ProtectedRoute>
+          } />
           
           {/* Catch all route */}
           <Route path="*" element={
@@ -151,6 +222,9 @@ const AppRouter: React.FC = () => {
         
         {/* Global Notification System */}
         <NotificationSystem />
+        
+        {/* Debug Panel for Development */}
+        <DebugPanel />
       </AuthWrapper>
     </Router>
   );
@@ -161,7 +235,11 @@ const App: React.FC = () => {
   return (
     <Provider store={store}>
       <PersistGate loading={<Loading />} persistor={persistor}>
-        <AppRouter />
+        <IndexedDBProvider>
+          <ThemeProvider>
+            <AppRouter />
+          </ThemeProvider>
+        </IndexedDBProvider>
       </PersistGate>
     </Provider>
   );

@@ -205,9 +205,9 @@ export const UserManagementTable: React.FC<UserManagementTableProps> = ({
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                     {user.lastLogin ? (
                       <div>
-                        <div>{new Date(user.lastLogin.toDate()).toLocaleDateString()}</div>
+                        <div>{new Date(user.lastLogin.toDate?.() || new Date(user.lastLogin.seconds * 1000)).toLocaleDateString()}</div>
                         <div className="text-xs">
-                          {new Date(user.lastLogin.toDate()).toLocaleTimeString()}
+                          {new Date(user.lastLogin.toDate?.() || new Date(user.lastLogin.seconds * 1000)).toLocaleTimeString()}
                         </div>
                       </div>
                     ) : (

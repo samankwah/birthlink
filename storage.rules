@@ -1,0 +1,52 @@
+rules_version = '2';
+
+// Firebase Storage Security Rules for BirthLink Ghana
+service firebase.storage {
+  match /b/{bucket}/o {
+    // Profile pictures: Allow authenticated users to upload their own profile pictures
+    match /profile-pictures/{userId}/{fileName} {
+      // Users can read, write, and delete their own profile pictures
+      allow read, write, delete: if request.auth != null && request.auth.uid == userId;
+      
+      // Additional validation for file uploads
+      allow write: if request.auth != null 
+                   && request.auth.uid == userId
+                   && request.resource.size < 5 * 1024 * 1024 // 5MB max file size
+                   && request.resource.contentType.matches('image/.*'); // Only images
+    }
+    
+    // Birth certificate documents: Allow authenticated users to access documents
+    match /birth-certificates/{userId}/{fileName} {
+      // Users can read and write their own birth certificates
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+      
+      // Registrars and admins can read all birth certificates
+      allow read: if request.auth != null && 
+                  (resource.metadata.registrarId == request.auth.uid ||
+                   request.auth.token.role in ['admin', 'registrar']);
+      
+      // File size and type validation for certificates
+      allow write: if request.auth != null 
+                   && request.resource.size < 10 * 1024 * 1024 // 10MB max for certificates
+                   && request.resource.contentType.matches('(image/.*)|(application/pdf)'); // Images or PDFs
+    }
+    
+    // System assets: Public read access
+    match /assets/{allPaths=**} {
+      allow read;
+    }
+    
+    // Temp uploads: Allow authenticated users to upload to temp folder
+    match /temp/{userId}/{fileName} {
+      allow write: if request.auth != null 
+                   && request.auth.uid == userId
+                   && request.resource.size < 20 * 1024 * 1024; // 20MB for temp files
+      allow delete: if request.auth != null && request.auth.uid == userId;
+    }
+    
+    // Deny all other access by default
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}

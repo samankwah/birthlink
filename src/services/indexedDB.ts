@@ -30,18 +30,31 @@ export interface IndexedDBService {
 
 class IndexedDBServiceImpl implements IndexedDBService {
   private db: IDBDatabase | null = null;
+  private isInitializing = false;
+  private initPromise: Promise<void> | null = null;
 
   async init(): Promise<void> {
+    if (this.db) return;
+    if (this.initPromise) return this.initPromise;
+    
+    this.isInitializing = true;
+    this.initPromise = this.performInit();
+    return this.initPromise;
+  }
+
+  private async performInit(): Promise<void> {
     return new Promise((resolve, reject) => {
       const request = indexedDB.open(DB_NAME, DB_VERSION);
 
       request.onerror = () => {
         console.error('Failed to open IndexedDB:', request.error);
+        this.isInitializing = false;
         reject(request.error);
       };
 
       request.onsuccess = () => {
         this.db = request.result;
+        this.isInitializing = false;
         console.log('IndexedDB initialized successfully');
         resolve();
       };
@@ -80,15 +93,23 @@ class IndexedDBServiceImpl implements IndexedDBService {
     });
   }
 
-  private ensureDB(): void {
+  private async ensureDB(): Promise<void> {
+    if (!this.db && !this.isInitializing) {
+      await this.init();
+    }
+    
+    if (this.isInitializing && this.initPromise) {
+      await this.initPromise;
+    }
+    
     if (!this.db) {
-      throw new Error('IndexedDB not initialized. Call init() first.');
+      throw new Error('IndexedDB failed to initialize');
     }
   }
 
   // Registration methods
   async addRegistration(registration: BirthRegistration): Promise<string> {
-    this.ensureDB();
+    await this.ensureDB();
     
     return new Promise((resolve, reject) => {
       const transaction = this.db!.transaction([STORES.REGISTRATIONS], 'readwrite');
@@ -115,7 +136,7 @@ class IndexedDBServiceImpl implements IndexedDBService {
   }
 
   async getRegistration(id: string): Promise<BirthRegistration | undefined> {
-    this.ensureDB();
+    await this.ensureDB();
     
     return new Promise((resolve, reject) => {
       const transaction = this.db!.transaction([STORES.REGISTRATIONS], 'readonly');
@@ -133,7 +154,7 @@ class IndexedDBServiceImpl implements IndexedDBService {
   }
 
   async getAllRegistrations(): Promise<BirthRegistration[]> {
-    this.ensureDB();
+    await this.ensureDB();
     
     return new Promise((resolve, reject) => {
       const transaction = this.db!.transaction([STORES.REGISTRATIONS], 'readonly');
@@ -151,7 +172,7 @@ class IndexedDBServiceImpl implements IndexedDBService {
   }
 
   async updateRegistration(registration: BirthRegistration): Promise<void> {
-    this.ensureDB();
+    await this.ensureDB();
     
     return new Promise((resolve, reject) => {
       const transaction = this.db!.transaction([STORES.REGISTRATIONS], 'readwrite');
@@ -171,7 +192,7 @@ class IndexedDBServiceImpl implements IndexedDBService {
   }
 
   async deleteRegistration(id: string): Promise<void> {
-    this.ensureDB();
+    await this.ensureDB();
     
     return new Promise((resolve, reject) => {
       const transaction = this.db!.transaction([STORES.REGISTRATIONS], 'readwrite');
@@ -191,7 +212,7 @@ class IndexedDBServiceImpl implements IndexedDBService {
 
   // Sync queue methods
   async addToSyncQueue(item: Omit<SyncQueueItem, 'id'>): Promise<string> {
-    this.ensureDB();
+    await this.ensureDB();
     
     return new Promise((resolve, reject) => {
       const transaction = this.db!.transaction([STORES.SYNC_QUEUE], 'readwrite');
@@ -220,7 +241,7 @@ class IndexedDBServiceImpl implements IndexedDBService {
   }
 
   async getSyncQueue(): Promise<SyncQueueItem[]> {
-    this.ensureDB();
+    await this.ensureDB();
     
     return new Promise((resolve, reject) => {
       const transaction = this.db!.transaction([STORES.SYNC_QUEUE], 'readonly');
@@ -238,7 +259,7 @@ class IndexedDBServiceImpl implements IndexedDBService {
   }
 
   async removeSyncQueueItem(id: string): Promise<void> {
-    this.ensureDB();
+    await this.ensureDB();
     
     return new Promise((resolve, reject) => {
       const transaction = this.db!.transaction([STORES.SYNC_QUEUE], 'readwrite');
@@ -257,7 +278,7 @@ class IndexedDBServiceImpl implements IndexedDBService {
   }
 
   async clearSyncQueue(): Promise<void> {
-    this.ensureDB();
+    await this.ensureDB();
     
     return new Promise((resolve, reject) => {
       const transaction = this.db!.transaction([STORES.SYNC_QUEUE], 'readwrite');
@@ -277,7 +298,7 @@ class IndexedDBServiceImpl implements IndexedDBService {
 
   // Cache methods
   async setCache(key: string, data: unknown): Promise<void> {
-    this.ensureDB();
+    await this.ensureDB();
     
     return new Promise((resolve, reject) => {
       const transaction = this.db!.transaction([STORES.CACHE], 'readwrite');
@@ -303,7 +324,7 @@ class IndexedDBServiceImpl implements IndexedDBService {
   }
 
   async getCache(key: string): Promise<unknown> {
-    this.ensureDB();
+    await this.ensureDB();
     
     return new Promise((resolve, reject) => {
       const transaction = this.db!.transaction([STORES.CACHE], 'readonly');
@@ -336,7 +357,7 @@ class IndexedDBServiceImpl implements IndexedDBService {
   }
 
   async deleteCache(key: string): Promise<void> {
-    this.ensureDB();
+    await this.ensureDB();
     
     return new Promise((resolve, reject) => {
       const transaction = this.db!.transaction([STORES.CACHE], 'readwrite');
@@ -354,7 +375,7 @@ class IndexedDBServiceImpl implements IndexedDBService {
   }
 
   async clearCache(): Promise<void> {
-    this.ensureDB();
+    await this.ensureDB();
     
     return new Promise((resolve, reject) => {
       const transaction = this.db!.transaction([STORES.CACHE], 'readwrite');
@@ -374,7 +395,7 @@ class IndexedDBServiceImpl implements IndexedDBService {
 
   // Cleanup expired cache entries
   async cleanupExpiredCache(): Promise<void> {
-    this.ensureDB();
+    await this.ensureDB();
     
     return new Promise((resolve, reject) => {
       const transaction = this.db!.transaction([STORES.CACHE], 'readwrite');
@@ -402,8 +423,3 @@ class IndexedDBServiceImpl implements IndexedDBService {
 
 // Singleton instance
 export const indexedDBService: IndexedDBService = new IndexedDBServiceImpl();
-
-// Initialize IndexedDB when the module is imported
-indexedDBService.init().catch(error => {
-  console.error('Failed to initialize IndexedDB:', error);
-});

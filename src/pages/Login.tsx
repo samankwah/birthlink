@@ -4,11 +4,15 @@ import { useDispatch, useSelector } from 'react-redux';
 import { Navigate, Link } from 'react-router-dom';
 import type { RootState, AppDispatch } from '../store';
 import { loginUser } from '../store/slices/authSlice';
+import { useDocumentTitle } from '../hooks';
 
 export const Login: React.FC = () => {
   const { t } = useTranslation();
   const dispatch = useDispatch<AppDispatch>();
   const { isAuthenticated, isLoading, error } = useSelector((state: RootState) => state.auth);
+  
+  // Set page title
+  useDocumentTitle("Login");
   
   const [formData, setFormData] = useState({
     email: '',
@@ -18,8 +22,17 @@ export const Login: React.FC = () => {
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
   const [showPassword, setShowPassword] = useState(false);
 
-  // Redirect if already authenticated
-  if (isAuthenticated) {
+  // Wait for loading to complete before making navigation decisions
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
+      </div>
+    );
+  }
+
+  // Only redirect if authenticated AND not loading
+  if (isAuthenticated && !isLoading) {
     return <Navigate to="/dashboard" replace />;
   }
 
@@ -57,20 +70,21 @@ export const Login: React.FC = () => {
       })).unwrap();
       
       // Success handling is done by Redux redirect
-    } catch (error: any) {
+    } catch (error: unknown) {
       // Enhanced error handling
       let errorMessage = t('auth.loginError', 'Login failed. Please check your credentials and try again.');
       
-      if (error?.message) {
-        if (error.message.includes('invalid-email')) {
+      if (error && typeof error === 'object' && 'message' in error) {
+        const message = (error as { message: string }).message;
+        if (message.includes('invalid-email')) {
           errorMessage = t('auth.invalidEmail', 'Invalid email address format');
-        } else if (error.message.includes('wrong-password') || error.message.includes('invalid-credential')) {
+        } else if (message.includes('wrong-password') || message.includes('invalid-credential')) {
           errorMessage = t('auth.invalidCredentials', 'Invalid email or password');
-        } else if (error.message.includes('user-not-found')) {
+        } else if (message.includes('user-not-found')) {
           errorMessage = t('auth.userNotFound', 'No account found with this email address');
-        } else if (error.message.includes('too-many-requests')) {
+        } else if (message.includes('too-many-requests')) {
           errorMessage = t('auth.tooManyAttempts', 'Too many failed attempts. Please try again later');
-        } else if (error.message.includes('network-request-failed')) {
+        } else if (message.includes('network-request-failed')) {
           errorMessage = t('auth.networkError', 'Network error. Please check your connection');
         }
       }

@@ -12,8 +12,48 @@ export const validateEmail = (email: string): boolean => {
 
 export const validateGhanaPhoneNumber = (phone: string): boolean => {
   // Ghana phone number format: +233XXXXXXXXX or 0XXXXXXXXX
+  // Network codes: 20, 23, 24, 26, 27, 28, 50, 54, 55, 56, 57, 59
   const phoneRegex = /^(\+233|0)[2-9][0-9]{8}$/;
-  return phoneRegex.test(phone.replace(/\s/g, ''));
+  return phoneRegex.test(phone.replace(/[\s-]/g, ''));
+};
+
+export const formatGhanaPhoneNumber = (phone: string): string => {
+  // Remove all non-numeric characters except +
+  const cleaned = phone.replace(/[^\d+]/g, '');
+  
+  // If starts with +233, format as +233 XX XXX XXXX
+  if (cleaned.startsWith('+233')) {
+    const number = cleaned.substring(4);
+    if (number.length >= 2) {
+      const formatted = number.replace(/(\d{2})(\d{3})(\d{4})/, '$1 $2 $3');
+      return `+233 ${formatted}`;
+    }
+    return cleaned;
+  }
+  
+  // If starts with 0, format as 0XX XXX XXXX
+  if (cleaned.startsWith('0')) {
+    const formatted = cleaned.replace(/(\d{3})(\d{3})(\d{4})/, '$1 $2 $3');
+    return formatted;
+  }
+  
+  return cleaned;
+};
+
+export const normalizeGhanaPhoneNumber = (phone: string): string => {
+  const cleaned = phone.replace(/[\s-]/g, '');
+  
+  // Convert 0XXXXXXXXX to +233XXXXXXXXX
+  if (cleaned.startsWith('0') && cleaned.length === 10) {
+    return `+233${cleaned.substring(1)}`;
+  }
+  
+  // If already in +233 format, keep as is
+  if (cleaned.startsWith('+233') && cleaned.length === 13) {
+    return cleaned;
+  }
+  
+  return cleaned;
 };
 
 export const validateGhanaID = (nationalId: string): boolean => {
@@ -103,6 +143,14 @@ export const validateRegistrationForm = (formData: RegistrationFormData): Valida
   // Optional Father National ID validation
   if (formData.fatherDetails.nationalId && !validateGhanaID(formData.fatherDetails.nationalId)) {
     errors.push({ field: 'fatherDetails.nationalId', message: 'Invalid Ghana National ID format' });
+  }
+
+  // Registrar Information Validation (Step 4)
+  if (!formData.registrarInfo?.region?.trim()) {
+    errors.push({ field: 'registrarInfo.region', message: 'Region is required' });
+  }
+  if (!formData.registrarInfo?.district?.trim()) {
+    errors.push({ field: 'registrarInfo.district', message: 'District is required' });
   }
 
   return errors;

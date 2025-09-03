@@ -25,6 +25,7 @@ export const FormField = forwardRef<
         name={props.name}
         value={props.value}
         onChange={props.onChange}
+        onBlur={props.onBlur}
         options={options}
         placeholder={placeholder}
       />
@@ -43,6 +44,7 @@ export const FormField = forwardRef<
       name={props.name}
       value={props.value}
       onChange={props.onChange}
+      onBlur={props.onBlur}
       placeholder={placeholder}
     />
   );

@@ -1,16 +1,15 @@
 import React, { useState, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useTranslation } from 'react-i18next';
-import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { updateProfile } from 'firebase/auth';
-import { storage } from '../../services/firebase';
+import { uploadFileToStorage } from '../../utils/storageHelper';
 import { updateUserProfile, updateUserPreferences } from '../../store/slices/authSlice';
 import { addNotification } from '../../store/slices/uiSlice';
 import { type RootState, type AppDispatch } from '../../store';
 import { Button, Select } from '../atoms';
 import { FormField } from '../molecules';
 import { GHANA_REGIONS, type UserProfile, type Language } from '../../types';
-import { Camera, Upload, X, Save, User } from 'lucide-react';
+import { FaCamera as Camera, FaUpload as Upload, FaTimes as X, FaSave as Save, FaUser as User } from 'react-icons/fa';
 
 interface ProfileEditProps {
   onSave: () => void;
@@ -163,37 +162,83 @@ export const ProfileEdit: React.FC<ProfileEditProps> = ({ onSave, onCancel }) =>
     setErrors(prev => ({ ...prev, profilePicture: '' }));
 
     try {
-      // In development mode, use a mock URL
-      if (import.meta.env.VITE_USE_MOCK_AUTH === 'true') {
-        await new Promise(resolve => setTimeout(resolve, 2000)); // Simulate upload delay
-        const mockUrl = URL.createObjectURL(file);
-        setFormData(prev => ({ ...prev, profilePicture: mockUrl }));
-        setImagePreview(null);
-        setHasChanges(true);
-        console.warn('🚧 Development mode: Using mock profile picture upload');
-        return;
-      }
-
-      // Production Firebase Storage upload
-      const storageRef = ref(storage, `profile-pictures/${user.uid}/${Date.now()}-${file.name}`);
-      const snapshot = await uploadBytes(storageRef, file);
-      const downloadURL = await getDownloadURL(snapshot.ref);
+      console.log('📤 Starting profile picture upload...');
       
+      // Define upload path
+      const uploadPath = `profile-pictures/${user.uid}/${Date.now()}-${file.name}`;
+      
+      // Use the storage helper to upload the file
+      const result = await uploadFileToStorage(file, uploadPath);
+      
+      if (!result.success) {
+        throw new Error(result.error || 'Upload failed');
+      }
+      
+      const downloadURL = result.downloadURL!;
+      console.log('🎉 Profile picture uploaded successfully:', downloadURL);
+      
+      // Update form data with new profile picture URL
       setFormData(prev => ({ ...prev, profilePicture: downloadURL }));
       setImagePreview(null);
       setHasChanges(true);
       
       // Update Firebase Auth profile
       if (firebaseUser) {
+        console.log('👤 Updating Firebase Auth profile...');
         await updateProfile(firebaseUser, {
           photoURL: downloadURL
         });
+        console.log('✅ Firebase Auth profile updated');
       }
+      
+      console.log('🎉 Profile picture upload completed successfully!');
     } catch (error) {
-      console.error('Failed to upload profile picture:', error);
+      console.error('❌ Profile picture upload failed:', error);
+      
+      let errorMessage = t('profile.storageError', 'Storage service unavailable. Please try again later.');
+      
+      if (error instanceof Error) {
+        console.error('❌ Error message:', error.message);
+        
+        // Map common error messages to user-friendly messages
+        if (error.message.includes('Permission denied')) {
+          errorMessage = t('profile.permissionError', 'Permission denied. Please ensure you are logged in and try again.');
+        } else if (error.message.includes('canceled')) {
+          errorMessage = t('profile.canceledError', 'Upload was canceled. Please try again.');
+        } else if (error.message.includes('Invalid file format')) {
+          errorMessage = t('profile.invalidFormatError', 'Invalid file format. Please select a valid image file.');
+        } else if (error.message.includes('quota exceeded')) {
+          errorMessage = t('profile.quotaError', 'Storage quota exceeded. Please contact support.');
+        } else if (error.message.includes('network') || error.message.includes('Network')) {
+          errorMessage = t('profile.networkError', 'Network error. Please check your connection and try again.');
+        } else if (error.message.includes('not initialized') || error.message.includes('not configured')) {
+          errorMessage = t('profile.configError', 'Storage service is not configured. Please contact support.');
+        } else if (error.message.includes('Firebase Storage bucket is not configured')) {
+          errorMessage = t('profile.bucketError', 'Firebase Storage is not properly set up. Please check the setup guide.');
+        } else if (error.message.includes('Unable to create storage reference')) {
+          errorMessage = t('profile.referenceError', 'Storage reference error. Please contact support.');
+        }
+        
+        // Add development mode help for storage issues
+        if (import.meta.env.DEV && errorMessage.includes('unavailable')) {
+          console.error(`
+🔧 FIREBASE STORAGE SETUP REQUIRED:
+
+The storage service is not properly configured. Please:
+
+1. Go to Firebase Console (https://console.firebase.google.com/)
+2. Select your 'birthlink-8772c' project  
+3. Navigate to Storage and click "Get Started" if not enabled
+4. See FIREBASE_STORAGE_SETUP.md for detailed instructions
+
+Current error: ${error.message}
+          `);
+        }
+      }
+      
       setErrors(prev => ({ 
         ...prev, 
-        profilePicture: t('profile.uploadError') 
+        profilePicture: errorMessage 
       }));
     } finally {
       setUploadingImage(false);
