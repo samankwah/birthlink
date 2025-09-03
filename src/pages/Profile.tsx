@@ -4,12 +4,16 @@ import { useTranslation } from 'react-i18next';
 import { type RootState } from '../store';
 import { Button } from '../components/atoms';
 import { ProfileEdit } from '../components/organisms';
+import { useDocumentTitle } from '../hooks';
 import { FaCamera as Camera, FaEdit as Edit, FaUser as User, FaPhone as Phone, FaMapMarkerAlt as MapPin, FaBriefcase as Briefcase, FaCalendar as Calendar, FaIdCard as IdCard } from 'react-icons/fa';
 
 export const Profile: React.FC = () => {
   const { t } = useTranslation();
   const { user } = useSelector((state: RootState) => state.auth);
   const [isEditing, setIsEditing] = useState(false);
+  
+  // Set page title
+  useDocumentTitle("Profile");
   const [, setShowProfilePictureUpload] = useState(false);
 
   if (!user) {

@@ -10,6 +10,7 @@ import {
 import { addNotification } from "../store/slices/uiSlice";
 import type { RootState, AppDispatch } from "../store";
 import type { BirthRegistration } from "../types";
+import { useDocumentTitle } from "../hooks";
 import {
   FaEdit as Edit3,
   FaTrash as Trash2,
@@ -32,6 +33,9 @@ export const CertificateList: React.FC = () => {
   const { t } = useTranslation();
   const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
+  
+  // Set page title
+  useDocumentTitle("Certificates");
 
   const { registrations, isLoading } = useSelector(
     (state: RootState) => state.registrations
@@ -46,6 +50,7 @@ export const CertificateList: React.FC = () => {
   const [currentPage, setCurrentPage] = useState(1);
   // Removed unused setter
   const [itemsPerPage] = useState(10);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   useEffect(() => {
     // Fetch registrations for the current user
@@ -99,46 +104,68 @@ export const CertificateList: React.FC = () => {
   };
 
   const handleEditRegistration = (registration: BirthRegistration) => {
-    // Navigate to edit form with registration data
-    navigate("/registrations/new", {
-      state: {
-        mode: "edit",
-        registrationData: registration,
-      },
-    });
+    // Navigate to edit form with registration ID
+    navigate(`/registrations/edit/${registration.id}`);
   };
 
   const handleDeleteRegistration = async (registrationId: string) => {
-    if (
-      window.confirm(
-        t(
-          "certificate.confirmDelete",
-          "Are you sure you want to delete this registration?"
-        )
+    const confirmed = window.confirm(
+      t(
+        "certificate.confirmDelete",
+        "Are you sure you want to delete this registration? This action cannot be undone."
       )
-    ) {
-      try {
-        await dispatch(deleteRegistration(registrationId)).unwrap();
-        dispatch(
-          addNotification({
-            type: "success",
-            message: t(
-              "certificate.deleteSuccess",
-              "Registration deleted successfully"
-            ),
-          })
-        );
-      } catch (error) {
-        dispatch(
-          addNotification({
-            type: "error",
-            message: t(
-              "certificate.deleteError",
-              "Failed to delete registration"
-            ),
-          })
-        );
+    );
+
+    if (!confirmed) return;
+
+    setDeletingId(registrationId);
+
+    try {
+      await dispatch(deleteRegistration(registrationId)).unwrap();
+      dispatch(
+        addNotification({
+          type: "success",
+          message: t(
+            "certificate.deleteSuccess",
+            "Registration deleted successfully"
+          ),
+        })
+      );
+    } catch (error: any) {
+      console.error("Delete registration error:", error);
+
+      let errorMessage = t(
+        "certificate.deleteError",
+        "Failed to delete registration"
+      );
+
+      // Handle specific error types
+      if (error?.message) {
+        if (
+          error.message.includes("permission-denied") ||
+          error.message.includes("insufficient permissions")
+        ) {
+          errorMessage =
+            "You don't have permission to delete this registration. Contact your administrator.";
+        } else if (error.message.includes("not-found")) {
+          errorMessage =
+            "Registration not found. It may have already been deleted.";
+        } else if (error.message.includes("network")) {
+          errorMessage =
+            "Network error. Please check your connection and try again.";
+        } else {
+          errorMessage = `Delete failed: ${error.message}`;
+        }
       }
+
+      dispatch(
+        addNotification({
+          type: "error",
+          message: errorMessage,
+        })
+      );
+    } finally {
+      setDeletingId(null);
     }
   };
 
@@ -194,7 +221,7 @@ export const CertificateList: React.FC = () => {
             
             .certificate-container {
               width: 100%;
-              max-width: 190mm;
+              max-width: 400mm;
               max-height: 250mm;
               border: none;
               padding: 5mm;
@@ -447,15 +474,15 @@ export const CertificateList: React.FC = () => {
             
             <div class="form-line">
               <span>witness my hand this</span>
-              <span class="dotted-line short-line">${getDayOfYear(
+              <span class="dotted-line">${getDayOfYear(
                 registration.registrarInfo?.registrationDate || new Date()
               )}</span>
               <span>day of</span>
-              <span class="dotted-line medium-line">${getMonthName(
+              <span class="dotted-line">${getMonthName(
                 registration.registrarInfo?.registrationDate || new Date()
               )}</span>
               <span>20</span>
-              <span class="dotted-line short-line">${getYear(
+              <span class="dotted-line">${getYear(
                 registration.registrarInfo?.registrationDate || new Date()
               )
                 .toString()
@@ -478,7 +505,8 @@ export const CertificateList: React.FC = () => {
             
            
           </div>
-        </body> <div class="footer-info">
+        </body> 
+            <div class="footer-info">
               <div>BHP Counterfeit</div>
               <div>Birth Certificate Form R</div>
             </div>
@@ -781,8 +809,13 @@ export const CertificateList: React.FC = () => {
                             }
                             className="p-2 text-red-600 hover:text-red-700"
                             title="Delete Registration"
+                            disabled={deletingId === registration.id}
                           >
-                            <Trash2 className="w-4 h-4" />
+                            {deletingId === registration.id ? (
+                              <div className="animate-spin rounded-full h-4 w-4 border-2 border-red-600 border-t-transparent" />
+                            ) : (
+                              <Trash2 className="w-4 h-4" />
+                            )}
                           </Button>
                         </div>
                       </td>

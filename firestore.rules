@@ -21,10 +21,18 @@ service cloud.firestore {
       return isAuthenticated() && (getUserRole() == 'registrar' || getUserRole() == 'admin');
     }
     
-    // Users collection - Enhanced security for production
+    // Users collection - Enhanced security for production with self-registration support
     match /users/{userId} {
       // Users can read/write their own profile
       allow read, write: if isAuthenticated() && request.auth.uid == userId;
+      
+      // Allow users to create their own profile during registration
+      allow create: if isAuthenticated() && 
+                       request.auth.uid == userId &&
+                       request.resource.data.uid == request.auth.uid &&
+                       request.resource.data.keys().hasAll(['email', 'role', 'profile', 'status']) &&
+                       request.resource.data.role in ['admin', 'registrar', 'viewer'] &&
+                       request.resource.data.email == request.auth.token.email;
       
       // Admins can read all user profiles (for user management)
       allow read: if isAdmin();
@@ -82,6 +90,18 @@ service cloud.firestore {
       allow update, delete: if isAdmin();
     }
     
+    // User Settings collection - Personal preferences and configurations
+    match /userSettings/{userId} {
+      // Users can read/write their own settings
+      allow read, write: if isAuthenticated() && request.auth.uid == userId;
+      
+      // Admins can read all user settings (for support and management)
+      allow read: if isAdmin();
+      
+      // Admins can update user settings (for support)
+      allow update: if isAdmin();
+    }
+    
     // System configuration - Production system management
     match /systemConfig/{configId} {
       // All authenticated users can read basic config
@@ -134,6 +154,24 @@ service cloud.firestore {
       
       // Admins can read all regional statistics
       allow read: if isAdmin();
+    }
+    
+    // Certificate counters for generating sequential certificate numbers
+    match /certificateCounters/{district} {
+      // Registrars and admins can read and update certificate counters
+      allow read, create, update: if canCreateRegistration();
+      
+      // Admins can delete counters if needed
+      allow delete: if isAdmin();
+    }
+    
+    // Entry counters for registrar tracking
+    match /entryCounters/{registrarId} {
+      // Registrars can read and update their own entry counters
+      allow read, create, update: if isAuthenticated() && request.auth.uid == registrarId;
+      
+      // Admins can read and manage all entry counters
+      allow read, create, update, delete: if isAdmin();
     }
   }
 }

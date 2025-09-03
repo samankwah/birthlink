@@ -13,3 +13,4 @@ export { AdminSettings } from './AdminSettings';
 export { Profile } from './Profile';
 export { CertificateGeneration } from './CertificateGeneration';
 export { CertificateList } from './CertificateList';
+export { HelpSupport } from './HelpSupport';

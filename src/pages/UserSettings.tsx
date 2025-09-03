@@ -13,6 +13,7 @@ import {
 import type { UserSettings as UserSettingsType } from '../store/slices/settingsSlice';
 import { Button } from '../components/atoms';
 import { Notification } from '../components/molecules';
+import { useDocumentTitle } from '../hooks';
 import { Layout } from '../components/templates/Layout';
 import { 
   SettingSection, 
@@ -28,6 +29,9 @@ export const UserSettings: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
   const { setTheme } = useTheme();
   const { user } = useSelector((state: RootState) => state.auth);
+  
+  // Set page title
+  useDocumentTitle("User Settings");
   const { 
     userSettings, 
     isLoading, 

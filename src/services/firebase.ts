@@ -22,6 +22,43 @@ export const auth = getAuth(app);
 
 // Initialize Cloud Firestore and get a reference to the service
 export const db = getFirestore(app);
+console.log('🔧 Firebase Firestore initialized:', {
+  projectId: app.options.projectId,
+  authDomain: app.options.authDomain
+});
+
+// Test Firestore connection
+import { enableNetwork, connectFirestoreEmulator as connectEmulator } from 'firebase/firestore';
+const testConnection = async () => {
+  try {
+    await enableNetwork(db);
+    console.log('✅ Firestore connection test successful');
+    console.log('🔧 Using emulators:', areEmulatorsConnected());
+    console.log('🌐 Firebase config loaded:', {
+      projectId: firebaseConfig.projectId,
+      authDomain: firebaseConfig.authDomain,
+      hasApiKey: !!firebaseConfig.apiKey
+    });
+  } catch (error: any) {
+    console.error('❌ Firestore connection test failed:', error);
+    console.error('💡 This may indicate:', [
+      '• Firebase emulators not running (if in development)',
+      '• Invalid Firebase configuration',
+      '• Network connectivity issues',
+      '• Firestore rules blocking access'
+    ]);
+    
+    if (import.meta.env.DEV) {
+      console.log('🚧 Development troubleshooting:');
+      console.log('1. Check if Firebase emulators are running: firebase emulators:start');
+      console.log('2. Verify VITE_USE_FIREBASE_EMULATORS=true in .env file');
+      console.log('3. Check console for Firebase connection errors');
+    }
+  }
+};
+
+// Run connection test after a short delay to ensure initialization is complete
+setTimeout(testConnection, 1000);
 
 // Initialize Cloud Functions and get a reference to the service
 export const functions = getFunctions(app);

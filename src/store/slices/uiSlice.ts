@@ -9,7 +9,7 @@ interface UIState {
     id: string;
     type: 'success' | 'error' | 'warning' | 'info';
     message: string;
-    timestamp: Date;
+    timestamp: number;
   }>;
   modals: {
     isRegistrationFormOpen: boolean;
@@ -49,12 +49,28 @@ const uiSlice = createSlice({
       type: 'success' | 'error' | 'warning' | 'info';
       message: string;
     }>) => {
-      const notification = {
-        id: crypto.randomUUID(),
-        timestamp: new Date(),
-        ...action.payload
-      };
-      state.notifications.push(notification);
+      // Check if a similar notification already exists (within last 5 seconds)
+      const now = Date.now();
+      const similarExists = state.notifications.some(notif => 
+        notif.type === action.payload.type && 
+        notif.message === action.payload.message && 
+        (now - notif.timestamp) < 5000
+      );
+      
+      // Only add if no similar notification exists recently
+      if (!similarExists) {
+        const notification = {
+          id: crypto.randomUUID(),
+          timestamp: now,
+          ...action.payload
+        };
+        state.notifications.push(notification);
+        
+        // Limit total notifications to prevent UI overflow
+        if (state.notifications.length > 5) {
+          state.notifications = state.notifications.slice(-5);
+        }
+      }
     },
     removeNotification: (state, action: PayloadAction<string>) => {
       state.notifications = state.notifications.filter(n => n.id !== action.payload);

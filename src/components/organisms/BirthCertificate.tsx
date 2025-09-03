@@ -82,33 +82,34 @@ export const BirthCertificate = forwardRef<
             .birth-certificate {
               width: 190mm !important;
               min-height: auto !important;
-              max-height: 277mm !important;
+              max-height: none !important;
               max-width: none !important;
               margin: 0 !important;
               padding: 8mm !important;
               font-family: 'Times New Roman', Times, serif !important;
-              font-size: 9pt !important;
-              line-height: 1.1 !important;
+              font-size: 10pt !important;
+              line-height: 1.2 !important;
               background: white !important;
               page-break-inside: avoid !important;
               page-break-after: avoid !important;
-              overflow: hidden !important;
+              overflow: visible !important;
             }
             .certificate-border {
-              border: 2px solid black !important;
-              padding: 8mm !important;
-              margin-bottom: 2mm !important;
+              border: 3px solid black !important;
+              padding: 10mm !important;
+              margin-bottom: 4mm !important;
               page-break-inside: avoid !important;
               page-break-after: avoid !important;
               height: auto !important;
-              max-height: 260mm !important;
-              overflow: hidden !important;
+              max-height: none !important;
+              overflow: visible !important;
             }
             .certificate-footer {
-              font-size: 8pt !important;
-              margin-top: 2mm !important;
+              font-size: 9pt !important;
+              margin-top: 4mm !important;
               display: flex !important;
               justify-content: space-between !important;
+              page-break-inside: avoid !important;
             }
             /* Override all inline font sizes for form fields */
             .border-b {
@@ -198,7 +199,9 @@ export const BirthCertificate = forwardRef<
               style={{
                 display: "flex",
                 justifyContent: "center",
+                alignItems: "flex-start",
                 marginBottom: "12px",
+                position: "relative",
               }}
             >
               <img
@@ -294,7 +297,7 @@ export const BirthCertificate = forwardRef<
                 style={{
                   minHeight: "22px",
                   paddingBottom: "3px",
-                  width: "60px",
+                  width: "100px",
                   display: "inline-block",
                   fontSize: "12pt",
                 }}
@@ -307,7 +310,7 @@ export const BirthCertificate = forwardRef<
                 style={{
                   minHeight: "22px",
                   paddingBottom: "3px",
-                  width: "200px",
+                  width: "160px",
                   display: "inline-block",
                   fontSize: "12pt",
                 }}
@@ -320,7 +323,7 @@ export const BirthCertificate = forwardRef<
                 style={{
                   minHeight: "22px",
                   paddingBottom: "3px",
-                  width: "200px",
+                  width: "100px",
                   display: "inline-block",
                   fontSize: "12pt",
                 }}
@@ -512,7 +515,7 @@ export const BirthCertificate = forwardRef<
                 style={{
                   minHeight: "22px",
                   paddingBottom: "3px",
-                  width: "60px",
+                  width: "90px",
                   display: "inline-block",
                   fontSize: "12pt",
                 }}
@@ -527,7 +530,7 @@ export const BirthCertificate = forwardRef<
                 style={{
                   minHeight: "22px",
                   paddingBottom: "3px",
-                  width: "200px",
+                  width: "120px",
                   display: "inline-block",
                   fontSize: "12pt",
                 }}
@@ -542,7 +545,7 @@ export const BirthCertificate = forwardRef<
                 style={{
                   minHeight: "22px",
                   paddingBottom: "3px",
-                  width: "200px",
+                  width: "70px",
                   display: "inline-block",
                   fontSize: "12pt",
                 }}
@@ -577,7 +580,7 @@ export const BirthCertificate = forwardRef<
 
             <div className="text-center">
               <div
-                className="border-b-2 border-black mb-2"
+                className="border-b-2 border-dotted border-black mb-2"
                 style={{ width: "200px", height: "35px" }}
               ></div>
               <div style={{ fontStyle: "italic", fontSize: "11pt" }}>
@@ -592,7 +595,7 @@ export const BirthCertificate = forwardRef<
           className="certificate-footer"
           style={{
             fontSize: "9pt",
-            marginTop: "3mm",
+            marginTop: "1mm",
             display: "flex",
             justifyContent: "space-between",
           }}

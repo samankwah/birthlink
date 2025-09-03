@@ -13,6 +13,7 @@ import type { AdminSettings as AdminSettingsType } from '../store/slices/setting
 import { Button } from '../components/atoms';
 import { Notification } from '../components/molecules';
 import { Layout } from '../components/templates/Layout';
+import { useDocumentTitle } from '../hooks';
 import { 
   SettingSection, 
   ToggleCard, 
@@ -25,6 +26,9 @@ export const AdminSettings: React.FC = () => {
   const { t } = useTranslation();
   const dispatch = useDispatch<AppDispatch>();
   const { user } = useSelector((state: RootState) => state.auth);
+  
+  // Set page title
+  useDocumentTitle("Admin Settings");
   const { 
     adminSettings, 
     isLoading, 

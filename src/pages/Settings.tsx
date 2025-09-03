@@ -6,6 +6,7 @@ import type { SystemConfig } from '../types';
 import { Button } from '../components/atoms';
 import { FormField, Notification } from '../components/molecules';
 import { Layout } from '../components/templates/Layout';
+import { useDocumentTitle } from '../hooks';
 
 interface SettingsFormData {
   systemMaintenance: boolean;
@@ -22,6 +23,9 @@ interface SettingsFormData {
 export const Settings: React.FC = () => {
   const { t } = useTranslation();
   const { user } = useSelector((state: RootState) => state.auth);
+  
+  // Set page title
+  useDocumentTitle("Settings");
   
   const [formData, setFormData] = useState<SettingsFormData>({
     systemMaintenance: false,

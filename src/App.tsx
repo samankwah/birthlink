@@ -9,7 +9,7 @@ import { useAuth } from './hooks/useAuth';
 import { indexedDBService } from './services/indexedDB';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { Layout } from './components/templates/Layout';
-import { NotificationSystem } from './components/organisms';
+import { NotificationSystem, DebugPanel } from './components/organisms';
 import { 
   Dashboard, 
   Login, 
@@ -23,7 +23,8 @@ import {
   UserSettings,
   AdminSettings,
   CertificateGeneration,
-  CertificateList 
+  CertificateList,
+  HelpSupport
 } from './pages';
 import './locales/i18n';
 
@@ -117,6 +118,14 @@ const AppRouter: React.FC = () => {
               </Layout>
             </ProtectedRoute>
           } />
+          
+          <Route path="/registrations/edit/:id" element={
+            <ProtectedRoute requiredRole="registrar">
+              <Layout>
+                <NewRegistration />
+              </Layout>
+            </ProtectedRoute>
+          } />
 
           {/* Certificate List Route (Original) */}
           <Route path="/certificate" element={
@@ -163,6 +172,15 @@ const AppRouter: React.FC = () => {
             </ProtectedRoute>
           } />
           
+          {/* Help & Support Route */}
+          <Route path="/help" element={
+            <ProtectedRoute>
+              <Layout>
+                <HelpSupport />
+              </Layout>
+            </ProtectedRoute>
+          } />
+          
           {/* User Settings Route */}
           <Route path="/settings" element={
             <ProtectedRoute>
@@ -204,6 +222,9 @@ const AppRouter: React.FC = () => {
         
         {/* Global Notification System */}
         <NotificationSystem />
+        
+        {/* Debug Panel for Development */}
+        <DebugPanel />
       </AuthWrapper>
     </Router>
   );

@@ -139,6 +139,8 @@ const initialState: SettingsState = {
 export const loadUserSettings = createAsyncThunk(
   'settings/loadUserSettings',
   async (userId: string) => {
+    console.log('🔍 Loading user settings for userId:', userId);
+    
     if (shouldUseMockAuth()) {
       console.warn('🚧 Development mode: Using mock user settings');
       await new Promise(resolve => setTimeout(resolve, 500));
@@ -147,22 +149,33 @@ export const loadUserSettings = createAsyncThunk(
 
     if (!db) throw new Error('Firebase not available');
 
-    const docRef = doc(db, 'userSettings', userId);
-    const docSnap = await getDoc(docRef);
+    try {
+      console.log('🔍 Fetching user settings from Firestore...');
+      const docRef = doc(db, 'userSettings', userId);
+      const docSnap = await getDoc(docRef);
 
-    if (docSnap.exists()) {
-      return { ...defaultUserSettings, ...docSnap.data() } as UserSettings;
+      if (docSnap.exists()) {
+        console.log('✅ Found existing user settings:', docSnap.data());
+        return { ...defaultUserSettings, ...docSnap.data() } as UserSettings;
+      }
+
+      // Create default settings for new user
+      console.log('📝 Creating default user settings for new user');
+      await setDoc(docRef, defaultUserSettings);
+      console.log('✅ Default user settings created successfully');
+      return defaultUserSettings;
+    } catch (error) {
+      console.error('❌ Error loading user settings:', error);
+      throw error;
     }
-
-    // Create default settings for new user
-    await setDoc(docRef, defaultUserSettings);
-    return defaultUserSettings;
   }
 );
 
 export const saveUserSettings = createAsyncThunk(
   'settings/saveUserSettings',
   async ({ userId, settings }: { userId: string; settings: Partial<UserSettings> }) => {
+    console.log('💾 Saving user settings for userId:', userId, 'settings:', settings);
+    
     if (shouldUseMockAuth()) {
       console.warn('🚧 Development mode: Mock saving user settings');
       await new Promise(resolve => setTimeout(resolve, 800));
@@ -171,13 +184,18 @@ export const saveUserSettings = createAsyncThunk(
 
     if (!db) throw new Error('Firebase not available');
 
-    const docRef = doc(db, 'userSettings', userId);
-    await updateDoc(docRef, {
-      ...settings,
-      updatedAt: Timestamp.now(),
-    });
-
-    return settings;
+    try {
+      const docRef = doc(db, 'userSettings', userId);
+      await updateDoc(docRef, {
+        ...settings,
+        updatedAt: Timestamp.now(),
+      });
+      console.log('✅ User settings saved successfully');
+      return settings;
+    } catch (error) {
+      console.error('❌ Error saving user settings:', error);
+      throw error;
+    }
   }
 );
 

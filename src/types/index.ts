@@ -179,6 +179,7 @@ export interface FormFieldProps {
   disabled?: boolean;
   value?: string;
   onChange?: (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => void;
+  onBlur?: () => void;
 }
 
 export interface ModalProps {

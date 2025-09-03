@@ -5,3 +5,4 @@ export { UserManagementTable } from './UserManagementTable';
 export { ProfileEdit } from './ProfileEdit';
 export { BirthCertificate } from './BirthCertificate';
 export { Footer } from './Footer';
+export { DebugPanel } from './DebugPanel';

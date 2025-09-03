@@ -1,13 +1,13 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '../atoms';
 import { FormField } from '../molecules';
 import { BirthCertificate } from './BirthCertificate';
-import type { AppDispatch } from '../../store';
-import { createRegistration } from '../../store/slices/registrationSlice';
-import { addNotification } from '../../store/slices/uiSlice';
+import type { AppDispatch, RootState } from '../../store';
+import { createRegistration, updateRegistration } from '../../store/slices/registrationSlice';
+import { addNotification, clearNotifications } from '../../store/slices/uiSlice';
 import type { RegistrationFormData, BirthRegistration } from '../../types';
 import { validateRegistrationForm, getFieldError, type ValidationError } from '../../utils/validation';
 import { useOnlineStatus } from '../../hooks';
@@ -135,7 +135,7 @@ const REGIONS_DISTRICTS = {
 // ];
 
 interface BirthRegistrationFormProps {
-  initialData?: Partial<RegistrationFormData>;
+  initialData?: BirthRegistration;
   mode?: 'create' | 'edit';
   onCancel?: () => void;
 }
@@ -149,16 +149,21 @@ export const BirthRegistrationForm: React.FC<BirthRegistrationFormProps> = ({
   const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
   const isOnline = useOnlineStatus();
+  const { user } = useSelector((state: RootState) => state.auth);
+  const { isLoading } = useSelector((state: RootState) => state.registrations);
   
   const [currentStep, setCurrentStep] = useState(1);
   const [validationErrors, setValidationErrors] = useState<ValidationError[]>([]);
   const [availableDistricts, setAvailableDistricts] = useState<Array<{value: string; label: string}>>([]);
+  const [touchedFields, setTouchedFields] = useState<string[]>([]);
   
   const [formData, setFormData] = useState<RegistrationFormData>({
     childDetails: {
       firstName: initialData?.childDetails?.firstName || '',
       lastName: initialData?.childDetails?.lastName || '',
-      dateOfBirth: initialData?.childDetails?.dateOfBirth || '',
+      dateOfBirth: initialData?.childDetails?.dateOfBirth 
+        ? initialData.childDetails.dateOfBirth.toISOString().split('T')[0]
+        : '',
       placeOfBirth: initialData?.childDetails?.placeOfBirth || '',
       gender: initialData?.childDetails?.gender || 'Male',
       hospitalOfBirth: initialData?.childDetails?.hospitalOfBirth || '',
@@ -168,19 +173,24 @@ export const BirthRegistrationForm: React.FC<BirthRegistrationFormProps> = ({
       firstName: initialData?.motherDetails?.firstName || '',
       lastName: initialData?.motherDetails?.lastName || '',
       nationalId: initialData?.motherDetails?.nationalId || '',
-      dateOfBirth: initialData?.motherDetails?.dateOfBirth || '',
+      dateOfBirth: initialData?.motherDetails?.dateOfBirth 
+        ? initialData.motherDetails.dateOfBirth.toISOString().split('T')[0]
+        : '',
       occupation: initialData?.motherDetails?.occupation || '',
-      nationality: initialData?.motherDetails?.nationality || 'Ghana'
+      nationality: initialData?.motherDetails?.nationality || 'Ghana',
+      phoneNumber: initialData?.motherDetails?.phoneNumber || ''
     },
     fatherDetails: {
       firstName: initialData?.fatherDetails?.firstName || '',
       lastName: initialData?.fatherDetails?.lastName || '',
       nationalId: initialData?.fatherDetails?.nationalId || '',
-      dateOfBirth: initialData?.fatherDetails?.dateOfBirth || '',
+      dateOfBirth: initialData?.fatherDetails?.dateOfBirth 
+        ? initialData.fatherDetails.dateOfBirth.toISOString().split('T')[0]
+        : '',
       occupation: initialData?.fatherDetails?.occupation || '',
-      nationality: initialData?.fatherDetails?.nationality || 'Ghana'
+      nationality: initialData?.fatherDetails?.nationality || 'Ghana',
+      phoneNumber: initialData?.fatherDetails?.phoneNumber || ''
     },
-    // Add registrar info fields
     registrarInfo: {
       region: initialData?.registrarInfo?.region || '',
       district: initialData?.registrarInfo?.district || '',
@@ -191,8 +201,13 @@ export const BirthRegistrationForm: React.FC<BirthRegistrationFormProps> = ({
   const [showPreview, setShowPreview] = useState(false);
   const [previewRegistration, setPreviewRegistration] = useState<BirthRegistration | null>(null);
 
-  // Convert form data to registration format for certificate preview
-  const convertToRegistration = (data: RegistrationFormData): BirthRegistration => {
+  // Clear any existing notifications when component mounts
+  useEffect(() => {
+    dispatch(clearNotifications());
+  }, [dispatch]);
+
+  // Convert form data to registration format for certificate preview - memoized
+  const convertToRegistration = useCallback((data: RegistrationFormData): BirthRegistration => {
     return {
       id: 'preview-' + Date.now(),
       registrationNumber: 'GHA-' + new Date().getFullYear() + '-000000',
@@ -209,7 +224,7 @@ export const BirthRegistrationForm: React.FC<BirthRegistrationFormProps> = ({
         dateOfBirth: new Date(data.fatherDetails.dateOfBirth || new Date().toISOString().split('T')[0])
       },
       registrarInfo: {
-        registrarId: 'preview-registrar',
+        registrarId: user?.uid || 'preview-registrar',
         registrationDate: new Date(),
         location: data.registrarInfo?.location || data.childDetails.placeOfBirth || 'Ghana',
         region: data.registrarInfo?.region || '',
@@ -220,27 +235,62 @@ export const BirthRegistrationForm: React.FC<BirthRegistrationFormProps> = ({
       createdAt: { seconds: Date.now() / 1000, nanoseconds: 0 } as any,
       updatedAt: { seconds: Date.now() / 1000, nanoseconds: 0 } as any
     };
-  };
+  }, [user?.uid]);
 
-  // Check if form is completely filled
-  const isFormComplete = () => {
+  // Check if form is completely filled - memoized to prevent re-calculation
+  const isFormComplete = useMemo(() => {
     const errors = validateRegistrationForm(formData);
     return errors.length === 0;
-  };
+  }, [formData]);
+
+  // Memoize the preview registration conversion
+  const previewRegistrationData = useMemo(() => {
+    if (isFormComplete) {
+      return convertToRegistration(formData);
+    }
+    return null;
+  }, [formData, isFormComplete, convertToRegistration]);
 
   // Update preview registration only when form is complete
   useEffect(() => {
-    if (isFormComplete()) {
-      const updatedRegistration = convertToRegistration(formData);
-      setPreviewRegistration(updatedRegistration);
+    if (previewRegistrationData) {
+      setPreviewRegistration(previewRegistrationData);
       setShowPreview(true);
     } else {
       setShowPreview(false);
       setPreviewRegistration(null);
     }
-  }, [formData, isFormComplete]);
+  }, [previewRegistrationData]);
 
-  const handleInputChange = (section: keyof RegistrationFormData, field: string, value: string) => {
+  // Memoized validation function to prevent re-creation
+  const currentStepErrors = useMemo(() => {
+    if (touchedFields.length === 0) return [];
+    
+    const allErrors = validateRegistrationForm(formData);
+    
+    // Filter errors based on current step
+    let stepPrefix = '';
+    switch (currentStep) {
+      case 1: stepPrefix = 'childDetails'; break;
+      case 2: stepPrefix = 'motherDetails'; break;
+      case 3: stepPrefix = 'fatherDetails'; break;
+      case 4: stepPrefix = 'registrarInfo'; break;
+      default: return [];
+    }
+    
+    const stepErrors = allErrors.filter(e => e.field.startsWith(stepPrefix));
+    // Only show errors for touched fields
+    return stepErrors.filter(error => touchedFields.includes(error.field));
+  }, [currentStep, formData, touchedFields]);
+
+  // Update validation errors when step errors change
+  useEffect(() => {
+    setValidationErrors(currentStepErrors);
+  }, [currentStepErrors]);
+
+  const handleInputChange = useCallback((section: keyof RegistrationFormData, field: string, value: string) => {
+    const fieldPath = `${section}.${field}`;
+    
     setFormData(prev => ({
       ...prev,
       [section]: {
@@ -249,11 +299,11 @@ export const BirthRegistrationForm: React.FC<BirthRegistrationFormProps> = ({
       }
     }));
     
+    // Mark field as touched (only add if not already present)
+    setTouchedFields(prev => prev.includes(fieldPath) ? prev : [...prev, fieldPath]);
+    
     // Clear validation error for this field when user starts typing
-    const fieldPath = `${section}.${field}`;
-    if (validationErrors.some(e => e.field === fieldPath)) {
-      setValidationErrors(prev => prev.filter(e => e.field !== fieldPath));
-    }
+    setValidationErrors(prev => prev.filter(e => e.field !== fieldPath));
 
     // Special validation for child's date of birth (age restriction)
     if (section === 'childDetails' && field === 'dateOfBirth' && value) {
@@ -278,14 +328,14 @@ export const BirthRegistrationForm: React.FC<BirthRegistrationFormProps> = ({
         ...prev,
         registrarInfo: {
           location: prev.registrarInfo?.location || '',
-          region: prev.registrarInfo?.region || '',
+          region: value,
           district: ''
         }
       }));
     }
-  };
+  }, []);
 
-  const validateCurrentStep = (): boolean => {
+  const validateCurrentStep = (showAllErrors: boolean = false): boolean => {
     const errors = validateRegistrationForm(formData);
     
     // Filter errors based on current step
@@ -308,12 +358,29 @@ export const BirthRegistrationForm: React.FC<BirthRegistrationFormProps> = ({
         stepErrors = errors;
     }
     
+    // Only show errors for touched fields unless explicitly requesting all errors
+    if (!showAllErrors) {
+      stepErrors = stepErrors.filter(error => touchedFields.includes(error.field));
+    }
+    
     setValidationErrors(stepErrors);
-    return stepErrors.length === 0;
+    
+    // Return true if current step has no errors
+    const stepPrefix = currentStep === 1 ? 'childDetails' :
+                      currentStep === 2 ? 'motherDetails' :
+                      currentStep === 3 ? 'fatherDetails' : 'registrarInfo';
+    const currentStepErrors = errors.filter(e => e.field.startsWith(stepPrefix));
+    
+    // If showing all errors, check all step errors; otherwise only touched fields
+    if (showAllErrors) {
+      return currentStepErrors.length === 0;
+    } else {
+      return currentStepErrors.filter(error => touchedFields.includes(error.field)).length === 0;
+    }
   };
 
   const handleNextStep = () => {
-    if (validateCurrentStep()) {
+    if (validateCurrentStep(true)) {
       if (currentStep < 4) {
         setCurrentStep(currentStep + 1);
       }
@@ -330,14 +397,24 @@ export const BirthRegistrationForm: React.FC<BirthRegistrationFormProps> = ({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
+    // Prevent multiple submissions
+    if (isLoading) {
+      console.log('Form submission already in progress, ignoring...');
+      return;
+    }
+    
+    console.log('🚀 Starting registration submission process...');
+    console.log('Form data:', formData);
+    console.log('User authentication state:', user);
+    console.log('Online status:', isOnline);
+    
     const allErrors = validateRegistrationForm(formData);
     setValidationErrors(allErrors);
     
     if (allErrors.length > 0) {
-      dispatch(addNotification({
-        type: 'error',
-        message: t('registration.registrationError')
-      }));
+      console.error('❌ Validation errors found:', allErrors);
+      // Don't show toast notification for validation errors - they're already shown inline
+      // Just log and return to prevent submission
       return;
     }
 
@@ -356,22 +433,79 @@ export const BirthRegistrationForm: React.FC<BirthRegistrationFormProps> = ({
       let registrationData: BirthRegistration;
       
       if (isOnline) {
-        // Try online creation first
-        console.log('Attempting online registration...');
-        const enhancedFormData = {
-          ...formData,
-          certificateNumber,
-          entryNumber,
-          registrationNumber
-        };
-        const result = await dispatch(createRegistration(enhancedFormData)).unwrap();
-        console.log('Registration created successfully:', result);
-        registrationData = result;
-        
-        dispatch(addNotification({
-          type: 'success',
-          message: 'Registration saved successfully!'
-        }));
+        if (mode === 'edit' && initialData?.id) {
+          // Update existing registration
+          console.log('Updating existing registration...');
+          const updateData = {
+            childDetails: {
+              firstName: formData.childDetails.firstName,
+              lastName: formData.childDetails.lastName,
+              dateOfBirth: new Date(formData.childDetails.dateOfBirth),
+              placeOfBirth: formData.childDetails.placeOfBirth,
+              gender: formData.childDetails.gender,
+              hospitalOfBirth: formData.childDetails.hospitalOfBirth
+            },
+            motherDetails: {
+              firstName: formData.motherDetails.firstName,
+              lastName: formData.motherDetails.lastName,
+              dateOfBirth: new Date(formData.motherDetails.dateOfBirth),
+              nationalId: formData.motherDetails.nationalId,
+              occupation: formData.motherDetails.occupation,
+              nationality: formData.motherDetails.nationality,
+              phoneNumber: formData.motherDetails.phoneNumber || ''
+            },
+            fatherDetails: {
+              firstName: formData.fatherDetails.firstName,
+              lastName: formData.fatherDetails.lastName,
+              dateOfBirth: new Date(formData.fatherDetails.dateOfBirth),
+              nationalId: formData.fatherDetails.nationalId,
+              occupation: formData.fatherDetails.occupation,
+              nationality: formData.fatherDetails.nationality,
+              phoneNumber: formData.fatherDetails.phoneNumber || ''
+            },
+            registrarInfo: {
+              registrarId: user?.uid || 'current-user',
+              registrationDate: new Date(),
+              location: formData.registrarInfo?.location || 'Ghana',
+              region: formData.registrarInfo?.region || '',
+              district: formData.registrarInfo?.district || ''
+            },
+            status: 'submitted' as const,
+            updatedAt: { seconds: Date.now() / 1000, nanoseconds: 0 } as any
+          };
+          
+          const result = await dispatch(updateRegistration({ 
+            id: initialData.id, 
+            updates: updateData 
+          })).unwrap();
+          console.log('Registration updated successfully:', result);
+          
+          dispatch(addNotification({
+            type: 'success',
+            message: 'Registration updated successfully!'
+          }));
+          
+          // Navigate back to dashboard after update
+          navigate('/dashboard');
+          return;
+        } else {
+          // Create new registration
+          console.log('Attempting online registration...');
+          const enhancedFormData = {
+            ...formData,
+            certificateNumber,
+            entryNumber,
+            registrationNumber
+          };
+          const result = await dispatch(createRegistration(enhancedFormData)).unwrap();
+          console.log('Registration created successfully:', result);
+          registrationData = result;
+          
+          dispatch(addNotification({
+            type: 'success',
+            message: 'Registration saved successfully!'
+          }));
+        }
       } else {
         // Use offline creation
         console.log('Using offline registration...');
@@ -408,7 +542,7 @@ export const BirthRegistrationForm: React.FC<BirthRegistrationFormProps> = ({
             phoneNumber: formData.fatherDetails.phoneNumber || ''
           },
           registrarInfo: {
-            registrarId: 'current-user',
+            registrarId: user?.uid || 'current-user',
             registrationDate: new Date(),
             location: formData.registrarInfo?.location || 'Ghana',
             region: formData.registrarInfo?.region || '',
@@ -435,11 +569,29 @@ export const BirthRegistrationForm: React.FC<BirthRegistrationFormProps> = ({
       navigate('/certificate/generate', { state: { registration: registrationData } });
       
     } catch (error: any) {
-      console.error('Registration submission error:', error);
+      console.error('💥 Registration submission error:', error);
+      console.error('Error type:', typeof error);
+      console.error('Error message:', error?.message);
+      console.error('Error code:', error?.code);
+      console.error('Full error object:', JSON.stringify(error, null, 2));
+      
+      // Create detailed error message
+      let errorMessage = t('registration.registrationError');
+      if (error?.message) {
+        if (error.message.includes('permission-denied')) {
+          errorMessage = 'Permission denied. Please check your user role and authentication.';
+        } else if (error.message.includes('network')) {
+          errorMessage = 'Network error. Please check your internet connection.';
+        } else if (error.message.includes('firebase')) {
+          errorMessage = 'Database connection error. Please try again later.';
+        } else {
+          errorMessage = `Registration failed: ${error.message}`;
+        }
+      }
       
       // Fallback to offline if online creation fails
       if (isOnline) {
-        console.log('Online registration failed, trying offline...');
+        console.log('🔄 Online registration failed, trying offline fallback...');
         try {
           await dispatch(createRegistration(formData)).unwrap();
           dispatch(addNotification({
@@ -447,16 +599,17 @@ export const BirthRegistrationForm: React.FC<BirthRegistrationFormProps> = ({
             message: 'Registration saved offline due to connection issues. Will sync automatically.'
           }));
           navigate('/certificate/generate');
-        } catch {
+        } catch (offlineError: any) {
+          console.error('💥 Offline registration also failed:', offlineError);
           dispatch(addNotification({
             type: 'error',
-            message: t('registration.registrationError')
+            message: errorMessage
           }));
         }
       } else {
         dispatch(addNotification({
           type: 'error',
-          message: t('registration.registrationError')
+          message: errorMessage
         }));
       }
     }
@@ -724,6 +877,7 @@ export const BirthRegistrationForm: React.FC<BirthRegistrationFormProps> = ({
           required
           value={formData.registrarInfo?.region || ''}
           onChange={(e) => handleInputChange('registrarInfo', 'region', e.target.value)}
+          onBlur={() => setTouchedFields(prev => prev.includes('registrarInfo.region') ? prev : [...prev, 'registrarInfo.region'])}
           error={getFieldError(validationErrors, 'registrarInfo.region')}
           options={[
             { value: '', label: 'Select Region...' },
@@ -753,6 +907,7 @@ export const BirthRegistrationForm: React.FC<BirthRegistrationFormProps> = ({
           required
           value={formData.registrarInfo?.district || ''}
           onChange={(e) => handleInputChange('registrarInfo', 'district', e.target.value)}
+          onBlur={() => setTouchedFields(prev => prev.includes('registrarInfo.district') ? prev : [...prev, 'registrarInfo.district'])}
           error={getFieldError(validationErrors, 'registrarInfo.district')}
           options={[
             { value: '', label: formData.registrarInfo?.region ? 'Select District...' : 'Select Region First' },
@@ -848,11 +1003,18 @@ export const BirthRegistrationForm: React.FC<BirthRegistrationFormProps> = ({
                   <Button
                     type="submit"
                     className="w-full sm:w-auto"
+                    disabled={isLoading}
                   >
-                    {mode === 'create' 
-                      ? 'Generate' 
-                      : t('registration.updateRegistration')
-                    }
+                    {isLoading ? (
+                      <div className="flex items-center">
+                        <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent mr-2"></div>
+                        {mode === 'create' ? 'Processing...' : 'Updating...'}
+                      </div>
+                    ) : (
+                      mode === 'create' 
+                        ? 'Generate' 
+                        : t('registration.updateRegistration')
+                    )}
                   </Button>
                 )}
               </div>

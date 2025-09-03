@@ -39,6 +39,89 @@
     "months": "months",
     "years": "years"
   },
+  "help": {
+    "title": "Help & Support",
+    "subtitle": "Find answers to common questions, contact support, and access user guides",
+    "faq": {
+      "title": "Frequently Asked Questions",
+      "questions": {
+        "newBirth": "How do I register a new birth?",
+        "documents": "What documents are required for birth registration?",
+        "certificate": "How can I generate a birth certificate?",
+        "edit": "Can I edit a registration after it's been submitted?",
+        "password": "How do I change my password?",
+        "forgotPassword": "What should I do if I forget my password?",
+        "language": "How do I change the system language?",
+        "roles": "What are the different user roles in the system?"
+      },
+      "answers": {
+        "newBirth": "To register a new birth, navigate to the 'New Registration' page from the main menu. Fill in all required information including child details, parent information, and birth location. Make sure you have all necessary documents ready.",
+        "documents": "You typically need the hospital birth certificate, parents' identification documents, marriage certificate (if applicable), and any other supporting documents as required by your region's regulations.",
+        "certificate": "Go to the 'Certificates' section and select 'Generate Certificate'. Choose the registration record and select the certificate type. The system will generate a PDF certificate that you can download and print.",
+        "edit": "Yes, if you have registrar privileges, you can edit registrations by going to the 'Registrations' page and clicking the edit button next to the record you want to modify.",
+        "password": "Go to your Profile settings and look for the 'Change Password' section. You'll need to enter your current password and then your new password twice for confirmation.",
+        "forgotPassword": "On the login page, click 'Forgot Password?' and enter your email address. You'll receive instructions to reset your password via email.",
+        "language": "Click on your profile dropdown in the top right corner and select your preferred language from the language menu. The system supports English, Twi, Ga, and Ewe.",
+        "roles": "There are three main roles: Viewer (can view registrations and generate certificates), Registrar (can create and edit registrations), and Admin (full system access including user management and settings)."
+      }
+    },
+    "contact": {
+      "title": "Contact Support",
+      "technical": "Technical Support",
+      "registration": "Registration Assistance",
+      "admin": "System Administration",
+      "emergency": "Emergency Support",
+      "emergencyDesc": "For urgent technical issues affecting critical operations, please contact our emergency support line:",
+      "hours": "Monday - Friday, 8:00 AM - 5:00 PM GMT",
+      "adminHours": "Monday - Friday, 9:00 AM - 4:00 PM GMT",
+      "available247": "24/7"
+    },
+    "guides": {
+      "title": "User Guides & Tutorials",
+      "gettingStarted": "Getting Started Guide",
+      "gettingStartedDesc": "Learn the basics of using the BirthLink system",
+      "registrationManual": "Birth Registration Manual",
+      "registrationManualDesc": "Step-by-step instructions for registering births",
+      "certificateGuide": "Certificate Generation Guide",
+      "certificateGuideDesc": "How to generate and print birth certificates",
+      "userManagement": "User Management Manual",
+      "userManagementDesc": "Admin guide for managing users and permissions",
+      "systemSettings": "System Settings Guide",
+      "systemSettingsDesc": "Configuration and customization options",
+      "troubleshooting": "Troubleshooting Guide",
+      "troubleshootingDesc": "Common issues and their solutions",
+      "downloadPdf": "Download PDF"
+    },
+    "status": {
+      "title": "System Status",
+      "allOperational": "All systems operational",
+      "lastUpdated": "Last updated:",
+      "uptime": "Uptime:",
+      "services": {
+        "auth": "User Authentication",
+        "registration": "Birth Registration",
+        "certificates": "Certificate Generation",
+        "database": "Database Services",
+        "storage": "File Storage",
+        "email": "Email Notifications"
+      },
+      "maintenance": {
+        "title": "Scheduled Maintenance",
+        "noMaintenance": "No scheduled maintenance at this time. We'll notify users in advance of any planned downtime."
+      },
+      "statusTypes": {
+        "operational": "Operational",
+        "degraded": "Degraded",
+        "down": "Down"
+      }
+    },
+    "navigation": {
+      "faq": "FAQ",
+      "contact": "Contact Support",
+      "guides": "User Guides",
+      "status": "System Status"
+    }
+  },
   "auth": {
     "login": "Login",
     "logout": "Logout",
@@ -208,7 +291,18 @@
     "registrarInfo": "Registration Information",
     "registrationLocation": "Registration Location",
     "childName": "Child Name",
-    "nationality": "Nationality"
+    "nationality": "Nationality",
+    "childInformation": "Child Information",
+    "motherInformation": "Mother Information",
+    "fatherInformation": "Father Information",
+    "region": "Region",
+    "district": "District",
+    "male": "Male",
+    "female": "Female",
+    "placeOfBirth": "Place of Birth",
+    "hospitalOfBirth": "Hospital of Birth",
+    "occupation": "Occupation",
+    "nationalId": "National ID"
   },
   "validation": {
     "required": "This field is required",
@@ -230,6 +324,9 @@
     "lastSync": "Last sync: {{time}}"
   },
   "dashboard": {
+    "title": "Dashboard Overview",
+    "subtitle": "Birth registration system overview and key metrics",
+    "personalizedSubtitle": "Your birth registration overview and key metrics",
     "welcome": "Welcome, {{name}}!",
     "recentRegistrations": "Recent Registrations",
     "totalRegistrations": "Total Registrations",
@@ -422,7 +519,12 @@
     "shareText": "Birth Certificate for Registration Number:",
     "linkCopied": "Certificate link copied to clipboard",
     "regenerated": "New certificate serial number generated",
-    "noRegistrationData": "No registration data available for certificate generation"
+    "noRegistrationData": "No registration data available for certificate generation",
+    "preview": "Certificate Preview",
+    "previewReady": "Certificate preview is ready",
+    "completeForm": "Complete all required fields to preview certificate",
+    "completeAllFields": "Complete all required fields to preview certificate",
+    "requiredSteps": "Fill all 4 steps: Child Details, Mother Details, Father Details, and Registration Info"
   },
   "settings": {
     "user": {
@@ -587,5 +689,12 @@
       "syncBatchSizeError": "Sync batch size must be between 10 and 200",
       "languagesRequiredError": "At least one language must be enabled"
     }
+  },
+  "feedback": {
+    "urgency_medium": "Medium - Impacts work",
+    "urgency_high": "High - Prevents work"
+  },
+  "pilot": {
+    "badge": "Pilot Phase 3"
   }
 }

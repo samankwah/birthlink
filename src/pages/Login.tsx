@@ -4,11 +4,15 @@ import { useDispatch, useSelector } from 'react-redux';
 import { Navigate, Link } from 'react-router-dom';
 import type { RootState, AppDispatch } from '../store';
 import { loginUser } from '../store/slices/authSlice';
+import { useDocumentTitle } from '../hooks';
 
 export const Login: React.FC = () => {
   const { t } = useTranslation();
   const dispatch = useDispatch<AppDispatch>();
   const { isAuthenticated, isLoading, error } = useSelector((state: RootState) => state.auth);
+  
+  // Set page title
+  useDocumentTitle("Login");
   
   const [formData, setFormData] = useState({
     email: '',

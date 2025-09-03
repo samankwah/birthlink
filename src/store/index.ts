@@ -33,12 +33,14 @@ export const store = configureStore({
           'persist/REHYDRATE',
           'auth/setFirebaseUser',
           'auth/login/fulfilled',
-          'auth/register/fulfilled'
+          'auth/register/fulfilled',
+          'ui/addNotification'
         ],
         ignoredActionsPaths: ['payload.firebaseUser', 'meta.arg', 'payload.timestamp'],
         ignoredPaths: [
           'auth.firebaseUser',
-          'registrations.lastDoc'
+          'registrations.lastDoc',
+          'ui.notifications'
         ]
       }
     })

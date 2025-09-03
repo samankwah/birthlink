@@ -224,7 +224,7 @@ export const ProfileDropdown: React.FC = () => {
             <div className="border-t border-gray-200 mt-2 pt-2">
               <button
                 onClick={() => {
-                  // Open help or support
+                  navigate('/help');
                   setIsOpen(false);
                 }}
                 className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 flex items-center space-x-3"

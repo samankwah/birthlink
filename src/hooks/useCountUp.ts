@@ -40,7 +40,7 @@ export const useCountUp = (
     return roundedCurrent.toLocaleString();
   };
 
-  const animate = (currentTime: number) => {
+  const animate = useCallback((currentTime: number) => {
     if (!startTimeRef.current) {
       startTimeRef.current = currentTime;
     }
@@ -60,7 +60,7 @@ export const useCountUp = (
       setDisplayValue(targetValue);
       setIsAnimating(false);
     }
-  };
+  }, [duration, easing, targetValue]);
 
   const startAnimation = useCallback(() => {
     if (getNumericValue(targetValue) === 0) {

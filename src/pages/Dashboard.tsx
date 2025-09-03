@@ -1,8 +1,10 @@
 import React, { useState, useMemo, useEffect } from "react";
-// import { useTranslation } from "react-i18next"; // Currently unused
-// import { useSelector } from "react-redux"; // Currently unused
+import { useTranslation } from "react-i18next";
+import { useSelector, useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
-// import type { RootState } from "../store"; // Currently unused
+import type { RootState, AppDispatch } from "../store";
+import { deleteRegistration } from "../store/slices/registrationSlice";
+import { addNotification } from "../store/slices/uiSlice";
 import {
   StatCard,
   // QuickActionCard, // Currently unused
@@ -11,13 +13,21 @@ import {
 import {
   useDashboardStats,
   useRecentRegistrations,
+  useDocumentTitle,
   // useQuickActions, // Currently unused
 } from "../hooks";
 
 export const Dashboard: React.FC = () => {
-  // const { t } = useTranslation(); // Currently unused
+  const { t } = useTranslation();
   const navigate = useNavigate();
-  // const { user } = useSelector((state: RootState) => state.auth); // Currently unused
+  
+  // Set page title
+  useDocumentTitle("Dashboard");
+  const dispatch = useDispatch<AppDispatch>();
+  const { user } = useSelector((state: RootState) => state.auth);
+  
+  // Check if current user is admin (can delete registrations)
+  const canDeleteRegistrations = user?.role === 'admin';
   const {
     stats,
     isLoading: statsLoading,
@@ -80,10 +90,32 @@ export const Dashboard: React.FC = () => {
     // Implement print logic here
   };
 
-  const handleDelete = (registrationId: string) => {
+  const handleDelete = async (registrationId: string) => {
     if (window.confirm("Are you sure you want to delete this registration?")) {
-      console.log("Deleting registration:", registrationId);
-      // Implement delete logic here
+      try {
+        await dispatch(deleteRegistration(registrationId)).unwrap();
+        dispatch(addNotification({
+          type: 'success',
+          message: 'Registration deleted successfully'
+        }));
+        // Refresh dashboard data after deletion
+        refreshStats();
+      } catch (error: any) {
+        console.error('Error deleting registration:', error);
+        
+        // Use specific error message from Redux state or the caught error
+        let errorMessage = 'Failed to delete registration';
+        if (error?.message) {
+          errorMessage = error.message;
+        } else if (typeof error === 'string') {
+          errorMessage = error;
+        }
+        
+        dispatch(addNotification({
+          type: 'error',
+          message: errorMessage
+        }));
+      }
     }
   };
 
@@ -109,10 +141,14 @@ export const Dashboard: React.FC = () => {
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-3xl font-bold text-gray-900">
-                Dashboard Overview
+                {user?.profile?.firstName 
+                  ? `${user.profile.firstName}'s Dashboard` 
+                  : t('dashboard.title', 'Dashboard Overview')}
               </h1>
               <p className="mt-2 text-lg text-gray-500">
-                Birth registration system overview and key metrics
+                {user?.profile?.firstName 
+                  ? t('dashboard.personalizedSubtitle', 'Your birth registration overview and key metrics')
+                  : t('dashboard.subtitle', 'Birth registration system overview and key metrics')}
               </p>
             </div>
           </div>
@@ -491,31 +527,36 @@ export const Dashboard: React.FC = () => {
                                     </svg>
                                     Print Certificate
                                   </button>
-                                  <div className="border-t border-gray-100"></div>
-                                  <button
-                                    onClick={() => {
-                                      handleDelete(registration.id);
-                                      setOpenDropdown(null);
-                                    }}
-                                    className="flex items-center w-full px-4 py-2 text-sm text-red-600 hover:bg-red-50"
-                                  >
-                                    <svg
-                                      className="w-4 h-4 mr-3"
-                                      fill="currentColor"
-                                      viewBox="0 0 20 20"
-                                    >
-                                      <path
-                                        fillRule="evenodd"
-                                        d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z"
-                                      />
-                                      <path
-                                        fillRule="evenodd"
-                                        d="M4 5a2 2 0 012-2v1a1 1 0 102 0V3h3v1a1 1 0 102 0V3a2 2 0 012 2v6a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm3 2a1 1 0 112 0v3a1 1 0 11-2 0V7z"
-                                        clipRule="evenodd"
-                                      />
-                                    </svg>
-                                    Delete Registration
-                                  </button>
+                                  {/* Only show delete option for admin users */}
+                                  {canDeleteRegistrations && (
+                                    <>
+                                      <div className="border-t border-gray-100"></div>
+                                      <button
+                                        onClick={() => {
+                                          handleDelete(registration.id);
+                                          setOpenDropdown(null);
+                                        }}
+                                        className="flex items-center w-full px-4 py-2 text-sm text-red-600 hover:bg-red-50"
+                                      >
+                                        <svg
+                                          className="w-4 h-4 mr-3"
+                                          fill="currentColor"
+                                          viewBox="0 0 20 20"
+                                        >
+                                          <path
+                                            fillRule="evenodd"
+                                            d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z"
+                                          />
+                                          <path
+                                            fillRule="evenodd"
+                                            d="M4 5a2 2 0 012-2v1a1 1 0 102 0V3h3v1a1 1 0 102 0V3a2 2 0 012 2v6a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm3 2a1 1 0 112 0v3a1 1 0 11-2 0V7z"
+                                            clipRule="evenodd"
+                                          />
+                                        </svg>
+                                        Delete Registration
+                                      </button>
+                                    </>
+                                  )}
                                 </div>
                               </div>
                             )}
